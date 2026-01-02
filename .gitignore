@@ -1,0 +1,58 @@
+# --- General & OS ---
+.DS_Store
+Thumbs.db
+*.log
+
+# --- Node.js (Frontend Tooling) ---
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# --- Python (Backend) ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Virtual Environments (Python) ---
+venv/
+.venv/
+env/
+ENV/
+
+# --- AWS SAM (Infrastructure) ---
+.aws-sam/
+samconfig.toml
+# Note: You CAN commit samconfig.toml if it has no secrets,
+# but it's safer to ignore it while learning to avoid leaking Account IDs.
+
+# --- Testing ---
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- IDE Settings (VS Code) ---
+.vscode/
+*.code-workspace
+
+# --- Environment Variables (Secrets) ---
+.env
+.env.local
