@@ -24,7 +24,7 @@ jobs:
 
       - name: Deploy Static Site to S3
         run: |
-          aws s3 sync . s3://${{ secrets.S3_BUCKET_NAME }} --delete --exclude ".git/*" --exclude ".github/*" --exclude "README.md"
+          aws s3 sync ./frontend s3://${{ secrets.S3_BUCKET_NAME }} --delete
 
       - name: Fix Cache-Control for index.html
         run: |
