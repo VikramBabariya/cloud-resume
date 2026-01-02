@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -95,10 +95,10 @@
     </p>
 
     <script>
-      const counterContainer = document.getElementById("counter");
+      const counterContainer = document.getElementById('counter');
       // REPLACE WITH YOUR ACTUAL API GATEWAY URL + /count
       const apiURL =
-        "https://kj49hc8y0a.execute-api.ap-south-1.amazonaws.com/count";
+        'https://kj49hc8y0a.execute-api.ap-south-1.amazonaws.com/count';
 
       async function updateCounter() {
         try {
@@ -106,8 +106,8 @@
           let data = await response.json();
           counterContainer.innerHTML = data.count;
         } catch (error) {
-          console.error("Error fetching count:", error);
-          counterContainer.innerHTML = "Error";
+          console.error('Error fetching count:', error);
+          counterContainer.innerHTML = 'Error';
         }
       }
       updateCounter();
