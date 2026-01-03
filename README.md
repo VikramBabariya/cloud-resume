@@ -43,7 +43,7 @@ The solution uses a decoupled client-server architecture hosted entirely on AWS.
 
 ## 4. Key Features & Implementation Details
 
-### A. Performance & Global Scale (New)
+### A. Performance & Global Scale
 * **Ultra-Low Latency:** Utilizes CloudFront's global network of over 400+ Points of Presence (PoPs). A user in London and a user in Tokyo both load the site instantly from a local edge server rather than fetching from the origin S3 bucket every time.
 * **Caching Strategy:** Optimized cache behaviors ensure static assets (images, CSS) are cached aggressively at the edge, while dynamic API calls bypass the cache for real-time accuracy.
 
