@@ -43,20 +43,24 @@ The solution uses a decoupled client-server architecture hosted entirely on AWS.
 
 ## 4. Key Features & Implementation Details
 
-### A. Secure Static Hosting (Frontend)
-* **S3 Bucket Policies:** Configured to block public access, allowing read access only via the CloudFront Origin Access Control (OAC).
-* **Custom Domain:** Configured via Route 53 with an SSL/TLS certificate managed by ACM for secure HTTPS communication.
+### A. Performance & Global Scale (New)
+* **Ultra-Low Latency:** Utilizes CloudFront's global network of over 400+ Points of Presence (PoPs). A user in London and a user in Tokyo both load the site instantly from a local edge server rather than fetching from the origin S3 bucket every time.
+* **Caching Strategy:** Optimized cache behaviors ensure static assets (images, CSS) are cached aggressively at the edge, while dynamic API calls bypass the cache for real-time accuracy.
 
-### B. Serverless Backend (API & Database)
-* **Visitor Counter:** A REST API endpoint fetches and increments a specific item in the DynamoDB table.
-* **CORS Configuration:** API Gateway is configured to only allow requests from the specific frontend domain.
-* **Atomic Counter:** DynamoDB `ADD` operations are used to ensure concurrent visitors are counted accurately.
+### B. Secure Static Hosting
+* **S3 Bucket Policies:** Configured to block public access, allowing read access *only* via the CloudFront Origin Access Control (OAC). This prevents users from bypassing the CDN.
+* **HTTPS Enforcement:** All traffic is forced over HTTPS using a custom SSL/TLS certificate managed by **AWS Certificate Manager (ACM)**.
 
-### C. Quality Assurance & Formatting
+### C. Serverless Backend (API & Database)
+* **Cost Efficiency:** The architecture fits almost entirely within the AWS Free Tier. Lambda and DynamoDB only charge when code runs or data is accessed ("Pay-per-use"), meaning zero idle costs.
+* **High Availability:** Unlike a traditional single-server setup, this architecture relies on managed services (Lambda, DynamoDB) that are inherently distributed across multiple Availability Zones (AZs) by AWS.
+* **Atomic Counting:** Used DynamoDB `ADD` operations to handle concurrent site visitors accurately without race conditions.
+
+### D. Quality Assurance & Formatting
 * **Automated Formatting:** **Prettier** is configured to ensure consistent code style across HTML, CSS, and JS files.
 * **Git Hooks:** **Husky** is implemented to run pre-commit hooks. This prevents unformatted code from being committed to the repository, ensuring a clean codebase.
 
-### D. Observability & Monitoring
+### E. Observability & Monitoring
 To ensure system reliability and ease of debugging, a robust observability strategy was implemented:
 * **Dashboards:** A custom **CloudWatch Dashboard** aggregates key metrics (API Latency, Visitor Count, Error Rates) into a single visual pane.
 * **Canary Synthetics:** **CloudWatch Synthetics** (Canary) is deployed to run scheduled heartbeat scripts. This simulates user traffic to verify that the website endpoint is reachable and the API is responsive.
