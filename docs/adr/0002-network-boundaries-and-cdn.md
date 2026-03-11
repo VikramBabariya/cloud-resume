@@ -1,4 +1,4 @@
-# ADR 0004: Static Asset Delivery and Network Boundaries
+# ADR 0002: Static Asset Delivery and Network Boundaries
 
 ## Context
 
