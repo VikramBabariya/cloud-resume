@@ -56,7 +56,18 @@ To ensure this serverless application remains cost-effective and secure against 
 
 ---
 
-## 4. Key Features & Implementation Details
+## 5. Architecture Decisions
+
+Detailed architectural choices are documented as Architecture Decision Records (ADRs) to maintain a clean history of technical tradeoffs.
+
+- [ADR 0001: Compute Layer for Backend API](docs/adr/0001-serverless-compute-layer.md)
+- [ADR 0002: Static Asset Delivery and Network Boundaries](docs/adr/0002-network-boundaries-and-cdn.md)
+- [ADR 0003: DynamoDB vs. Relational Database (RDS)](docs/adr/0003-dynamodb-vs-rds.md)
+- [ADR 0004: Credentials Storage for Dynamic Verification API](docs/adr/0004-dynamic-credential-storage.md)
+
+---
+
+## 6. Key Features & Implementation Details
 
 ### A. Performance & Global Scale
 
@@ -90,7 +101,15 @@ To ensure system reliability and ease of debugging, a robust observability strat
 
 ---
 
-## 5. Automation & CI/CD Pipeline
+## 7. Security & IAM
+
+This project enforces strict cloud security boundaries, including least-privilege IAM roles, Cross-Origin Resource Sharing (CORS) restrictions, and rigorous cost-control mechanisms to minimize the blast radius of potential security incidents.
+
+For a deep dive into the IAM policies, network boundaries, and security implementation, please refer to the detailed [Security Documentation](docs/SECURITY.md).
+
+---
+
+## 8. Automation & CI/CD Pipeline
 
 The project utilizes **GitHub Actions** for continuous integration and deployment.
 
@@ -105,7 +124,15 @@ The project utilizes **GitHub Actions** for continuous integration and deploymen
 
 ---
 
-## 6. How to Run Locally (Development)
+## 9. Deployment & Runbook
+
+The step-by-step infrastructure provisioning guide, including manual ClickOps instructions, architectural flow, and conceptual bridges to Infrastructure as Code (Terraform), has been extracted to a dedicated runbook for incident response and deployment clarity.
+
+Please refer to the [Deployment Runbook](docs/RUNBOOK.md) for full execution steps.
+
+---
+
+## 10. How to Run Locally (Development)
 
 Since this project relies on AWS services (DynamoDB, API Gateway), strictly "local" development requires mocking these services or connecting to the live cloud resources from your local machine.
 
