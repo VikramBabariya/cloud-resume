@@ -1,64 +1,77 @@
-graph LR
-%% Definitions
-User((User/Browser))
-R53[Route 53 <br> DNS]
-CF[CloudFront <br> CDN]
-S3[S3 Bucket <br> Static Website]
-ACM[ACM <br> SSL Certificate]
+graph TD
+%% Styles & Color Taxonomy
+classDef client fill:#5A6B86,stroke:#232F3E,stroke-width:2px,color:#FFF;
+classDef edge fill:#242F3E,stroke:#3F8624,stroke-width:2px,color:#FFF;
+classDef compute fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:#FFF;
+classDef db fill:#3B48CC,stroke:#232F3E,stroke-width:2px,color:#FFF;
+classDef sec fill:#DD344C,stroke:#232F3E,stroke-width:2px,color:#FFF;
+classDef ext fill:#8C4FFF,stroke:#232F3E,stroke-width:2px,color:#FFF;
+classDef obs fill:#E7157B,stroke:#232F3E,stroke-width:2px,color:#FFF;
+classDef cicd fill:#2088FF,stroke:#232F3E,stroke-width:2px,color:#FFF;
 
-    APIG[API Gateway]
+    %% --- Architectural Tiers ---
 
-    %% Flow A: Counter
-    LambdaCount[Lambda Function <br> Visitor Counter]
-    DDB[(DynamoDB <br> Database)]
+    subgraph Tier1_Client ["Client Zone"]
+        User((User/Browser)):::client
+    end
 
-    %% Flow B: Validator
-    LambdaValid[Lambda Function <br> Credential Validator]
-    SSM[SSM Parameter Store <br> SecureString]
-    ExtAPI((External <br> Credential API))
+    subgraph Tier2_Delivery ["Edge & Delivery Layer"]
+        R53[Route 53 <br> DNS Routing]:::edge
+        CF[CloudFront <br> Global CDN]:::edge
+        S3[S3 Bucket <br> Static Assets]:::db
+        ACM[ACM <br> TLS Certificate]:::sec
+    end
 
-    CW[CloudWatch <br> Logs & Metrics]
-    XRay[X-Ray <br> Tracing]
+    subgraph Tier3_Backend ["Serverless Compute Layer"]
+        APIG[API Gateway <br> REST API Proxy]:::compute
+        LambdaCount[Lambda Function <br> Visitor Counter]:::compute
+        LambdaValid[Lambda Function <br> Credential Validator]:::compute
+    end
 
-    GH[GitHub Actions <br> CI/CD Pipeline]
+    subgraph Tier4_Data ["Data & Secrets Layer"]
+        DDB[(DynamoDB <br> NoSQL Table)]:::db
+        SSM[SSM Parameter Store <br> SecureString]:::sec
+    end
 
-    %% Infrastructure Flow
+    subgraph Tier5_External ["External Integrations"]
+        ExtAPI((Credential Provider <br> External API)):::ext
+    end
+
+    subgraph Layer_Observability ["Observability & Telemetry"]
+        CW[CloudWatch <br> Logs & Alarms]:::obs
+        XRay[X-Ray <br> Distributed Tracing]:::obs
+    end
+
+    subgraph Layer_CICD ["Automation Pipeline"]
+        GH[GitHub Actions <br> CI/CD]:::cicd
+    end
+
+    %% --- Data Flow & Networking ---
+
+    %% Public Internet
     User -- HTTPS Request --> R53
-    R53 -- Resolves --> CF
-    CF -- GET (Frontend) --> S3
-    CF -. Uses .- ACM
+    R53 -- Resolves to --> CF
+    CF -. Secures Connection .- ACM
+    CF -- Origin Access (OAC) --> S3
 
-    %% Frontend to Backend
-    S3 -- JS Fetch --> APIG
+    %% Frontend API Calls
+    S3 -- JS Async Fetch --> APIG
 
-    %% Backend Flow A (Counter)
+    %% Microservice A: Counter
     APIG -- Route: /counter --> LambdaCount
-    LambdaCount -- Update/Read --> DDB
+    LambdaCount -- dynamodb:UpdateItem --> DDB
 
-    %% Backend Flow B (Credential Validation)
+    %% Microservice B: Validator
     APIG -- Route: /verify --> LambdaValid
     LambdaValid -- ssm:GetParameter --> SSM
-    LambdaValid -- HTTPS TLS --> ExtAPI
+    LambdaValid -- HTTPS Outbound --> ExtAPI
 
-    %% Observability
-    APIG -. Traces .-> XRay
-    LambdaCount -. Logs/Metrics .-> CW
+    %% Telemetry Mapping
+    APIG -. Request Tracing .-> XRay
+    LambdaCount -. Execution Logs .-> CW
     LambdaCount -. Traces .-> XRay
-    LambdaValid -. Logs/Metrics .-> CW
+    LambdaValid -. Execution Logs .-> CW
     LambdaValid -. Traces .-> XRay
 
-    %% CI/CD
-    GH -- Syncs Assets --> S3
-
-    %% Styles
-    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:white;
-    classDef db fill:#3F8624,stroke:#232F3E,stroke-width:2px,color:white;
-    classDef obs fill:#E7157B,stroke:#232F3E,stroke-width:2px,color:white;
-    classDef sec fill:#DD344C,stroke:#232F3E,stroke-width:2px,color:white;
-    classDef ext fill:#8C4FFF,stroke:#232F3E,stroke-width:2px,color:white;
-
-    class LambdaCount,LambdaValid,APIG,S3,CF,R53,ACM aws;
-    class DDB db;
-    class CW,XRay obs;
-    class SSM sec;
-    class ExtAPI ext;
+    %% Deployment Mapping
+    GH -- Syncs UI Assets --> S3
