@@ -2,7 +2,7 @@
 
 ## 1. Project Overview
 
-This project is a serverless full-stack application that hosts my professional resume on AWS. It demonstrates the use of cloud-native architecture, automated quality checks, and advanced observability. The website includes a dynamic "visitor counter" that updates in real-time, utilizing a purely serverless backend.
+This project is a serverless full-stack application that hosts my professional resume on AWS. It demonstrates the use of cloud-native architecture, automated quality checks, and advanced observability. The website includes a dynamic "visitor counter" that updates in real-time, utilizing a purely serverless backend, alongside a secure integration that cryptographically verifies and displays my AWS certification status dynamically.
 
 **Live Demo:** [https://vb-web.in/]
 
@@ -18,12 +18,21 @@ The solution uses a decoupled client-server architecture hosted entirely on AWS.
 
 ### High-Level Workflow:
 
+**Flow A: The Visitor Counter**
+
 1.  **Frontend:** Static files (HTML, CSS, JS) are stored in an **S3 Bucket**.
 2.  **Content Delivery:** **CloudFront** acts as a CDN to cache content globally and enforce HTTPS via an **ACM Certificate**.
 3.  **DNS:** **Route 53** manages the domain name resolution.
 4.  **Backend Trigger:** JavaScript on the frontend triggers an API call to **API Gateway**.
 5.  **Compute:** API Gateway triggers a **Lambda function** (written in Python).
 6.  **Database:** The Lambda function atomically updates and retrieves the visitor count from a **DynamoDB** table.
+
+**Flow B: Dynamic Credential Validation**
+
+1.  **Backend Trigger:** A separate asynchronous JavaScript `fetch()` call requests the credential status from **API Gateway**.
+2.  **Compute & Security:** API Gateway routes the request to a dedicated **Lambda function**.
+3.  **Secret Retrieval:** The Lambda function securely retrieves the external API key from **AWS SSM Parameter Store (SecureString)** using a strictly scoped, least-privilege IAM execution role.
+4.  **External Validation:** Lambda calls the third-party certification provider to cryptographically verify the badge status and returns the formatted JSON payload to the frontend.
 
 ---
 
@@ -40,19 +49,20 @@ To ensure this serverless application remains cost-effective and secure against 
 
 ## 4. Tech Stack
 
-| Domain                | Technology / Service                                             |
-| :-------------------- | :--------------------------------------------------------------- |
-| **Frontend**          | HTML5, CSS3, JavaScript                                          |
-| **Cloud Storage**     | AWS S3 (Static Website Hosting)                                  |
-| **CDN & Security**    | AWS CloudFront, AWS Certificate Manager (ACM)                    |
-| **DNS**               | AWS Route 53                                                     |
-| **Compute (Backend)** | AWS Lambda                                                       |
-| **API Management**    | AWS API Gateway (REST/HTTP API)                                  |
-| **Database**          | AWS DynamoDB (NoSQL)                                             |
-| **Code Quality**      | Prettier, Husky                                                  |
-| **Observability**     | AWS CloudWatch (Logs, Alarms, Dashboards, Synthetics), AWS X-Ray |
-| **Version Control**   | Git & GitHub                                                     |
-| **CI/CD**             | GitHub Actions                                                   |
+| Domain                 | Technology / Service                                             |
+| :--------------------- | :--------------------------------------------------------------- |
+| **Frontend**           | HTML5, CSS3, JavaScript                                          |
+| **Cloud Storage**      | AWS S3 (Static Website Hosting)                                  |
+| **CDN & Security**     | AWS CloudFront, AWS Certificate Manager (ACM)                    |
+| **DNS**                | AWS Route 53                                                     |
+| **Compute (Backend)**  | AWS Lambda                                                       |
+| **API Management**     | AWS API Gateway (REST/HTTP API)                                  |
+| **Database**           | AWS DynamoDB (NoSQL)                                             |
+| **Secrets Management** | AWS SSM Parameter Store (SecureString / KMS Encrypted)           |
+| **Code Quality**       | Prettier, Husky                                                  |
+| **Observability**      | AWS CloudWatch (Logs, Alarms, Dashboards, Synthetics), AWS X-Ray |
+| **Version Control**    | Git & GitHub                                                     |
+| **CI/CD**              | GitHub Actions                                                   |
 
 ---
 
@@ -84,6 +94,7 @@ Detailed architectural choices are documented as Architecture Decision Records (
 - **Cost Efficiency:** The architecture fits almost entirely within the AWS Free Tier. Lambda and DynamoDB only charge when code runs or data is accessed ("Pay-per-use"), meaning zero idle costs.
 - **High Availability:** Unlike a traditional single-server setup, this architecture relies on managed services (Lambda, DynamoDB) that are inherently distributed across multiple Availability Zones (AZs) by AWS.
 - **Atomic Counting:** Used DynamoDB `ADD` operations to handle concurrent site visitors accurately without race conditions.
+- **Secure Third-Party API Integration:** The backend securely orchestrates external API calls to validate my AWS certification status in real-time. By storing the required API keys as KMS-encrypted SecureStrings in AWS SSM Parameter Store, the architecture guarantees that no sensitive credentials are ever exposed to the frontend or hardcoded into the compute layer.
 
 ### D. Quality Assurance & Formatting
 
@@ -120,7 +131,7 @@ The project utilizes **GitHub Actions** for continuous integration and deploymen
 3.  **Deploy:**
     - Syncs frontend assets to the S3 bucket.
     - Invalidates the CloudFront cache to ensure immediate content updates.
-    - Updates the Lambda function code via AWS CLI commands.
+    - Updates the Lambda functions (both the Visitor Counter and the Credential Validator) via AWS CLI commands to ensure the backend is running the latest deployment package.
 
 ---
 
@@ -141,6 +152,7 @@ Since this project relies on AWS services (DynamoDB, API Gateway), strictly "loc
 - Node.js & npm (for Prettier/Husky).
 - Python 3.x (for Backend logic).
 - AWS CLI configured (if running backend scripts against live AWS).
+- Local `.env` file or AWS CLI configured with SSM access (to mock the external credential API key for the validation function).
 
 ### Step 1: Clone the Repository
 
