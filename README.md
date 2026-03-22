@@ -14,7 +14,7 @@ The solution uses a decoupled client-server architecture hosted entirely on AWS.
 
 ### Architecture Diagram
 
-<img width="1830" height="434" alt="cloud-resume-acrch-diagram" src="https://github.com/user-attachments/assets/75f54e38-cb12-4b11-ad81-e708e63cba31" />
+![cloud-resume-architecture-diagram](/docs/architecture/export/system-design.png)
 
 ### High-Level Workflow:
 
