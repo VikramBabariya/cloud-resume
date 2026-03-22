@@ -4,7 +4,7 @@
 
 This project is a serverless full-stack application that hosts my professional resume on AWS. It demonstrates the use of cloud-native architecture, automated quality checks, and advanced observability. The website includes a dynamic "visitor counter" that updates in real-time, utilizing a purely serverless backend, alongside a secure integration that cryptographically verifies and displays my AWS certification status dynamically.
 
-**Live Demo:** [https://vb-web.in/]
+**Live Demo:** [https://vb-web.in/]()
 
 ---
 
@@ -177,5 +177,6 @@ npm install
 ## 11. Future Improvements
 
 - Migrate manual infrastructure setup to Terraform or AWS CDK for full Infrastructure as Code (IaC).
+- [FinOps Initiative: Mitigate Orphaned EBS Cost](https://github.com/VikramBabariya/cloud-resume/issues/3)
+- [Architectural Enhancement: Automated CI/CD Pipeline (GitOps)](https://github.com/VikramBabariya/cloud-resume/issues/5)
 - Implement a Dark/Light mode toggle for the UI.
-- Add authentication for an admin dashboard to view detailed visitor analytics.
