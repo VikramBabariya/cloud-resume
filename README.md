@@ -4,7 +4,7 @@
 
 This project is a serverless full-stack application that hosts my professional resume on AWS. It demonstrates the use of cloud-native architecture, automated quality checks, and advanced observability. The website includes a dynamic "visitor counter" that updates in real-time, utilizing a purely serverless backend, alongside a secure integration that cryptographically verifies and displays my AWS certification status dynamically.
 
-**Live Demo:** [https://vb-web.in/]
+**Live Demo:** [https://vb-web.in/]()
 
 ---
 
@@ -14,7 +14,7 @@ The solution uses a decoupled client-server architecture hosted entirely on AWS.
 
 ### Architecture Diagram
 
-<img width="1830" height="434" alt="cloud-resume-acrch-diagram" src="https://github.com/user-attachments/assets/75f54e38-cb12-4b11-ad81-e708e63cba31" />
+![cloud-resume-architecture-diagram](/docs/architecture/export/system-design.png)
 
 ### High-Level Workflow:
 
@@ -95,6 +95,7 @@ Detailed architectural choices are documented as Architecture Decision Records (
 - **High Availability:** Unlike a traditional single-server setup, this architecture relies on managed services (Lambda, DynamoDB) that are inherently distributed across multiple Availability Zones (AZs) by AWS.
 - **Atomic Counting:** Used DynamoDB `ADD` operations to handle concurrent site visitors accurately without race conditions.
 - **Secure Third-Party API Integration:** The backend securely orchestrates external API calls to validate my AWS certification status in real-time. By storing the required API keys as KMS-encrypted SecureStrings in AWS SSM Parameter Store, the architecture guarantees that no sensitive credentials are ever exposed to the frontend or hardcoded into the compute layer.
+- **Data Lifecycle & Threat Modeling:** The precise routing logic, payload transformations, and secure memory decryption sequences for both microservices are strictly mapped in the [Level 1 Data Flow Diagram (DFD)](docs/architecture/data-flow.md).
 
 ### D. Quality Assurance & Formatting
 
@@ -177,5 +178,6 @@ npm install
 ## 11. Future Improvements
 
 - Migrate manual infrastructure setup to Terraform or AWS CDK for full Infrastructure as Code (IaC).
+- [FinOps Initiative: Mitigate Orphaned EBS Cost](https://github.com/VikramBabariya/cloud-resume/issues/3)
+- [Architectural Enhancement: Automated CI/CD Pipeline (GitOps)](https://github.com/VikramBabariya/cloud-resume/issues/5)
 - Implement a Dark/Light mode toggle for the UI.
-- Add authentication for an admin dashboard to view detailed visitor analytics.
