@@ -1,3 +1,4 @@
+```mermaid
 graph TD
 %% Styles & Color Taxonomy
 classDef client fill:#5A6B86,stroke:#232F3E,stroke-width:2px,color:#FFF;
@@ -75,3 +76,4 @@ classDef cicd fill:#2088FF,stroke:#232F3E,stroke-width:2px,color:#FFF;
 
     %% Deployment Mapping
     GH -- Syncs UI Assets --> S3
+```
