@@ -95,6 +95,7 @@ Detailed architectural choices are documented as Architecture Decision Records (
 - **High Availability:** Unlike a traditional single-server setup, this architecture relies on managed services (Lambda, DynamoDB) that are inherently distributed across multiple Availability Zones (AZs) by AWS.
 - **Atomic Counting:** Used DynamoDB `ADD` operations to handle concurrent site visitors accurately without race conditions.
 - **Secure Third-Party API Integration:** The backend securely orchestrates external API calls to validate my AWS certification status in real-time. By storing the required API keys as KMS-encrypted SecureStrings in AWS SSM Parameter Store, the architecture guarantees that no sensitive credentials are ever exposed to the frontend or hardcoded into the compute layer.
+- **Data Lifecycle & Threat Modeling:** The precise routing logic, payload transformations, and secure memory decryption sequences for both microservices are strictly mapped in the [Level 1 Data Flow Diagram (DFD)](docs/architecture/data-flow.md).
 
 ### D. Quality Assurance & Formatting
 
