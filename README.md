@@ -2,7 +2,7 @@
 
 ## 1. Project Overview
 
-This project is a serverless full-stack application that hosts my professional resume on AWS. It demonstrates the use of cloud-native architecture, automated quality checks, and advanced observability. The website includes a dynamic "visitor counter" that updates in real-time, utilizing a purely serverless backend, alongside a secure integration that cryptographically verifies and displays my AWS certification status dynamically.
+This project is a serverless full-stack application that hosts my professional resume on AWS. It demonstrates the use of cloud-native architecture, automated quality checks, and advanced observability. The frontend utilizes a "Resume as Code" methodology for automated content compilation, while the backend features a purely serverless real-time visitor counter and a secure integration that cryptographically verifies my AWS certification status dynamically.
 
 **Live Demo:** [https://vb-web.in/](https://vb-web.in/)
 
@@ -15,6 +15,7 @@ The solution uses a decoupled client-server architecture hosted entirely on AWS.
 ### Architecture Diagram
 
 ![cloud-resume-architecture-diagram](/docs/architecture/export/system-design.png)
+_(Diagram source maintained via Diagrams as Code in `/docs/architecture/source`)_
 
 ### High-Level Workflow:
 
@@ -51,7 +52,8 @@ To ensure this serverless application remains cost-effective and secure against 
 
 | Domain                 | Technology / Service                                             |
 | :--------------------- | :--------------------------------------------------------------- |
-| **Frontend**           | HTML5, CSS3, JavaScript                                          |
+| **Frontend UI**        | HTML5, CSS3, JavaScript                                          |
+| **Content Management** | Resume as Code (YAML + Python/Jinja2 Templating)                 |
 | **Cloud Storage**      | AWS S3 (Static Website Hosting)                                  |
 | **CDN & Security**     | AWS CloudFront, AWS Certificate Manager (ACM)                    |
 | **DNS**                | AWS Route 53                                                     |
@@ -74,71 +76,73 @@ Detailed architectural choices are documented as Architecture Decision Records (
 - [ADR 0002: Static Asset Delivery and Network Boundaries](docs/adr/0002-network-boundaries-and-cdn.md)
 - [ADR 0003: DynamoDB vs. Relational Database (RDS)](docs/adr/0003-dynamodb-vs-rds.md)
 - [ADR 0004: Credentials Storage for Dynamic Verification API](docs/adr/0004-dynamic-credential-storage.md)
+- [ADR 0005: Resume as Code Methodology](docs/adr/0005-resume-as-code-methodology.md)
 
 ---
 
 ## 6. Key Features & Implementation Details
 
-### A. Performance & Global Scale
+### A. Resume as Code (Data Decoupling)
 
-- **Ultra-Low Latency:** Utilizes CloudFront's global network of over 400+ Points of Presence (PoPs). A user in London and a user in Tokyo both load the site instantly from a local edge server rather than fetching from the origin S3 bucket every time.
+- **Separation of Concerns:** Professional history and skills are stored in a version-controlled YAML data file. A Python-based Jinja2 templating engine dynamically compiles this data into the final HTML artifact during the CI/CD deployment. This entirely eliminates manual HTML editing for content updates, ensuring formatting consistency and reducing technical debt.
+
+### B. Performance & Global Scale
+
+- **Ultra-Low Latency:** Utilizes CloudFront's global network of over 400+ Points of Presence (PoPs).
 - **Caching Strategy:** Optimized cache behaviors ensure static assets (images, CSS) are cached aggressively at the edge, while dynamic API calls bypass the cache for real-time accuracy.
 
-### B. Secure Static Hosting
+### C. Secure Static Hosting
 
-- **S3 Bucket Policies:** Configured to block public access, allowing read access _only_ via the CloudFront Origin Access Control (OAC). This prevents users from bypassing the CDN.
+- **S3 Bucket Policies:** Configured to block public access, allowing read access _only_ via the CloudFront Origin Access Control (OAC).
 - **HTTPS Enforcement:** All traffic is forced over HTTPS using a custom SSL/TLS certificate managed by **AWS Certificate Manager (ACM)**.
 
-### C. Serverless Backend (API & Database)
+### D. Serverless Backend (API & Database)
 
-- **Cost Efficiency:** The architecture fits almost entirely within the AWS Free Tier. Lambda and DynamoDB only charge when code runs or data is accessed ("Pay-per-use"), meaning zero idle costs.
-- **High Availability:** Unlike a traditional single-server setup, this architecture relies on managed services (Lambda, DynamoDB) that are inherently distributed across multiple Availability Zones (AZs) by AWS.
+- **Cost Efficiency:** The architecture fits almost entirely within the AWS Free Tier.
+- **High Availability:** Inherently distributed across multiple Availability Zones (AZs) by AWS.
 - **Atomic Counting:** Used DynamoDB `ADD` operations to handle concurrent site visitors accurately without race conditions.
-- **Secure Third-Party API Integration:** The backend securely orchestrates external API calls to validate my AWS certification status in real-time. By storing the required API keys as KMS-encrypted SecureStrings in AWS SSM Parameter Store, the architecture guarantees that no sensitive credentials are ever exposed to the frontend or hardcoded into the compute layer.
+- **Secure Third-Party API Integration:** The backend securely orchestrates external API calls to validate my AWS certification status in real-time, retrieving credentials via KMS-encrypted SecureStrings.
 - **Data Lifecycle & Threat Modeling:** The precise routing logic, payload transformations, and secure memory decryption sequences for both microservices are strictly mapped in the [Level 1 Data Flow Diagram (DFD)](docs/architecture/data-flow.md).
 
-### D. Quality Assurance & Formatting
+### E. Quality Assurance & Formatting
 
-- **Automated Formatting:** **Prettier** is configured to ensure consistent code style across HTML, CSS, and JS files.
-- **Git Hooks:** **Husky** is implemented to run pre-commit hooks. This prevents unformatted code from being committed to the repository, ensuring a clean codebase.
+- **Automated Formatting:** **Prettier** is configured to ensure consistent code style.
+- **Git Hooks:** **Husky** is implemented to run pre-commit hooks, preventing unformatted code from entering the repository.
 
-### E. Observability & Monitoring
+### F. Observability & Monitoring
 
-To ensure system reliability and ease of debugging, a robust observability strategy was implemented:
-
-- **Dashboards:** A custom **CloudWatch Dashboard** aggregates key metrics (API Latency, Visitor Count, Error Rates) into a single visual pane.
-- **Canary Synthetics:** **CloudWatch Synthetics** (Canary) is deployed to run scheduled heartbeat scripts. This simulates user traffic to verify that the website endpoint is reachable and the API is responsive.
-- **Distributed Tracing:** **AWS X-Ray** is enabled to visualize the request path and identify bottlenecks.
-- **Structured Logging:** **CloudWatch Logs** capture execution details from the Lambda function.
+- **Dashboards:** A custom **CloudWatch Dashboard** aggregates key metrics.
+- **Canary Synthetics:** **CloudWatch Synthetics** verifies endpoint reachability.
+- **Distributed Tracing:** **AWS X-Ray** is enabled to visualize the request path.
+- **Structured Logging:** **CloudWatch Logs** capture execution details.
 
 ---
 
 ## 7. Security & IAM
 
-This project enforces strict cloud security boundaries, including least-privilege IAM roles, Cross-Origin Resource Sharing (CORS) restrictions, and rigorous cost-control mechanisms to minimize the blast radius of potential security incidents.
-
-For a deep dive into the IAM policies, network boundaries, and security implementation, please refer to the detailed [Security Documentation](docs/SECURITY.md).
+This project enforces strict cloud security boundaries, including least-privilege IAM roles, Cross-Origin Resource Sharing (CORS) restrictions, and rigorous cost-control mechanisms. For a deep dive into the IAM policies, network boundaries, and security implementation, please refer to the detailed [Security Documentation](docs/SECURITY.md).
 
 ---
 
 ## 8. Automation & CI/CD Pipeline
 
-The project utilizes **GitHub Actions** for continuous integration and deployment.
+The project utilizes **GitHub Actions** for continuous integration, templating, and deployment.
 
 ### Workflow Steps:
 
 1.  **Checkout Code:** Pulls the latest repository code.
-2.  **Formatting Check:** Runs the Prettier check. If the code does not meet style guidelines, the build fails.
-3.  **Deploy:**
-    - Syncs frontend assets to the S3 bucket.
+2.  **Formatting & Linting:** Runs Prettier checks and validates the YAML data schema.
+3.  **Compile Static Assets (Build):** Executes the Python/Jinja2 build script to merge the `resume.yaml` data into the HTML template, generating the immutable `index.html` artifact.
+4.  **Deploy:**
+    - Syncs the compiled frontend assets to the S3 bucket.
     - Invalidates the CloudFront cache to ensure immediate content updates.
-    - Updates the Lambda functions (both the Visitor Counter and the Credential Validator) via AWS CLI commands to ensure the backend is running the latest deployment package.
+    - Updates the Lambda functions via AWS CLI commands to ensure the backend is running the latest deployment package.
 
 ---
 
 ## 9. Deployment & Runbook
 
-The step-by-step infrastructure provisioning guide, including manual ClickOps instructions, architectural flow, and conceptual bridges to Infrastructure as Code (Terraform), has been extracted to a dedicated runbook for incident response and deployment clarity.
+The step-by-step infrastructure provisioning guide, including manual ClickOps instructions, architectural flow, and conceptual bridges to Infrastructure as Code (Terraform), has been extracted to a dedicated runbook for incident response.
 
 Please refer to the [Deployment Runbook](docs/RUNBOOK.md) for full execution steps.
 
@@ -146,34 +150,42 @@ Please refer to the [Deployment Runbook](docs/RUNBOOK.md) for full execution ste
 
 ## 10. How to Run Locally (Development)
 
-Since this project relies on AWS services (DynamoDB, API Gateway), strictly "local" development requires mocking these services or connecting to the live cloud resources from your local machine.
+The frontend requires compiling the YAML data into HTML before viewing. Backend development requires AWS CLI configuration to test live resources.
 
 **Prerequisites:**
 
 - Node.js & npm (for Prettier/Husky).
-- Python 3.x (for Backend logic).
+- Python 3.x (for the Jinja2 Build Engine and Backend logic).
 - AWS CLI configured (if running backend scripts against live AWS).
-- Local `.env` file or AWS CLI configured with SSM access (to mock the external credential API key for the validation function).
 
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/VikramBabariya/cloud-resume.git
+git clone [https://github.com/VikramBabariya/cloud-resume.git](https://github.com/VikramBabariya/cloud-resume.git)
 cd cloud-resume-challenge
 ```
 
-### Step 2: Install Frontend Dependencies
+### Step 2: Install Dependencies
 
 ```bash
+# Install frontend formatting tools
 npm install
-# This installs Prettier and sets up Husky hooks automatically
+
+# Install Python templating engine dependencies
+pip install jinja2 pyyaml
 ```
 
-### Step 3: Run the Frontend
+### Step 3: Build and Run the Frontend
 
+```bash
+# Compile the YAML data into the HTML template
+python build.py
+
+# Serve the generated files locally (e.g., using Python's built-in server)
+python -m http.server 8000
 ```
-# You can utilize some local http server to open index.html file in the browser
-```
+
+Navigate to http://localhost:8000 in your browser.
 
 ## 11. Future Improvements
 
