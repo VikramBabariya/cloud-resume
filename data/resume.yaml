@@ -1,0 +1,72 @@
+# resume.yaml - The Single Source of Truth
+basics:
+  name: Vikram Babariya
+  label: Cloud Architect / DevOps Engineer
+  email: contact@vb-web.in
+  url: https://vb-web.in
+  summary: |
+    Software Engineer transitioning into a Cloud Architecture role, specializing in AWS serverless ecosystems, CI/CD pipelines, and infrastructure as code. Proven ability to design highly available, cost-optimized systems with strict security boundaries.
+  location:
+    city: Rajkot
+    region: Gujarat
+    countryCode: IN
+  profiles:
+    - network: LinkedIn
+      username: vikram-babariya
+      url: https://www.linkedin.com/in/vikram-babariya
+
+work:
+  - name: Corporate Entity
+    position: Software Engineer
+    startDate: "2024-06-01"
+    endDate: "2025-06-01"
+    summary: Full-stack development, system optimization, and API integration.
+    highlights:
+      - Engineered backend services, reducing query latency and optimizing data flow.
+      - Maintained cross-functional alignment utilizing strict Agile and SDLC methodologies.
+
+education:
+  - institution: Dharmsinh Desai University
+    area: Computer Science
+    studyType: Bachelor of Technology (BTech)
+    startDate: "2020-08-01"
+    endDate: "2024-05-01"
+
+skills:
+  - name: Cloud Computing & Infrastructure
+    level: Advanced
+    keywords:
+      - AWS (S3, Lambda, DynamoDB, API Gateway, CloudFront)
+      - AWS SSM Parameter Store (Secrets Management)
+      - Route 53 & ACM
+  - name: DevOps & Platform Engineering
+    level: Intermediate
+    keywords:
+      - GitHub Actions (CI/CD)
+      - Docker / Containerization
+      - GitOps workflows
+
+projects:
+  - name: Serverless Cloud Resume Portfolio
+    startDate: "2026-01-01"
+    endDate: "Present"
+    url: https://vb-web.in
+    description: A highly available, secure serverless portfolio demonstrating cloud-native architecture.
+    highlights:
+      - Deployed a dual-path serverless backend using API Gateway, Lambda, and DynamoDB for atomic transaction counting.
+      - Engineered a dynamic credential verification system using AWS SSM Parameter Store for secure, zero-trust secrets management.
+      - Implemented strict FinOps guardrails, maintaining a $6.00/month architectural cost.
+  
+  - name: Inventory Management Capstone
+    startDate: "2026-02-01"
+    endDate: "2026-02-27"
+    description: Containerized full-stack application demonstrating decoupled microservices.
+    highlights:
+      - Architected the backend using FastAPI, PostgreSQL, and a Redis caching layer to optimize database read operations.
+      - Containerized the application lifecycle using Docker to ensure environment parity between local development and production.
+
+certificates:
+  - name: AWS Certified Cloud Practitioner
+    date: "2026-03-01"
+    issuer: Amazon Web Services
+    url: https://aws.amazon.com/verification

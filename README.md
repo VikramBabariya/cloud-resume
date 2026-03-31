@@ -85,6 +85,7 @@ Detailed architectural choices are documented as Architecture Decision Records (
 ### A. Resume as Code (Data Decoupling)
 
 - **Separation of Concerns:** Professional history and skills are stored in a version-controlled YAML data file. A Python-based Jinja2 templating engine dynamically compiles this data into the final HTML artifact during the CI/CD deployment. This entirely eliminates manual HTML editing for content updates, ensuring formatting consistency and reducing technical debt.
+  _(The data schema strictly adheres to the JSON Resume standard. The raw data source can be found in `/data/resume.yaml`)_
 
 ### B. Performance & Global Scale
 
