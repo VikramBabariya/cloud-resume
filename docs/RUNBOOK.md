@@ -13,10 +13,10 @@ The following outlines the logical, dependency-driven sequence required to build
 
 1. **Provision the Data Layer (DynamoDB):** Create a DynamoDB table named `VisitorCount` with a primary partition key `id` (String).
 2. **Provision Secrets Management (SSM):** Create an AWS Systems Manager (SSM) Parameter of type `SecureString` to hold the external certification API key. Ensure it is encrypted using the default AWS KMS key.
-3. **Configure Compute (Lambda):** \* Create the **Counter Lambda** (Python) and assign a least-privilege IAM role scoped strictly to `dynamodb:UpdateItem` and `dynamodb:GetItem` for the specific table ARN.
+3. **Configure Compute (Lambda):** - Create the **Counter Lambda** (Python) and assign a least-privilege IAM role scoped strictly to `dynamodb:UpdateItem` and `dynamodb:GetItem` for the specific table ARN.
    - Create the **Validator Lambda** (Python) and assign a least-privilege IAM role scoped strictly to `ssm:GetParameter` for the specific SSM parameter ARN. Upload the backend application logic for both functions.
 4. **Establish the API Boundary (API Gateway):** Create an HTTP API. Map two distinct routes (e.g., `/counter` and `/verify`) to integrate with their respective Lambda functions. Configure the CORS policy to strictly allow origins from `vb-web.in`.
-5. **Deploy Frontend Storage (S3):** Create an S3 bucket with public access blocked, and upload the formatted HTML/CSS/JS files.
+5. **Build and Deploy Frontend Storage (S3):** _Critical SRE Note: Do not sync the root repository to S3._ You must first execute the local build script (`python build.py`) to compile the `resume.yaml` data into the final HTML artifact. Create an S3 bucket with public access blocked, and upload **only** the compiled output directory (e.g., `./dist`) containing the final HTML/CSS/JS files.
 6. **Configure Global Delivery (CloudFront & Route 53):** Deploy a CloudFront distribution pointing to the S3 bucket via Origin Access Control (OAC). Finally, route domain traffic by creating an A-Record in Route 53 pointing to the CloudFront distribution.
 
 ### Conceptual Bridge to Infrastructure as Code (IaC)
