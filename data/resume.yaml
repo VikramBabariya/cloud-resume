@@ -77,7 +77,7 @@ skills:
 projects:
   - name: Cloud-Native Serverless Portfolio
     startDate: "2026-01-01"
-    endDate: "Present"
+    current: true
     url: https://vb-web.in
     description: A highly available, secure serverless application demonstrating cloud architecture and "Resume as Code" CI/CD automation.
     highlights:
@@ -88,7 +88,7 @@ projects:
 
   - name: Inventory Management Capstone
     startDate: "2026-02-01"
-    endDate: "Present"
+    current: true
     description: Containerized full-stack application demonstrating decoupled microservices and optimized caching.
     highlights:
       - Architected the backend using FastAPI and PostgreSQL, integrating a Redis caching layer to drastically reduce database read latency.
