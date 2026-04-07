@@ -1,0 +1,100 @@
+# resume.yaml - The Single Source of Truth
+basics:
+  name: Vikram Babariya
+  label: Cloud Architect / DevOps Engineer
+  email: vikram000712345@gmail.com
+  phone: "+91 70482 63900"
+  url: https://vb-web.in
+  summary: |
+    Software Engineer transitioning into Cloud Architecture and DevOps, specializing in AWS serverless ecosystems, CI/CD pipelines, and infrastructure as code. Proven track record of architecting highly available backend systems, optimizing data pipelines, and enforcing strict security boundaries in enterprise environments.
+  location:
+    city: Rajkot
+    region: Gujarat
+    countryCode: IN
+  profiles:
+    - network: LinkedIn
+      username: vikram-babariya
+      url: https://www.linkedin.com/in/vikram-babariya
+    - network: GitHub
+      username: VikramBabariya
+      url: https://github.com/VikramBabariya
+
+work:
+  - name: Infineon Technologies
+    position: Software Engineer (Backend & Automation)
+    location: Gujarat, India
+    startDate: "2024-06-01"
+    endDate: "2025-06-01"
+    summary: Engineered backend automation tools and optimized legacy I/O operations for enterprise hardware testing pipelines.
+    highlights:
+      - Architected and deployed the Unit Resolution System, automating the translation of analog values to digital registers, completely eliminating manual configuration errors.
+      - Optimized internal testing workflows by refactoring legacy I2C/UART functions to asynchronous concurrency models (async/await), drastically reducing test cycle times.
+      - Engineered comprehensive Unit Tests and server-side logging for visualization tools, achieving and maintaining 99.9% system availability during critical test phases.
+      - Developed a runtime inspection tool analyzing Python call stacks to prevent false-positive hardware failures, improving lab automation reliability.
+
+  - name: Infineon Technologies
+    position: Software Engineering Intern
+    location: Gujarat, India
+    startDate: "2023-12-01"
+    endDate: "2024-05-01"
+    summary: Developed highly scalable data ingestion pipelines and visualization dashboards for semiconductor failure analysis.
+    highlights:
+      - Architected a scalable Wafer Visualization Platform (SPA), accelerating defect pattern identification and reducing analysis time from hours to minutes.
+      - Optimized backend performance by integrating Snowflake with Django, implementing multi-threading for data ingestion to process 100+ massive wafer datasets concurrently.
+      - Developed dynamic, data-driven dashboards using Plotly.js to visualize test data, directly influencing yield improvement strategies.
+
+education:
+  - institution: Dharmsinh Desai University
+    area: Computer Science and Engineering
+    studyType: Bachelor of Technology (BTech)
+    startDate: "2020-10-01"
+    endDate: "2024-05-01"
+    score: "CGPA: 7.97"
+    location: Nadiad, Gujarat
+
+skills:
+  - name: Cloud Computing & Serverless
+    level: Advanced
+    keywords:
+      - AWS (Lambda, API Gateway, S3, CloudFront, DynamoDB)
+      - AWS SSM Parameter Store (Secrets Management)
+      - IAM Least Privilege & Security Boundaries
+      - Route 53 & ACM (TLS/SSL)
+  - name: DevOps, CI/CD & Observability
+    level: Intermediate
+    keywords:
+      - GitHub Actions (Automated Pipelines)
+      - Docker / Containerization
+      - AWS X-Ray & CloudWatch Synthetics
+      - GitOps Workflows
+  - name: Backend Engineering & Languages
+    level: Advanced
+    keywords:
+      - Python, JavaScript (Node.js), C/C++, SQL
+      - Django, FastAPI, Express.js
+      - PostgreSQL, Redis
+
+projects:
+  - name: Cloud-Native Serverless Portfolio
+    startDate: "2026-01-01"
+    current: true
+    url: https://vb-web.in
+    description: A highly available, secure serverless application demonstrating cloud architecture and "Resume as Code" CI/CD automation.
+    highlights:
+      - Architected a high-availability frontend utilizing AWS CloudFront and S3, enforcing Origin Access Control (OAC) to serve content securely with ultra-low latency from 400+ global edge locations.
+      - Engineered a dual-path event-driven backend using API Gateway, Lambda, and DynamoDB, executing atomic database operations to handle concurrent user traffic.
+      - Implemented dynamic credential verification orchestrating external APIs, securely retrieving KMS-encrypted keys via AWS SSM Parameter Store.
+      - Designed a robust GitHub Actions CI/CD pipeline featuring automated YAML linting, Python/Jinja2 template compilation, and zero-downtime AWS deployments.
+
+  - name: Inventory Management Capstone
+    startDate: "2026-02-01"
+    current: true
+    description: Containerized full-stack application demonstrating decoupled microservices and optimized caching.
+    highlights:
+      - Architected the backend using FastAPI and PostgreSQL, integrating a Redis caching layer to drastically reduce database read latency.
+      - Containerized the application lifecycle utilizing Docker to ensure strict environment parity between local development and production deployments.
+
+certificates:
+  - name: AWS Certified Cloud Practitioner
+    date: "2025-12-01"
+    issuer: Amazon Web Services
