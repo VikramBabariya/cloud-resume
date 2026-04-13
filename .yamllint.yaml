@@ -1,0 +1,17 @@
+# .yamllint.yaml - Strict syntax governance
+extends: default
+
+rules:
+  # Enforce 2-space indentation (JSON Resume standard)
+  indentation:
+    spaces: 2
+    indent-sequences: true
+  
+  # Allow long lines for text-heavy summary/highlight paragraphs
+  line-length: disable
+  
+  # Ensure the file ends with a newline character for POSIX compliance
+  new-line-at-end-of-file: enable
+  
+  # Prevent trailing spaces which can break Jinja2 parsing
+  trailing-spaces: enable

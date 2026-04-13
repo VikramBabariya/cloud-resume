@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky"
+    "prepare": "husky",
+    "validate:syntax": "yamllint data/resume.yaml",
+    "validate:schema": "ajv validate -s docs/schema.json -d data/resume.yaml",
+    "validate": "npm run validate:syntax && npm run validate:schema"
   },
   "repository": {
     "type": "git",
@@ -20,6 +23,7 @@
   },
   "homepage": "https://github.com/VikramBabariya/cloud-resume#readme",
   "devDependencies": {
+    "ajv-cli": "^3.3.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4"

@@ -1,0 +1,207 @@
+/* Core Variables for maintaining design consistency */
+:root {
+  --primary-color: #2c3e50;
+  --accent-color: #2980b9;
+  --accent-hover: #3498db;
+  --text-main: #333333;
+  --text-muted: #7f8c8d;
+  --bg-color: #f4f4f7;
+  --card-bg: #ffffff;
+  --border-radius: 8px;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif;
+  line-height: 1.6;
+  color: var(--text-main);
+  background-color: var(--bg-color);
+  margin: 0;
+  padding: 2vh 2vw;
+}
+
+.container {
+  max-width: 850px;
+  margin: 0 auto;
+  background: var(--card-bg);
+  padding: 40px 50px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border-radius: var(--border-radius);
+}
+
+/* Typography & Semantic Landmarks */
+header {
+  text-align: center;
+  border-bottom: 2px solid #eaeaea;
+  padding-bottom: 25px;
+  margin-bottom: 30px;
+}
+
+h1 {
+  margin: 0;
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  letter-spacing: -0.5px;
+}
+
+h2 {
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 8px;
+  font-size: 1.25rem;
+}
+
+h3 {
+  color: var(--accent-color);
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  margin-top: 35px;
+  font-size: 1.4rem;
+}
+
+h4 {
+  margin: 0 0 5px 0;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+/* UI Components & Buttons */
+.profiles {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition:
+    background 0.3s ease,
+    transform 0.1s ease;
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: #fff;
+  border: 1px solid var(--accent-color);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  text-decoration: none;
+  color: #fff;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+}
+
+.btn-secondary:hover {
+  background: rgba(41, 128, 185, 0.1);
+  text-decoration: none;
+}
+
+.demo-link {
+  font-size: 0.85rem;
+  font-weight: normal;
+  margin-left: 8px;
+}
+
+/* Data Structuring & Grids */
+.skill-category {
+  margin-bottom: 15px;
+}
+
+.skills-grid span {
+  display: inline-block;
+  background: #ecf0f1;
+  color: var(--primary-color);
+  padding: 6px 12px;
+  margin: 6px 6px 0 0;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.job,
+.project {
+  margin-bottom: 25px;
+}
+
+.job-header,
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.job-summary,
+.project-description {
+  margin: 5px 0 10px 0;
+  color: #555;
+}
+
+ul {
+  padding-left: 20px;
+  margin-top: 5px;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+.date {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Observability Footer */
+.footer-telemetry {
+  max-width: 850px;
+  margin: 20px auto 0;
+  text-align: right;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* Mobile Responsive Matrix */
+@media (max-width: 768px) {
+  .container {
+    padding: 30px 20px;
+  }
+  .job-header,
+  .project-header {
+    flex-direction: column;
+  }
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+  .footer-telemetry {
+    text-align: center;
+  }
+}
