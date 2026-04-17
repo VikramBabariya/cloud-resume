@@ -77,7 +77,7 @@
             <div class="project-header">
               <h4>
                 {{ project.name | e }}
-                {% if project.url %}
+                {% if project.url is defined and project.url %}
                   <a href="{{ project.url | e }}" target="_blank" rel="noopener noreferrer" class="demo-link" aria-label="Live demo for {{ project.name | e }}">[Live Demo]</a>
                 {% endif %}
               </h4>
@@ -131,7 +131,14 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5-second hard timeout
           
-          const response = await fetch(apiURL, { signal: controller.signal });
+          const response = await fetch(apiURL, { 
+            signal: controller.signal,
+            method: 'GET',
+            mode: 'cors',               // Explicitly declare cross-origin intent
+            headers: {
+              'Accept': 'application/json' // Explicitly request a JSON response
+            }
+          });
           clearTimeout(timeoutId);
           
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
