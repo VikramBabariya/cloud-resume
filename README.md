@@ -149,15 +149,17 @@ Please refer to the [Deployment Runbook](docs/RUNBOOK.md) for full execution ste
 
 ---
 
-## 10. How to Run Locally (Development)
+## 10. 🛠️ Local Development & Compilation Engine
 
-The frontend requires compiling the YAML data into HTML before viewing. Backend development requires AWS CLI configuration to test live resources.
+This project operates on a strict **"Resume as Code"** methodology. The frontend UI is treated as a stateless compilation target, generated dynamically by a custom Python Static Site Generator (SSG) to ensure absolute separation of concerns between data (`resume.yaml`) and presentation (`Jinja2`).
 
-**Prerequisites:**
+### System Requirements
 
-- Node.js & npm (for Prettier/Husky).
-- Python 3.x (for the Jinja2 Build Engine and Backend logic).
-- AWS CLI configured (if running backend scripts against live AWS).
+To guarantee deterministic builds and prevent software supply chain pollution, local environments must strictly mirror the CI/CD pipeline. We enforce explicit minimum patch versions to eliminate "it works on my machine" anomalies and maintain a robust DevSecOps posture.
+
+- **Python:** `>= 3.12.x`
+- **Node.js:** `>= 24.13.x`
+- **npm:** `>= 11.6.x`
 
 ### Step 1: Clone the Repository
 
@@ -166,27 +168,45 @@ git clone [https://github.com/VikramBabariya/cloud-resume.git](https://github.co
 cd cloud-resume-challenge
 ```
 
-### Step 2: Install Dependencies
+### Step 2. Environment Initialization
+
+Before compiling the artifact, you must initialize the isolated dependency sandboxes. Never install these tools globally.
 
 ```bash
-# Install frontend formatting tools
-npm install
+# 1. Initialize the Python Virtual Environment (Prevents dependency hell)
+python3 -m venv .venv
+source .venv/bin/activate  # Windows: .\.venv\Scripts\Activate.ps1
 
-# Install Python templating engine dependencies
-pip install jinja2 pyyaml
+# 2. Install Python Build Dependencies
+pip install -r requirements.txt
+
+# 3. Install Node.js Validation Tooling
+npm install
 ```
+
+### Step 3: SRE Quality Gates
+
+To prevent malformed data from reaching the production S3 bucket, all configuration changes must pass a strict two-stage local validation gate.
+
+```bash
+# Executes yamllint (structural syntax) and ajv-cli (semantic schema validation)
+npm run validate
+```
+
+- **Stage 1 (Syntax):** Enforces YAML 1.2 specifications and prevents indentation/spacing violations.
+- **Stage 2 (Semantic):** Validates the data payload against the official `schema.json` contract (JSON Resume Standard), ensuring all required business logic fields exist before compilation.
 
 ### Step 3: Build and Run the Frontend
 
 ```bash
-# Compile the YAML data into the HTML template
+# Once validation passes, execute the build engine to merge the data layer with the presentation template.
 python build.py
 
-# Serve the generated files locally (e.g., using Python's built-in server)
+# To test the compiled artifact and asynchronous API fetches locally without triggering browser CORS restrictions, utilize Python's built-in HTTP server:
 python -m http.server 8000
 ```
 
-Navigate to http://localhost:8000 in your browser.
+Navigate to http://localhost:8000 to verify the UI and telemetry integrations.
 
 ## 11. Future Improvements
 
