@@ -77,7 +77,7 @@
             <div class="project-header">
               <h4>
                 {{ project.name | e }}
-                {% if project.url %}
+                {% if project.url is defined and project.url %}
                   <a href="{{ project.url | e }}" target="_blank" rel="noopener noreferrer" class="demo-link" aria-label="Live demo for {{ project.name | e }}">[Live Demo]</a>
                 {% endif %}
               </h4>
