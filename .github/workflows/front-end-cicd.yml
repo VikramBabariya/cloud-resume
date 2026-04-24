@@ -1,35 +1,108 @@
-name: Deploy Frontend to S3 and Invalidate CloudFront
+name: Deploy Resume-as-Code Pipeline (OIDC)
 
+# Trigger deployment strictly on merges to the main branch
 on:
   push:
     branches:
       - main
 
+# DevSecOps Constraint: These permissions are strictly required for Zero-Trust Federation.
+# 'id-token: write' allows the GitHub runner to request the JWT from the OIDC provider.
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    
     steps:
+      # 1. Environment Provisioning: Code Checkout
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Check Frontend Formatting
-        run: npx prettier --check "**/*.{html,css,js}"
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      # 2. Environment Provisioning: Python Setup
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          python-version: '3.12'
+
+      # 3. Environment Provisioning: Dependency Caching
+      # Strategic Reasoning: Caches the pip dependencies to drastically lower pipeline execution time 
+      # and Mean Time To Recovery (MTTR) in the event of a runner failure.
+      - name: Cache Python Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # 4. Setup Node.js Runtime
+      - name: Setup Node.js (v24.x)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: 'npm'
+
+      # 5. Decoupled Dependency Provisioning
+      # Strategic Reasoning: We create the .venv and install all linters/generators 
+      # FIRST, making them globally available to subsequent steps in the runner.
+      - name: Provision Python Virtual Environment & Dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      # 6. SRE Shift-Left Quality Gates
+      # Strategic Reasoning: Dependencies are now installed. We activate the .venv 
+      # so npm can access the yamllint binary. The pipeline will Fail Fast here 
+      # if formatting or schema contracts are violated.
+      - name: SRE Quality Gates (Formatting, Syntax, Schema)
+        run: |
+          npx prettier --check "**/*.{html,css,js}"
+          source .venv/bin/activate
+          npm run validate
+
+
+      # 7. Compile Static Artifacts & Enforce Integrity
+      # Strategic Reasoning: Validation has passed. We reactivate the .venv, compile, 
+      # and mathematically verify the index.html artifact exists before deployment.
+      - name: Compile Static Artifacts & Enforce Integrity
+        run: |
+          source .venv/bin/activate
+          python build.py
+          test -f ./dist/index.html || { echo "Critical Failure: Artifact missing."; exit 1; }
+
+
+      # 8. Secure Authentication (Zero-Trust OIDC)
+      # Strategic Reasoning: Replaces legacy, long-lived Access Keys with an ephemeral STS token.
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ap-south-1
+          # Strategic Reasoning (Non-Repudiation): This dynamically generated session name guarantees 
+          # that every STS credential usage logged in AWS CloudTrail can be deterministically traced 
+          # back to this exact GitHub run ID and repository, ensuring total observability.
+          role-session-name: ${{ github.event.repository.name }}-${{ github.run_id }}
 
-      - name: Deploy Static Site to S3
+      # 9. Idempotent Deployment & Artifact Hygiene
+      # Strategic Reasoning: Targets ONLY the /dist directory, mathematically preventing raw source code 
+      # (Python, YAML) from leaking to the public. The --delete flag enforces Idempotency, ensuring 
+      # the S3 bucket is a perfect, hygienic mirror of the current build.
+      - name: Deploy Compiled Artifact to S3 Origin
         run: |
-          aws s3 sync ./frontend s3://${{ secrets.S3_BUCKET_NAME }} --delete
+          aws s3 sync ./dist s3://${{ secrets.S3_BUCKET_NAME }} --delete
 
-      - name: Fix Cache-Control for index.html
+      # 10. Zero-Downtime Deployment & Cache Invalidation
+      # Strategic Reasoning: Forces the global CDN to purge stale assets, ensuring hiring managers 
+      # instantly receive the latest resume payload across all edge locations.
+      - name: Invalidate CloudFront Edge Cache
         run: |
-          aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/index.html s3://${{ secrets.S3_BUCKET_NAME }}/index.html --metadata-directive REPLACE --cache-control "max-age=0,no-cache,no-store,must-revalidate" --content-type text/html
-
-      - name: Invalidate CloudFront Cache
-        run: |
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.CDN_DISTRIBUTION_ID }} --paths "/*"
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CDN_DISTRIBUTION_ID }} \
+            --paths "/*"
