@@ -8,6 +8,23 @@ This project is a serverless full-stack application that hosts my professional r
 
 ---
 
+## 2. Core Architectural Highlights (SRE & DevSecOps)
+
+This project transcends a standard static website by operating as a fully automated **"Resume-as-Code" (RaC)** platform. The CI/CD deployment pipeline is engineered to enforce strict Site Reliability Engineering (SRE) quality gates, mathematically guaranteeing deterministic and idempotent artifact generation prior to AWS synchronization.
+
+- **Zero-Trust Identity Federation & Non-Repudiation**
+  - _Implementation:_ Long-lived AWS IAM Access Keys have been strictly deprecated. The GitHub Actions CI/CD runner authenticates against AWS utilizing an OpenID Connect (OIDC) Identity Provider to assume a short-lived, ephemeral STS session token.
+  - _Strategic Value:_ This Zero-Trust architecture mathematically enforces **Blast Radius Containment**; in the event of a runner compromise, the credential automatically expires. Furthermore, dynamic STS session naming (via GitHub Run IDs) guarantees absolute **Non-Repudiation**, ensuring every deployment mutation is cryptographically traceable within AWS CloudTrail.
+- **Shift-Left Quality Gates & The "Fail Fast" Principle**
+  - _Implementation:_ The pipeline explicitly decouples data (`resume.yaml`) from presentation. Before the Python SSG build engine compiles the artifact, the data layer undergoes rigorous local and CI/CD validation utilizing `yamllint`, `ajv-cli` (JSON Schema semantic validation), and Prettier.
+  - _Strategic Value:_ Enforcing these Shift-Left Quality Gates applies the SRE **"Fail Fast"** principle. By terminating the build pipeline within seconds upon detecting a malformed data contract or syntax error, we preserve CI/CD compute budgets and drastically lower the **Mean Time To Recovery (MTTR)**.
+- **Idempotent Deployment & Artifact Hygiene**
+  - _Implementation:_ The deployment stage exclusively targets the compiled `./dist` directory utilizing the `aws s3 sync --delete` command against the origin S3 bucket.
+  - _Strategic Value:_ This strict enforcement of Idempotency guarantees **Artifact Hygiene**. By mathematically ensuring the S3 bucket is a perfect, 1:1 mirror of the validated build, we uphold the **Principle of Least Privilege (PoLP)** at the storage layer, physically preventing raw backend Python scripts or YAML data from ever leaking to the public internet boundary.
+- **Performance Engineering & Zero-Downtime Delivery**
+  - _Implementation:_ The custom Python compilation engine performs Critical CSS Injection directly into the HTML `<head>`, eliminating render-blocking network requests. Post-deployment, the pipeline executes a mandatory `cloudfront create-invalidation` command.
+  - _Strategic Value:_ This ensures top-tier **Time To First Contentful Paint (TTFCP)** performance metrics. The automated CDN invalidation guarantees a **Zero-Downtime Deployment** experience, forcing global edge locations (e.g., Mumbai, Hyderabad) to instantly serve the freshest artifact to end-users without manual intervention.
+
 ## 2. Architecture
 
 The solution uses a decoupled client-server architecture hosted entirely on AWS.
