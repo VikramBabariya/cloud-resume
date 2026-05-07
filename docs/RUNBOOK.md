@@ -38,8 +38,8 @@ source .venv/bin/activate  # Windows: .\.venv\Scripts\Activate.ps1
 # 2. Install Python Build Dependencies
 pip install -r requirements.txt
 
-# 3. Install Node.js Validation Tooling
-npm install
+# 3. Install Node.js Validation Tooling Cleanly
+npm ci
 ```
 
 ### Step 3.2: SRE Quality Gates (Shift-Left Testing)
@@ -47,6 +47,9 @@ npm install
 Execute the local validation wrapper to test the data contract. If this fails, investigate the SRE error trace and do not commit.
 
 ```Bash
+# Enforce UI Formatting Consistency
+npx prettier --check "**/*.{html,css,js}"
+
 # Executes yamllint (structural syntax) and ajv-cli (semantic schema validation)
 npm run validate
 ```
@@ -63,9 +66,19 @@ python build.py
 python3 -m http.server 8000 --directory dist
 ```
 
-## 4. Resource Provisioning (The Outer Loop)
+## 4. Outer Loop: Automated CI/CD Pipeline (Frontend)
 
-The following outlines the logical sequence required to build the cloud environment. _Critical SRE Note: Secrets and Identity Providers must be provisioned before the compute layers that require them._
+The Outer Loop governs the fully automated, immutable deployment of the verified frontend artifact to the AWS cloud environment via GitHub Actions (`.github/workflows/front-end-cicd.yml`).
+
+**Zero-Trust Identity Federation (OIDC):** The runner dynamically requests a JSON Web Token (JWT) and submits it to AWS STS. The workflow explicitly sets the `role-session-name` to `${{ github.event.repository.name }}-${{ github.run_id }}` to guarantee non-repudiation in CloudTrail logs.
+
+**Idempotent Deployment:** Execution relies on `aws s3 sync ./dist s3://${{ secrets.S3_BUCKET_NAME }} --delete`. By targeting strictly the `./dist` folder, we enforce Artifact Hygiene, preventing backend scripts from leaking to the public internet.
+
+**Zero-Downtime Edge Invalidation:** The pipeline automatically executes `aws cloudfront create-invalidation` to purge global edge caches, ensuring immediate content freshness.
+
+## 5. Backend Resource Provisioning (The ClickOps Foundation)
+
+While the frontend is fully automated, the serverless backend is currently provisioned manually._Critical SRE Note: Secrets and Identity Providers must be provisioned before the compute layers that require them._
 
 1. Provision the Data Layer (DynamoDB): Create a DynamoDB table named VisitorCount with a primary partition key id (String). Set billing mode to On-Demand to optimize for free-tier usage.
 
@@ -78,13 +91,7 @@ The following outlines the logical sequence required to build the cloud environm
 
 4. Establish the API Boundary (API Gateway): Create an HTTP API. Map routes to integrate with their respective Lambda functions. Configure the CORS policy to strictly allow origins from your registered domain.
 
-5. Provision Zero-Trust Identity Federation (OIDC): Create an AWS IAM OpenID Connect provider for GitHub (token.actions.githubusercontent.com). Create an IAM Role trusting this provider, scoped exclusively to the main branch of the GitHub repository. Attach inline policies strictly permitting s3:PutObject, s3:DeleteObject, and cloudfront:CreateInvalidation.
-
-6. Build and Deploy Frontend Storage (S3): Critical SRE Note: The S3 sync command must target strictly the ./dist directory using the --delete flag. Create an S3 bucket with public access blocked.
-
-7. Configure Global Delivery (CloudFront & Route 53): Deploy a CloudFront distribution pointing to the S3 bucket via Origin Access Control (OAC). Route domain traffic by creating an A-Record in Route 53.
-
-## 5. Conceptual Bridge to Infrastructure as Code (IaC)
+## 6. Conceptual Bridge to Infrastructure as Code (IaC)
 
 While the sequence above details a manual deployment approach, this state is designed to be translated into declarative configuration tools like Terraform. In our upcoming IaC sprint, these imperative steps will be replaced by the following resources:
 

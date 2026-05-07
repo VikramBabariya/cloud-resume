@@ -1,6 +1,6 @@
 # Cloud Resume: Serverless Portfolio on AWS
 
-## 1. Project Overview
+## Project Overview
 
 This project is a serverless full-stack application that hosts my professional resume on AWS. It demonstrates the use of cloud-native architecture, automated quality checks, and advanced observability. The frontend utilizes a "Resume as Code" methodology for automated content compilation, while the backend features a purely serverless real-time visitor counter and a secure integration that cryptographically verifies my AWS certification status dynamically.
 
@@ -8,7 +8,24 @@ This project is a serverless full-stack application that hosts my professional r
 
 ---
 
-## 2. Architecture
+## Core Architectural Highlights (SRE & DevSecOps)
+
+This project transcends a standard static website by operating as a fully automated **"Resume-as-Code" (RaC)** platform. The CI/CD deployment pipeline is engineered to enforce strict Site Reliability Engineering (SRE) quality gates, mathematically guaranteeing deterministic and idempotent artifact generation prior to AWS synchronization.
+
+- **Zero-Trust Identity Federation & Non-Repudiation**
+  - _Implementation:_ Long-lived AWS IAM Access Keys have been strictly deprecated. The GitHub Actions CI/CD runner authenticates against AWS utilizing an OpenID Connect (OIDC) Identity Provider to assume a short-lived, ephemeral STS session token.
+  - _Strategic Value:_ This Zero-Trust architecture mathematically enforces **Blast Radius Containment**; in the event of a runner compromise, the credential automatically expires. Furthermore, dynamic STS session naming (via GitHub Run IDs) guarantees absolute **Non-Repudiation**, ensuring every deployment mutation is cryptographically traceable within AWS CloudTrail.
+- **Shift-Left Quality Gates & The "Fail Fast" Principle**
+  - _Implementation:_ The pipeline explicitly decouples data (`resume.yaml`) from presentation. Before the Python SSG build engine compiles the artifact, the data layer undergoes rigorous local and CI/CD validation utilizing `yamllint`, `ajv-cli` (JSON Schema semantic validation), and Prettier.
+  - _Strategic Value:_ Enforcing these Shift-Left Quality Gates applies the SRE **"Fail Fast"** principle. By terminating the build pipeline within seconds upon detecting a malformed data contract or syntax error, we preserve CI/CD compute budgets and drastically lower the **Mean Time To Recovery (MTTR)**.
+- **Idempotent Deployment & Artifact Hygiene**
+  - _Implementation:_ The deployment stage exclusively targets the compiled `./dist` directory utilizing the `aws s3 sync --delete` command against the origin S3 bucket.
+  - _Strategic Value:_ This strict enforcement of Idempotency guarantees **Artifact Hygiene**. By mathematically ensuring the S3 bucket is a perfect, 1:1 mirror of the validated build, we uphold the **Principle of Least Privilege (PoLP)** at the storage layer, physically preventing raw backend Python scripts or YAML data from ever leaking to the public internet boundary.
+- **Performance Engineering & Zero-Downtime Delivery**
+  - _Implementation:_ The custom Python compilation engine performs Critical CSS Injection directly into the HTML `<head>`, eliminating render-blocking network requests. Post-deployment, the pipeline executes a mandatory `cloudfront create-invalidation` command.
+  - _Strategic Value:_ This ensures top-tier **Time To First Contentful Paint (TTFCP)** performance metrics. The automated CDN invalidation guarantees a **Zero-Downtime Deployment** experience, forcing global edge locations (e.g., Mumbai, Hyderabad) to instantly serve the freshest artifact to end-users without manual intervention.
+
+## Architecture
 
 The solution uses a decoupled client-server architecture hosted entirely on AWS.
 
@@ -37,7 +54,7 @@ _(Diagram source maintained via Diagrams as Code in `/docs/architecture/source`)
 
 ---
 
-## 3. FinOps and Guardrails
+## FinOps and Guardrails
 
 To ensure this serverless application remains cost-effective and secure against denial-of-wallet attacks, strict cloud governance policies have been implemented:
 
@@ -48,7 +65,7 @@ To ensure this serverless application remains cost-effective and secure against 
 
 ---
 
-## 4. Tech Stack
+## Tech Stack
 
 | Domain                 | Technology / Service                                             |
 | :--------------------- | :--------------------------------------------------------------- |
@@ -68,7 +85,7 @@ To ensure this serverless application remains cost-effective and secure against 
 
 ---
 
-## 5. Architecture Decisions
+## Architecture Decisions
 
 Detailed architectural choices are documented as Architecture Decision Records (ADRs) to maintain a clean history of technical tradeoffs.
 
@@ -80,7 +97,7 @@ Detailed architectural choices are documented as Architecture Decision Records (
 
 ---
 
-## 6. Key Features & Implementation Details
+## Key Features & Implementation Details
 
 ### A. Resume as Code (Data Decoupling)
 
@@ -119,13 +136,13 @@ Detailed architectural choices are documented as Architecture Decision Records (
 
 ---
 
-## 7. Security & IAM
+## Security & IAM
 
 This project enforces strict cloud security boundaries, including least-privilege IAM roles, Cross-Origin Resource Sharing (CORS) restrictions, and rigorous cost-control mechanisms. For a deep dive into the IAM policies, network boundaries, and security implementation, please refer to the detailed [Security Documentation](docs/SECURITY.md).
 
 ---
 
-## 8. Automation & CI/CD Pipeline
+## Automation & CI/CD Pipeline
 
 The project utilizes **GitHub Actions** for continuous integration, templating, and deployment.
 
@@ -141,7 +158,7 @@ The project utilizes **GitHub Actions** for continuous integration, templating, 
 
 ---
 
-## 9. Deployment & Runbook
+## Deployment & Runbook
 
 The step-by-step infrastructure provisioning guide, including manual ClickOps instructions, architectural flow, and conceptual bridges to Infrastructure as Code (Terraform), has been extracted to a dedicated runbook for incident response.
 
@@ -149,7 +166,7 @@ Please refer to the [Deployment Runbook](docs/RUNBOOK.md) for full execution ste
 
 ---
 
-## 10. 🛠️ Local Development & Compilation Engine
+## Local Development & Compilation Engine
 
 This project operates on a strict **"Resume as Code"** methodology. The frontend UI is treated as a stateless compilation target, generated dynamically by a custom Python Static Site Generator (SSG) to ensure absolute separation of concerns between data (`resume.yaml`) and presentation (`Jinja2`).
 
@@ -208,7 +225,7 @@ python -m http.server 8000
 
 Navigate to http://localhost:8000 to verify the UI and telemetry integrations.
 
-## 11. Future Improvements
+## Future Improvements
 
 - Migrate manual infrastructure setup to Terraform or AWS CDK for full Infrastructure as Code (IaC).
 - [Architectural Enhancement: Automated CI/CD Pipeline (GitOps)](https://github.com/VikramBabariya/cloud-resume/issues/5)

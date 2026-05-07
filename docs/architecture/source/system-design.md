@@ -9,6 +9,7 @@ classDef sec fill:#DD344C,stroke:#232F3E,stroke-width:2px,color:#FFF;
 classDef ext fill:#8C4FFF,stroke:#232F3E,stroke-width:2px,color:#FFF;
 classDef obs fill:#E7157B,stroke:#232F3E,stroke-width:2px,color:#FFF;
 classDef cicd fill:#2088FF,stroke:#232F3E,stroke-width:2px,color:#FFF;
+classDef idp fill:#24292E,stroke:#FFF,stroke-width:2px,color:#FFF;
 
     %% --- Architectural Tiers ---
 
@@ -38,13 +39,16 @@ classDef cicd fill:#2088FF,stroke:#232F3E,stroke-width:2px,color:#FFF;
         ExtAPI((Credential Provider <br> External API)):::ext
     end
 
+    subgraph Tier_OIDC ["Ephemeral Credential Flow (Zero-Trust)"]
+        GHRunner[GitHub Actions <br> CI/CD Runner]:::cicd
+        GHIdP[GitHub OIDC IdP <br> Identity Provider]:::idp
+        STS[AWS STS <br> Security Token Service]:::sec
+        IAM[IAM Trust Policy <br> Condition Gatekeeper]:::sec
+    end
+
     subgraph Layer_Observability ["Observability & Telemetry"]
         CW[CloudWatch <br> Logs & Alarms]:::obs
         XRay[X-Ray <br> Distributed Tracing]:::obs
-    end
-
-    subgraph Layer_CICD ["Automation Pipeline"]
-        GH[GitHub Actions <br> CI/CD]:::cicd
     end
 
     %% --- Data Flow & Networking ---
@@ -74,6 +78,13 @@ classDef cicd fill:#2088FF,stroke:#232F3E,stroke-width:2px,color:#FFF;
     LambdaValid -. Execution Logs .-> CW
     LambdaValid -. Traces .-> XRay
 
-    %% Deployment Mapping
-    GH -- Syncs UI Assets --> S3
+    %% --- Zero-Trust OIDC Federation & Deployment ---
+    GHRunner -- 1. Requests JWT --> GHIdP
+    GHIdP -- 2. Issues Signed JWT --> GHRunner
+    GHRunner -- 3. Submits JWT <br> (AssumeRoleWithWebIdentity) --> STS
+    STS -. "4. Validates Token Claims vs." .- IAM
+    STS -- 5. Returns Ephemeral Session Token --> GHRunner
+
+    GHRunner -- "6. Idempotent Deployment <br> (aws s3 sync --delete)" --> S3
+    GHRunner -- 7. Cache Invalidation <br> (create-invalidation) --> CF
 ```
