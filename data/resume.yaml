@@ -76,11 +76,11 @@ skills:
       - PostgreSQL, Redis
 
 projects:
-  - name: Cloud-Native Serverless Portfolio
+  - name: Zero-Trust RaC Delivery Platform
     startDate: "2026-01-01"
     current: true
     url: https://vb-web.in
-    description: A highly available, secure serverless application demonstrating cloud architecture and "Resume as Code" CI/CD automation.
+    description: A production-grade Resume-as-Code pipeline engineered for strict artifact hygiene and non-repudiation, utilizing ephemeral STS credentials and idempotent deployment to guarantee secure, zero-downtime delivery.
     highlights:
       - Architected a high-availability frontend utilizing AWS CloudFront and S3, enforcing Origin Access Control (OAC) to serve content securely with ultra-low latency from 400+ global edge locations.
       - Engineered a dual-path event-driven backend using API Gateway, Lambda, and DynamoDB, executing atomic database operations to handle concurrent user traffic.
