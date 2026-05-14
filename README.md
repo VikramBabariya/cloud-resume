@@ -1,4 +1,6 @@
-# Cloud Resume: Serverless Portfolio on AWS
+# Zero-Trust RaC Delivery Platform
+
+> An SRE-hardened Zero-Trust RaC Delivery Platform leveraging OIDC federation and idempotent CI/CD to mathematically enforce blast radius containment and the Principle of Least Privilege (PoLP) at the edge.
 
 ## Executive Overview
 
