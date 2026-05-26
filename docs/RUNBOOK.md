@@ -7,7 +7,6 @@ Before executing any provisioning steps, you must understand the data flow, netw
 - **Public Boundary (RFC 1918 & NAT Consideration):** Traffic flows from the public internet via Route 53 to the CloudFront Edge network. The origin S3 bucket remains strictly private within the AWS network, accessible only via Origin Access Control (OAC). No public IP addresses are assigned to internal resources.
 - **API & Proxy Boundary:** API Gateway acts as the secure entry point, proxying HTTPS requests from the client browser to the appropriate backend microservice.
 - **Flow A (Visitor Counter):** API Gateway invokes the Counter Lambda, which executes an atomic `ADD` operation against the DynamoDB data layer.
-- **Flow B (Dynamic Credentialing):** API Gateway invokes the Validator Lambda. This function securely retrieves an encrypted external API key from AWS SSM Parameter Store, decrypts it in memory, and makes an outbound HTTPS call to cryptographically verify the AWS certification badge.
 - **CI/CD Deployment Boundary (Zero-Trust):** Automated deployments are executed via GitHub Actions. Long-lived AWS IAM Access Keys are strictly prohibited. The runner authenticates dynamically using an AWS OpenID Connect (OIDC) Identity Provider to assume a short-lived, least-privilege IAM role.
 
 ## 2. FinOps Pre-Flight Check
@@ -82,23 +81,17 @@ While the frontend is fully automated, the serverless backend is currently provi
 
 1. Provision the Data Layer (DynamoDB): Create a DynamoDB table named VisitorCount with a primary partition key id (String). Set billing mode to On-Demand to optimize for free-tier usage.
 
-2. Provision Secrets Management (SSM): Create an AWS Systems Manager (SSM) Parameter of type SecureString to hold the external certification API key. Ensure it is encrypted using the default AWS KMS key.
-
-3. Configure Compute (Lambda):
+2. Configure Compute (Lambda):
 
 - Create the Counter Lambda (Python) and assign a least-privilege IAM role scoped strictly to dynamodb:UpdateItem and dynamodb:GetItem for the specific table ARN.
-- Create the Validator Lambda (Python) and assign a least-privilege IAM role scoped strictly to ssm:GetParameter for the specific SSM parameter ARN.
 
-4. Establish the API Boundary (API Gateway): Create an HTTP API. Map routes to integrate with their respective Lambda functions. Configure the CORS policy to strictly allow origins from your registered domain.
+3. Establish the API Boundary (API Gateway): Create an HTTP API. Map routes to integrate with their respective Lambda functions. Configure the CORS policy to strictly allow origins from your registered domain.
 
 ## 6. Conceptual Bridge to Infrastructure as Code (IaC)
 
 While the sequence above details a manual deployment approach, this state is designed to be translated into declarative configuration tools like Terraform. In our upcoming IaC sprint, these imperative steps will be replaced by the following resources:
 
 - aws_dynamodb_table
-
-- aws_ssm_parameter
-
 - aws_iam_openid_connect_provider
 - aws_iam_role & aws_iam_role_policy
 - aws_lambda_function

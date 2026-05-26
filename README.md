@@ -4,7 +4,7 @@
 
 ## Executive Overview
 
-This project is a fully automated, serverless full-stack application hosting a professional web portfolio on AWS. It demonstrates enterprise-grade cloud-native architecture, automated Site Reliability Engineering (SRE) quality gates, and advanced observability. The frontend utilizes a "Resume-as-Code" methodology for deterministic artifact compilation, while the backend features a purely serverless real-time visitor counter and a secure integration that cryptographically verifies AWS certification status dynamically.
+This project is a fully automated, serverless full-stack application hosting a professional web portfolio on AWS. It demonstrates enterprise-grade cloud-native architecture, automated Site Reliability Engineering (SRE) quality gates, and advanced observability. The frontend utilizes a "Resume-as-Code" methodology for deterministic artifact compilation, while the backend features a purely serverless real-time visitor counter.
 
 **Live Production Environment:** [https://vb-web.in/](https://vb-web.in/)
 
@@ -43,13 +43,7 @@ _(Diagram source maintained via Diagrams as Code in `/docs/architecture/source`)
 1. **Frontend:** Static files are served globally via **CloudFront CDN** (enforcing HTTPS via **ACM**) from a strictly private **S3 Bucket** utilizing Origin Access Control (OAC).
 2. **Compute & Storage:** JavaScript triggers an API call to **API Gateway**, which invokes a Python **Lambda function** to execute an atomic `ADD` operation against an On-Demand **DynamoDB** table, preventing concurrent race conditions.
 
-**Flow B: Dynamic Credential Validation (Secure Orchestration)**
-
-1. **Compute & Security:** An asynchronous `fetch()` calls **API Gateway**, routing to a dedicated validation **Lambda function**.
-2. **Secret Retrieval:** The Lambda assumes a least-privilege execution role to securely retrieve an encrypted external API key from **AWS SSM Parameter Store (SecureString)**.
-3. **External Validation:** The function calls a third-party provider to cryptographically verify the AWS certification badge status and returns the formatted JSON payload.
-
-**Flow C: Zero-Trust CI/CD Deployment (Automation)**
+**Flow B: Zero-Trust CI/CD Deployment (Automation)**
 
 1. **Federated Authentication:** The `.github/workflows/front-end-cicd.yml` pipeline assumes an ephemeral deployment role via the AWS OIDC Identity Provider.
 2. **Immutable Delivery:** The pipeline executes the SRE quality gates, compiles the HTML artifact, synchronizes exclusively the `./dist` folder to the S3 origin, and programmatically purges the CloudFront edge cache.
@@ -62,21 +56,20 @@ To ensure this serverless application remains cost-effective and secure against 
 
 - **Hard Billing Alarms:** AWS Budgets is configured with a strict ₹500 INR ($6.00 USD) monthly limit.
 - **Proactive Alerting:** Notifications are dispatched to the administrative email when forecasted costs hit 100%.
-- **Cost-Optimized Storage:** External credentials are stored using AWS SSM Parameter Store (SecureString) to leverage standard-tier free encryption, explicitly avoiding the recurring costs of AWS Secrets Manager.
 - **Throttling:** API Gateway is configured with rate limiting to drop malicious traffic spikes before they trigger excessive Lambda compute durations.
 
 ---
 
 ## Technology Stack
 
-| Domain                      | Technology / Service                                         |
-| :-------------------------- | :----------------------------------------------------------- |
-| **Content Management**      | Resume-as-Code (YAML + Python/Jinja2 Static Site Generator)  |
-| **Cloud Storage & CDN**     | AWS S3 (Static Web Hosting), AWS CloudFront, AWS ACM         |
-| **Compute & API (Backend)** | AWS Lambda (Python 3.12), AWS API Gateway (REST/HTTP)        |
-| **Database & Secrets**      | AWS DynamoDB (NoSQL), AWS SSM Parameter Store (SecureString) |
-| **Observability**           | AWS CloudWatch (Logs, Alarms, Dashboards), AWS X-Ray         |
-| **CI/CD & Automation**      | GitHub Actions, AWS IAM (OIDC Federation)                    |
+| Domain                      | Technology / Service                                        |
+| :-------------------------- | :---------------------------------------------------------- |
+| **Content Management**      | Resume-as-Code (YAML + Python/Jinja2 Static Site Generator) |
+| **Cloud Storage & CDN**     | AWS S3 (Static Web Hosting), AWS CloudFront, AWS ACM        |
+| **Compute & API (Backend)** | AWS Lambda (Python 3.12), AWS API Gateway (REST/HTTP)       |
+| **Database & Secrets**      | AWS DynamoDB (NoSQL)                                        |
+| **Observability**           | AWS CloudWatch (Logs, Alarms, Dashboards), AWS X-Ray        |
+| **CI/CD & Automation**      | GitHub Actions, AWS IAM (OIDC Federation)                   |
 
 ---
 

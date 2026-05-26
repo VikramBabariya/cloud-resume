@@ -12,4 +12,3 @@ _(Diagram source maintained via Mermaid.js in `/docs/architecture/source/`)_
 ## Process Analysis
 
 - **Flow A (Visitor Counter):** Demonstrates the asynchronous trigger and atomic `ADD` operation against the NoSQL data store, ensuring concurrency control.
-- **Flow B (Credential Validation):** Illustrates the threat model for secrets management. The database (SSM) explicitly returns a KMS-encrypted string, which the Lambda function decrypts in memory before injecting it into the outbound HTTPS header for the third-party API request.
