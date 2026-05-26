@@ -27,16 +27,10 @@ classDef idp fill:#24292E,stroke:#FFF,stroke-width:2px,color:#FFF;
     subgraph Tier3_Backend ["Serverless Compute Layer"]
         APIG[API Gateway <br> REST API Proxy]:::compute
         LambdaCount[Lambda Function <br> Visitor Counter]:::compute
-        LambdaValid[Lambda Function <br> Credential Validator]:::compute
     end
 
     subgraph Tier4_Data ["Data & Secrets Layer"]
         DDB[(DynamoDB <br> NoSQL Table)]:::db
-        SSM[SSM Parameter Store <br> SecureString]:::sec
-    end
-
-    subgraph Tier5_External ["External Integrations"]
-        ExtAPI((Credential Provider <br> External API)):::ext
     end
 
     subgraph Tier_OIDC ["Ephemeral Credential Flow (Zero-Trust)"]
@@ -66,17 +60,10 @@ classDef idp fill:#24292E,stroke:#FFF,stroke-width:2px,color:#FFF;
     APIG -- Route: /counter --> LambdaCount
     LambdaCount -- dynamodb:UpdateItem --> DDB
 
-    %% Microservice B: Validator
-    APIG -- Route: /verify --> LambdaValid
-    LambdaValid -- ssm:GetParameter --> SSM
-    LambdaValid -- HTTPS Outbound --> ExtAPI
-
     %% Telemetry Mapping
     APIG -. Request Tracing .-> XRay
     LambdaCount -. Execution Logs .-> CW
     LambdaCount -. Traces .-> XRay
-    LambdaValid -. Execution Logs .-> CW
-    LambdaValid -. Traces .-> XRay
 
     %% --- Zero-Trust OIDC Federation & Deployment ---
     GHRunner -- 1. Requests JWT --> GHIdP
