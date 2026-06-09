@@ -6,7 +6,7 @@
 
 This project is a fully automated, serverless full-stack application hosting a professional web portfolio on AWS. It demonstrates enterprise-grade cloud-native architecture, automated Site Reliability Engineering (SRE) quality gates, and advanced observability. The frontend utilizes a "Resume-as-Code" methodology for deterministic artifact compilation, while the backend features a purely serverless real-time visitor counter.
 
-**Live Production Environment:** [https://vb-web.in/](https://vb-web.in/)
+**Live Production Environment:** [https://vikram-sre.dev/](https://vikram-sre.dev/)
 
 ---
 
@@ -14,6 +14,9 @@ This project is a fully automated, serverless full-stack application hosting a p
 
 This project transcends a standard static website by operating as a fully automated **"Resume-as-Code" (RaC)** platform. The CI/CD deployment pipeline is engineered to enforce strict quality gates, guaranteeing deterministic and idempotent artifact generation prior to AWS synchronization.
 
+- **Edge-Network Zero-Trust Ingress**
+  - _Implementation:_ Authoritative DNS is consolidated via Cloudflare utilizing root-level **CNAME Flattening**. Traffic operates strictly via **DNS Only (Grey Cloud)** routing. The cryptographic TLS handshake and **HSTS** enforcement are executed natively at the AWS CloudFront Global CDN boundary utilizing AWS Certificate Manager (ACM).
+  - _Strategic Value:_ This eliminates multi-vendor DNS propagation latency and explicitly mitigates Layer 7 interception threats before traffic reaches the CloudFront CDN, maximizing **MTTE** by signaling an enterprise-grade security posture and mathematical transit encryption to evaluating stakeholders.
 - **Zero-Trust Identity Federation & Non-Repudiation**
   - _Implementation:_ Long-lived AWS IAM Access Keys have been strictly deprecated. The GitHub Actions CI/CD runner authenticates against AWS utilizing an OpenID Connect (OIDC) Identity Provider to assume a short-lived, ephemeral STS session token.
   - _Strategic Value:_ This Zero-Trust architecture mathematically enforces **Blast Radius Containment**; in the event of a runner compromise, the credential automatically expires. Furthermore, dynamic STS session naming (via GitHub Run IDs) guarantees absolute **Non-Repudiation**, ensuring every deployment mutation is cryptographically traceable within AWS CloudTrail.
@@ -92,6 +95,7 @@ Detailed architectural choices are documented as ADRs to maintain an immutable h
 - [ADR 0005: Resume as Code Methodology](docs/adr/0005-resume-as-code-methodology.md)
 - [ADR 0006: Local Data Integrity Tooling (Shift-Left Quality Gates)](docs/adr/0006-local-data-integrity-tooling.md)
 - [ADR 0007: GitHub Actions Authentication via AWS OpenID Connect (OIDC)](docs/adr/0007-aws-oidc-authentication.md)
+- [ADR 0008: Strategic Domain Name Ingress and Registrar Procurement Selection](docs/adr/0008-domain-and-registrar-selection.md)
 
 ---
 
