@@ -63,16 +63,17 @@ To ensure this serverless application remains cost-effective and secure against 
 
 ---
 
-## Technology Stack
+## ⚙️ The DevSecOps Toolchain
 
-| Domain                      | Technology / Service                                        |
-| :-------------------------- | :---------------------------------------------------------- |
-| **Content Management**      | Resume-as-Code (YAML + Python/Jinja2 Static Site Generator) |
-| **Cloud Storage & CDN**     | AWS S3 (Static Web Hosting), AWS CloudFront, AWS ACM        |
-| **Compute & API (Backend)** | AWS Lambda (Python 3.12), AWS API Gateway (REST/HTTP)       |
-| **Database & Secrets**      | AWS DynamoDB (NoSQL)                                        |
-| **Observability**           | AWS CloudWatch (Logs, Alarms, Dashboards), AWS X-Ray        |
-| **CI/CD & Automation**      | GitHub Actions, AWS IAM (OIDC Federation)                   |
+| Domain                    | Technology / Service                                                                   |
+| :------------------------ | :------------------------------------------------------------------------------------- |
+| **Content Management**    | Resume-as-Code (YAML + Python/Jinja2 Static Site Generator)                            |
+| **Frontend & Edge**       | AWS CloudFront, S3 (Origin Access Control), Cloudflare DNS (Authoritative, Grey Cloud) |
+| **Serverless Backend**    | AWS Lambda (Python 3.12), AWS API Gateway (REST/HTTP)                                  |
+| **Database & Secrets**    | Amazon DynamoDB (NoSQL)                                                                |
+| **Identity & Security**   | AWS IAM (Strict **PoLP**), AWS STS, AWS OIDC, AWS ACM                                  |
+| **CI/CD & Quality Gates** | GitHub Actions, `yamllint`, `ajv-cli` (Shift-Left Validation)                          |
+| **Observability**         | AWS CloudWatch (Logs, Alarms, Dashboards), AWS X-Ray                                   |
 
 ---
 
