@@ -87,14 +87,34 @@ While the frontend is fully automated, the serverless backend is currently provi
 
 3. Establish the API Boundary (API Gateway): Create an HTTP API. Map routes to integrate with their respective Lambda functions. Configure the CORS policy to strictly allow origins from your registered domain.
 
-## 6. Conceptual Bridge to Infrastructure as Code (IaC)
+## 6. Disaster Recovery: Ingress & Edge Routing (Layer 7)
 
-While the sequence above details a manual deployment approach, this state is designed to be translated into declarative configuration tools like Terraform. In our upcoming IaC sprint, these imperative steps will be replaced by the following resources:
+**Objective:** To achieve near-zero **MTTR** in the event of accidental Cloudflare zone deletion, registrar compromise, or TLS certificate revocation. This section codifies the exact state required to rebuild the **Zero-Trust** public boundary natively within Cloudflare and AWS ACM.
 
-- aws_dynamodb_table
-- aws_iam_openid_connect_provider
-- aws_iam_role & aws_iam_role_policy
-- aws_lambda_function
-- aws_apigatewayv2_api
-- aws_s3_bucket
-- aws_cloudfront_distribution
+### 6.1. Registrar & Authoritative DNS Recovery (`vikram-sre.dev`)
+
+If the Cloudflare DNS zone is purged or corrupted, DNS resolution will fail globally. Execute the following to restore authoritative routing and edge security policies:
+
+1. **Recreate DNS Zone:** Add `vikram-sre.dev` back into the Cloudflare dashboard.
+2. **Re-establish CNAME Flattening:** - Navigate to **DNS > Records**.
+   - Add a `CNAME` record for `@` (Root) pointing to your AWS CloudFront distribution string (e.g., `d111111abcdef8.cloudfront.net`).
+   - **Critical SRE Action:** Set Proxy status to **DNS Only (Grey Cloud)**.
+3. **Re-establish WWW Routing:**
+   - Add a `CNAME` record for `www` pointing to `vikram-sre.dev`.
+   - **Critical SRE Action:** Set Proxy status to **DNS Only (Grey Cloud)**.
+4. **Hardcode Transit Security:**
+   - Navigate to **SSL/TLS > Edge Certificates**.
+   - Set **Minimum TLS Version** to **TLS 1.3** to isolate the cryptographic perimeter and block legacy handshake downgrade attacks.
+
+### 6.2. Cryptographic Identity Recovery (ACM TLS)
+
+If the TLS certificate is accidentally revoked or deleted, the native **HSTS** preload on the `.dev` TLD will cause browsers to hard-block your site, causing a total ingress failure.
+
+1. **Request New Certificate:** Navigate to AWS Certificate Manager (ACM) in `us-east-1` (mandatory region for CloudFront edge deployment).
+2. **Scope:** Request a public certificate for `vikram-sre.dev` and `*.vikram-sre.dev`.
+3. **DNS Validation via Cloudflare:** Extract the provided CNAME name/value pairs from AWS ACM and inject them into your Cloudflare DNS portal.
+   - _Recorded Validation State:_ - Type: `CNAME`
+     - Name: `_PLACEHOLDER_NAME` (Omit `.vikram-sre.dev` if Cloudflare auto-appends).
+     - Target: `_PLACEHOLDER_VALUE.acm-validations.aws`
+     - Proxy Status: **DNS Only (Grey Cloud)** (Required for ACM to rapidly poll the validation token).
+4. **Re-attach to Edge:** Once the certificate status shifts to _Issued_, edit the CloudFront Distribution's General Settings and select the newly generated custom SSL certificate to restore your **Blast Radius Containment** boundary.
