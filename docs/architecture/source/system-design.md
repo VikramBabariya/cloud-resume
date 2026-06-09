@@ -1,3 +1,18 @@
+# System Architecture: Zero-Trust RaC Platform
+
+This document serves as the Single Source of Truth (SSoT) for the network topology, data flow, and security boundaries of the Zero-Trust Resume-as-Code (RaC) Platform.
+
+### Edge-Network & Public Ingress Boundary
+
+**Strategic Ingress Definition:** The public entry point for this platform is strictly governed by the `vikram-sre.dev` namespace. This boundary acts as the primary **Shift-Left Quality Gate** for human evaluation, optimizing **MTTE**. To enforce strict **FinOps** cost boundaries and reduce architectural complexity, authoritative name resolution is entirely consolidated within Cloudflare's global Anycast network, completely bypassing AWS Route 53.
+
+> **Architectural Decision Record:** For the definitive technical justification regarding this single-provider consolidation, the choice of a **DNS Only (Grey Cloud)** configuration, and the native **HSTS** edge mechanics, refer to:
+> [ADR 0008: Strategic Domain Name Ingress and Registrar Procurement Selection](../../adr/0008-domain-and-registrar-selection.md)
+
+---
+
+### Architecture Topology
+
 ```mermaid
 graph TD
 %% Styles & Color Taxonomy
@@ -13,12 +28,15 @@ classDef idp fill:#24292E,stroke:#FFF,stroke-width:2px,color:#FFF;
 
     %% --- Architectural Tiers ---
 
+    subgraph Tier0_Ingress ["Consolidated Cloudflare Ingress Boundary"]
+        CF_Edge["Cloudflare Registrar & DNS <br> vikram-sre.dev (Grey Cloud)"]:::ext
+    end
+
     subgraph Tier1_Client ["Client Zone"]
         User((User/Browser)):::client
     end
 
-    subgraph Tier2_Delivery ["Edge & Delivery Layer"]
-        R53[Route 53 <br> DNS Routing]:::edge
+    subgraph Tier2_Delivery ["AWS Edge & Delivery Layer"]
         CF[CloudFront <br> Global CDN]:::edge
         S3[S3 Bucket <br> Static Assets]:::db
         ACM[ACM <br> TLS Certificate]:::sec
@@ -29,7 +47,7 @@ classDef idp fill:#24292E,stroke:#FFF,stroke-width:2px,color:#FFF;
         LambdaCount[Lambda Function <br> Visitor Counter]:::compute
     end
 
-    subgraph Tier4_Data ["Data & Secrets Layer"]
+    subgraph Tier4_Data ["Data Layer"]
         DDB[(DynamoDB <br> NoSQL Table)]:::db
     end
 
@@ -47,11 +65,11 @@ classDef idp fill:#24292E,stroke:#FFF,stroke-width:2px,color:#FFF;
 
     %% --- Data Flow & Networking ---
 
-    %% Public Internet
-    User -- HTTPS Request --> R53
-    R53 -- Resolves to --> CF
-    CF -. Secures Connection .- ACM
-    CF -- Origin Access (OAC) --> S3
+    %% Public Internet & Ingress
+    User -- "1. Request / DNS Query" --> CF_Edge
+    CF_Edge -- "2. CNAME Flattening (A Record Equivalent)" --> CF
+    CF -. "3. Negotiates TLS & HSTS" .- ACM
+    CF -- "4. Origin Access Control (OAC)" --> S3
 
     %% Frontend API Calls
     S3 -- JS Async Fetch --> APIG

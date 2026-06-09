@@ -5,33 +5,47 @@ flowchart TD
     classDef process fill:#0073BB,stroke:#232F3E,stroke-width:2px,color:#FFF;
     classDef datastore fill:#3B48CC,stroke:#232F3E,stroke-width:2px,color:#FFF;
     classDef proxy fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:#FFF;
+    classDef sec fill:#DD344C,stroke:#232F3E,stroke-width:2px,color:#FFF;
+    classDef cicd fill:#2088FF,stroke:#232F3E,stroke-width:2px,color:#FFF;
 
-    %% --- 1. External Entities ---
+    %% --- 1. External Entities & Sources ---
     User[Client Browser / User]:::external
+    Git[(YAML Source of Truth <br> GitHub Repository)]:::datastore
 
     %% --- 2. Data Stores ---
-    D1[(D1: S3 Static Assets)]:::datastore
-    D2[(D2: DynamoDB Visitor Table)]:::datastore
+    D1[(D1: S3 Bucket <br> Static Artifacts)]:::datastore
+    D2[(D2: DynamoDB <br> Visitor Table)]:::datastore
 
-    %% --- 3. Processes ---
-    P1(1.0 UI Rendering & Delivery):::process
-    P2{2.0 API Proxy & Routing}:::proxy
-    P3(3.0 Visitor Counting Logic):::process
+    %% --- 3. Processes, Proxies, & Security Gates ---
+    P_Ingress{1.0 Cloudflare DNS <br> vikram-sre.dev HSTS}:::proxy
+    P_CDN(2.0 Edge Delivery <br> CloudFront CDN):::process
+    P_API{3.0 API Proxy <br> API Gateway}:::proxy
+    P_Count(4.0 Visitor Logic <br> Python Lambda):::process
+
+    P_CICD(5.0 Shift-Left Gates <br> GitHub Actions):::cicd
+    P_STS{6.0 OIDC Federation <br> AWS STS}:::sec
 
     %% --- 4. Data Flows ---
 
-    %% Phase 1: Static UI Delivery
-    User -- "1. Request Website (HTTPS)" --> P1
-    P1 -- "2. Fetch HTML/CSS/JS" --> D1
-    D1 -- "3. Return Static Payload" --> P1
-    P1 -- "4. Render UI" --> User
+    %% Phase 1: HSTS Ingress & UI Delivery
+    User -- "1. Request Website (HTTPS)" --> P_Ingress
+    P_Ingress -- "2. CNAME Flattening (A Record Resolution)" --> P_CDN
+    P_CDN -- "3. OAC Fetch" --> D1
+    D1 -- "4. Return HTML/CSS/JS" --> P_CDN
+    P_CDN -- "5. Render UI" --> User
 
     %% Phase 2: Flow A (Visitor Counter)
-    User -- "5. Async Fetch (Empty Body)" --> P2
-    P2 -- "6. Route: /counter" --> P3
-    P3 -- "7. Atomic ADD Operation" --> D2
-    D2 -- "8. Return Updated Count (JSON)" --> P3
-    P3 -- "9. HTTP 200: {count: N}" --> P2
-    P2 -- "10. Return Payload to UI" --> User
+    User -- "6. Async Fetch (Empty Body)" --> P_API
+    P_API -- "7. Route: /counter" --> P_Count
+    P_Count -- "8. Atomic ADD Operation" --> D2
+    D2 -- "9. Return Updated Count" --> P_Count
+    P_Count -- "10. HTTP 200: {count: N}" --> P_API
+    P_API -- "11. Return Payload to UI" --> User
 
+    %% Phase 3: Flow B (Zero-Trust CI/CD Delivery)
+    Git -- "12. Code Commit Trigger" --> P_CICD
+    P_CICD -- "13. Request Ephemeral JWT" --> P_STS
+    P_STS -- "14. Issue Least-Privilege Token" --> P_CICD
+    P_CICD -- "15. Idempotent Sync (--delete)" --> D1
+    P_CICD -- "16. Edge Cache Invalidation" --> P_CDN
 ```

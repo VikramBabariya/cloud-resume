@@ -6,7 +6,7 @@
 
 This project is a fully automated, serverless full-stack application hosting a professional web portfolio on AWS. It demonstrates enterprise-grade cloud-native architecture, automated Site Reliability Engineering (SRE) quality gates, and advanced observability. The frontend utilizes a "Resume-as-Code" methodology for deterministic artifact compilation, while the backend features a purely serverless real-time visitor counter.
 
-**Live Production Environment:** [https://vb-web.in/](https://vb-web.in/)
+**Live Production Environment:** [https://vikram-sre.dev/](https://vikram-sre.dev/)
 
 ---
 
@@ -14,6 +14,9 @@ This project is a fully automated, serverless full-stack application hosting a p
 
 This project transcends a standard static website by operating as a fully automated **"Resume-as-Code" (RaC)** platform. The CI/CD deployment pipeline is engineered to enforce strict quality gates, guaranteeing deterministic and idempotent artifact generation prior to AWS synchronization.
 
+- **Edge-Network Zero-Trust Ingress**
+  - _Implementation:_ Authoritative DNS is consolidated via Cloudflare utilizing root-level **CNAME Flattening**. Traffic operates strictly via **DNS Only (Grey Cloud)** routing. The cryptographic TLS handshake and **HSTS** enforcement are executed natively at the AWS CloudFront Global CDN boundary utilizing AWS Certificate Manager (ACM).
+  - _Strategic Value:_ This eliminates multi-vendor DNS propagation latency and explicitly mitigates Layer 7 interception threats before traffic reaches the CloudFront CDN, maximizing **MTTE** by signaling an enterprise-grade security posture and mathematical transit encryption to evaluating stakeholders.
 - **Zero-Trust Identity Federation & Non-Repudiation**
   - _Implementation:_ Long-lived AWS IAM Access Keys have been strictly deprecated. The GitHub Actions CI/CD runner authenticates against AWS utilizing an OpenID Connect (OIDC) Identity Provider to assume a short-lived, ephemeral STS session token.
   - _Strategic Value:_ This Zero-Trust architecture mathematically enforces **Blast Radius Containment**; in the event of a runner compromise, the credential automatically expires. Furthermore, dynamic STS session naming (via GitHub Run IDs) guarantees absolute **Non-Repudiation**, ensuring every deployment mutation is cryptographically traceable within AWS CloudTrail.
@@ -50,26 +53,25 @@ _(Diagram source maintained via Diagrams as Code in `/docs/architecture/source`)
 
 ---
 
-## FinOps & Cost Governance
+## 📉 FinOps & Cloud Governance
 
-To ensure this serverless application remains cost-effective and secure against denial-of-wallet attacks, strict cloud governance policies have been implemented:
+Enterprise-grade architecture must respect lean economics. This platform is governed by strict AWS CloudWatch and AWS Budgets alarms, hard-capping maximum monthly exposure to **$6.00 USD (approx. ₹500 INR)**.
 
-- **Hard Billing Alarms:** AWS Budgets is configured with a strict ₹500 INR ($6.00 USD) monthly limit.
-- **Proactive Alerting:** Notifications are dispatched to the administrative email when forecasted costs hit 100%.
-- **Throttling:** API Gateway is configured with rate limiting to drop malicious traffic spikes before they trigger excessive Lambda compute durations.
+By leveraging Cloudflare's zero-markup registrar and consolidating authoritative DNS, we eliminated AWS Route 53 hosted zone fees, reducing the foundational Layer 7 routing TCO to $0.00/month. Furthermore, API Gateway is configured with rate limiting to drop malicious traffic spikes before they trigger excessive Lambda compute durations, protecting against Denial-of-Wallet attacks.
 
 ---
 
-## Technology Stack
+## ⚙️ The DevSecOps Toolchain
 
-| Domain                      | Technology / Service                                        |
-| :-------------------------- | :---------------------------------------------------------- |
-| **Content Management**      | Resume-as-Code (YAML + Python/Jinja2 Static Site Generator) |
-| **Cloud Storage & CDN**     | AWS S3 (Static Web Hosting), AWS CloudFront, AWS ACM        |
-| **Compute & API (Backend)** | AWS Lambda (Python 3.12), AWS API Gateway (REST/HTTP)       |
-| **Database & Secrets**      | AWS DynamoDB (NoSQL)                                        |
-| **Observability**           | AWS CloudWatch (Logs, Alarms, Dashboards), AWS X-Ray        |
-| **CI/CD & Automation**      | GitHub Actions, AWS IAM (OIDC Federation)                   |
+| Domain                    | Technology / Service                                                                   |
+| :------------------------ | :------------------------------------------------------------------------------------- |
+| **Content Management**    | Resume-as-Code (YAML + Python/Jinja2 Static Site Generator)                            |
+| **Frontend & Edge**       | AWS CloudFront, S3 (Origin Access Control), Cloudflare DNS (Authoritative, Grey Cloud) |
+| **Serverless Backend**    | AWS Lambda (Python 3.12), AWS API Gateway (REST/HTTP)                                  |
+| **Database & Secrets**    | Amazon DynamoDB (NoSQL)                                                                |
+| **Identity & Security**   | AWS IAM (Strict **PoLP**), AWS STS, AWS OIDC, AWS ACM                                  |
+| **CI/CD & Quality Gates** | GitHub Actions, `yamllint`, `ajv-cli` (Shift-Left Validation)                          |
+| **Observability**         | AWS CloudWatch (Logs, Alarms, Dashboards), AWS X-Ray                                   |
 
 ---
 
@@ -92,6 +94,7 @@ Detailed architectural choices are documented as ADRs to maintain an immutable h
 - [ADR 0005: Resume as Code Methodology](docs/adr/0005-resume-as-code-methodology.md)
 - [ADR 0006: Local Data Integrity Tooling (Shift-Left Quality Gates)](docs/adr/0006-local-data-integrity-tooling.md)
 - [ADR 0007: GitHub Actions Authentication via AWS OpenID Connect (OIDC)](docs/adr/0007-aws-oidc-authentication.md)
+- [ADR 0008: Strategic Domain Name Ingress and Registrar Procurement Selection](docs/adr/0008-domain-and-registrar-selection.md)
 
 ---
 
