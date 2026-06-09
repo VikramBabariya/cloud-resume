@@ -4,7 +4,9 @@
 
 Before executing any provisioning steps, you must understand the data flow, network boundaries, and underlying principles of this architecture:
 
-- **Public Boundary (RFC 1918 & NAT Consideration):** Traffic flows from the public internet via Route 53 to the CloudFront Edge network. The origin S3 bucket remains strictly private within the AWS network, accessible only via Origin Access Control (OAC). No public IP addresses are assigned to internal resources.
+- **Public Boundary (RFC 1918 & NAT Consideration):** Traffic flows from the public internet via Cloudflare Authoritative DNS (utilizing CNAME Flattening) directly to the AWS CloudFront Edge network. The origin S3 bucket remains strictly private within the AWS network, accessible only via Origin Access Control (OAC). No public IP addresses are assigned to internal resources.
+- **DNS Ingress & TLS Termination Governance:** Traffic routing is anchored to `vikram-sre.dev`. The `.dev` Top-Level Domain acts as a strict operational boundary, physically enforcing HSTS (HTTP Strict Transport Security) to cryptographically guarantee data-in-transit integrity prior to edge caching.
+  - _SRE Traceability:_ Review [ADR 0008](adr/0008-domain-and-registrar-selection.md) for the complete FinOps procurement logic, Single-Provider Consolidation, and MTTE-optimization strategy governing this Layer 7 namespace.
 - **API & Proxy Boundary:** API Gateway acts as the secure entry point, proxying HTTPS requests from the client browser to the appropriate backend microservice.
 - **Flow A (Visitor Counter):** API Gateway invokes the Counter Lambda, which executes an atomic `ADD` operation against the DynamoDB data layer.
 - **CI/CD Deployment Boundary (Zero-Trust):** Automated deployments are executed via GitHub Actions. Long-lived AWS IAM Access Keys are strictly prohibited. The runner authenticates dynamically using an AWS OpenID Connect (OIDC) Identity Provider to assume a short-lived, least-privilege IAM role.
@@ -45,7 +47,7 @@ npm ci
 
 Execute the local validation wrapper to test the data contract. If this fails, investigate the SRE error trace and do not commit.
 
-```Bash
+```bash
 # Enforce UI Formatting Consistency
 npx prettier --check "**/*.{html,css,js}"
 
@@ -57,7 +59,7 @@ npm run validate
 
 Execute the Python compiler to merge the validated data with the Jinja2 template and inject Critical Path CSS.
 
-```Bash
+```bash
 # Generate the dist/index.html artifact
 python build.py
 
@@ -69,23 +71,17 @@ python3 -m http.server 8000 --directory dist
 
 The Outer Loop governs the fully automated, immutable deployment of the verified frontend artifact to the AWS cloud environment via GitHub Actions (`.github/workflows/front-end-cicd.yml`).
 
-**Zero-Trust Identity Federation (OIDC):** The runner dynamically requests a JSON Web Token (JWT) and submits it to AWS STS. The workflow explicitly sets the `role-session-name` to `${{ github.event.repository.name }}-${{ github.run_id }}` to guarantee non-repudiation in CloudTrail logs.
-
-**Idempotent Deployment:** Execution relies on `aws s3 sync ./dist s3://${{ secrets.S3_BUCKET_NAME }} --delete`. By targeting strictly the `./dist` folder, we enforce Artifact Hygiene, preventing backend scripts from leaking to the public internet.
-
-**Zero-Downtime Edge Invalidation:** The pipeline automatically executes `aws cloudfront create-invalidation` to purge global edge caches, ensuring immediate content freshness.
+- **Zero-Trust Identity Federation (OIDC):** The runner dynamically requests a JSON Web Token (JWT) and submits it to AWS STS. The workflow explicitly sets the `role-session-name` to `${{ github.event.repository.name }}-${{ github.run_id }}` to guarantee non-repudiation in CloudTrail logs.
+- **Idempotent Deployment:** Execution relies on `aws s3 sync ./dist s3://${{ secrets.S3_BUCKET_NAME }} --delete`. By targeting strictly the `./dist` folder, we enforce Artifact Hygiene, preventing backend scripts from leaking to the public internet.
+- **Zero-Downtime Edge Invalidation:** The pipeline automatically executes `aws cloudfront create-invalidation` to purge global edge caches, ensuring immediate content freshness.
 
 ## 5. Backend Resource Provisioning (The ClickOps Foundation)
 
-While the frontend is fully automated, the serverless backend is currently provisioned manually._Critical SRE Note: Secrets and Identity Providers must be provisioned before the compute layers that require them._
+While the frontend is fully automated, the serverless backend is currently provisioned manually. _Critical SRE Note: Secrets and Identity Providers must be provisioned before the compute layers that require them._
 
-1. Provision the Data Layer (DynamoDB): Create a DynamoDB table named VisitorCount with a primary partition key id (String). Set billing mode to On-Demand to optimize for free-tier usage.
-
-2. Configure Compute (Lambda):
-
-- Create the Counter Lambda (Python) and assign a least-privilege IAM role scoped strictly to dynamodb:UpdateItem and dynamodb:GetItem for the specific table ARN.
-
-3. Establish the API Boundary (API Gateway): Create an HTTP API. Map routes to integrate with their respective Lambda functions. Configure the CORS policy to strictly allow origins from your registered domain.
+1. **Provision the Data Layer (DynamoDB):** Create a DynamoDB table named `VisitorCount` with a primary partition key `id` (String). Set billing mode to On-Demand to optimize for free-tier usage.
+2. **Configure Compute (Lambda):** Create the Counter Lambda (Python) and assign a least-privilege IAM role scoped strictly to `dynamodb:UpdateItem` and `dynamodb:GetItem` for the specific table ARN.
+3. **Establish the API Boundary (API Gateway):** Create an HTTP API. Map routes to integrate with their respective Lambda functions. Configure the CORS policy to strictly allow origins from your registered domain (`https://vikram-sre.dev`).
 
 ## 6. Disaster Recovery: Ingress & Edge Routing (Layer 7)
 
