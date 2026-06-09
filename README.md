@@ -53,13 +53,11 @@ _(Diagram source maintained via Diagrams as Code in `/docs/architecture/source`)
 
 ---
 
-## FinOps & Cost Governance
+## 📉 FinOps & Cloud Governance
 
-To ensure this serverless application remains cost-effective and secure against denial-of-wallet attacks, strict cloud governance policies have been implemented:
+Enterprise-grade architecture must respect lean economics. This platform is governed by strict AWS CloudWatch and AWS Budgets alarms, hard-capping maximum monthly exposure to **$6.00 USD (approx. ₹500 INR)**.
 
-- **Hard Billing Alarms:** AWS Budgets is configured with a strict ₹500 INR ($6.00 USD) monthly limit.
-- **Proactive Alerting:** Notifications are dispatched to the administrative email when forecasted costs hit 100%.
-- **Throttling:** API Gateway is configured with rate limiting to drop malicious traffic spikes before they trigger excessive Lambda compute durations.
+By leveraging Cloudflare's zero-markup registrar and consolidating authoritative DNS, we eliminated AWS Route 53 hosted zone fees, reducing the foundational Layer 7 routing TCO to $0.00/month. Furthermore, API Gateway is configured with rate limiting to drop malicious traffic spikes before they trigger excessive Lambda compute durations, protecting against Denial-of-Wallet attacks.
 
 ---
 
