@@ -21,7 +21,7 @@ The `resume.yaml` file must contain the following root-level arrays and dictiona
 - `work`: Professional experience (Must be chronological, newest first).
 - `education`: Academic history.
 - `skills`: Grouped technical competencies (e.g., Cloud & Serverless, DevOps).
-- `projects`: Key architectural builds (e.g., Cloud Resume, Microservices).
+- `projects`: Key architectural builds (e.g., RaC Platform, Microservices).
 - `certificates`: Verifiable industry certifications (e.g., AWS CCP).
 
 ## 3. SRE Reliability Gate: Two-Stage Validation

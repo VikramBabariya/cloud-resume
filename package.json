@@ -1,5 +1,5 @@
 {
-  "name": "cloud-resume",
+  "name": "zero-trust-rac-platform",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,16 +12,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/VikramBabariya/cloud-resume.git"
+    "url": "git+https://github.com/VikramBabariya/zero-trust-rac-platform.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/VikramBabariya/cloud-resume/issues"
+    "url": "https://github.com/VikramBabariya/zero-trust-rac-platform/issues"
   },
-  "homepage": "https://github.com/VikramBabariya/cloud-resume#readme",
+  "homepage": "https://github.com/VikramBabariya/zero-trust-rac-platform#readme",
   "devDependencies": {
     "ajv-cli": "^3.3.0",
     "husky": "^9.1.7",

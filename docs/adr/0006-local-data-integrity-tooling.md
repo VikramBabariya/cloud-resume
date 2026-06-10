@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-The Cloud Resume Project operates on a "Resume as Code" architecture, utilizing `data/resume.yaml` as the single source of truth. The downstream Python build engine (`build.py`) relies heavily on this file adhering to the JSON Resume schema.
+The Zero-Trust RaC Platform operates on a "Resume as Code" architecture, utilizing `data/resume.yaml` as the single source of truth. The downstream Python build engine (`build.py`) relies heavily on this file adhering to the JSON Resume schema.
 
 Currently, validation only occurs at the build script level. If a developer introduces a syntax error (e.g., malformed YAML indentation) or a semantic error (e.g., missing a required `startDate` field), the failure is caught late in the pipeline, consuming unnecessary CI/CD compute minutes and delaying the feedback loop.
 

@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-The Cloud Resume Project (CRP) requires an automated CI/CD pipeline (GitHub Actions) to deploy compiled frontend artifacts (`./dist`) to an AWS S3 Origin and invalidate the CloudFront CDN cache.
+The Zero-Trust RaC Platform requires an automated CI/CD pipeline (GitHub Actions) to deploy compiled frontend artifacts (`./dist`) to an AWS S3 Origin and invalidate the CloudFront CDN cache.
 
 The legacy configuration utilized static, long-lived AWS IAM User credentials (`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`) stored as GitHub Secrets.
 
@@ -22,7 +22,7 @@ GitHub Actions will authenticate to AWS dynamically by requesting a short-lived 
 
 To prevent the "Confused Deputy" vulnerability and enforce strict Zero-Trust boundaries, the following architectural constraints are mandated:
 
-1. **Strict Subject (`sub`) Bounding:** The AWS IAM Role Trust Policy must explicitly restrict the `sts:AssumeRoleWithWebIdentity` action. It will only trust tokens originating specifically from the `VikramBabariya/cloud-resume-challenge` repository, and strictly from the `main` branch.
+1. **Strict Subject (`sub`) Bounding:** The AWS IAM Role Trust Policy must explicitly restrict the `sts:AssumeRoleWithWebIdentity` action. It will only trust tokens originating specifically from the `VikramBabariya/zero-trust-rac-platform` repository, and strictly from the `main` branch.
 2. **Ephemeral Access:** The assumed STS token will have a maximum session duration of 1 hour, mathematically eliminating the risk of long-term credential leakage.
 3. **IAM Least Privilege:** The IAM Role assumed by the pipeline will **not** possess `AdministratorAccess`. It will be governed by an inline policy strictly scoped to:
    - `s3:ListBucket`, `s3:PutObject`, and `s3:DeleteObject` targeting _only_ the specific production S3 Bucket ARN.
