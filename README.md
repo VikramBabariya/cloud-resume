@@ -90,7 +90,7 @@ Detailed architectural choices are documented as ADRs to maintain an immutable h
 - [ADR 0001: Compute Layer for Backend API](docs/adr/0001-serverless-compute-layer.md)
 - [ADR 0002: Static Asset Delivery and Network Boundaries](docs/adr/0002-network-boundaries-and-cdn.md)
 - [ADR 0003: DynamoDB vs. Relational Database (RDS)](docs/adr/0003-dynamodb-vs-rds.md)
-- [ADR 0004: Credentials Storage for Dynamic Verification API](docs/adr/0004-dynamic-credential-storage.md)
+- [ADR 0004: Credentials Storage for Dynamic Verification API (Deprecated)](docs/adr/0004-dynamic-credential-storage.md)
 - [ADR 0005: Resume as Code Methodology](docs/adr/0005-resume-as-code-methodology.md)
 - [ADR 0006: Local Data Integrity Tooling (Shift-Left Quality Gates)](docs/adr/0006-local-data-integrity-tooling.md)
 - [ADR 0007: GitHub Actions Authentication via AWS OpenID Connect (OIDC)](docs/adr/0007-aws-oidc-authentication.md)

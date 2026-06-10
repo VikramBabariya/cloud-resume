@@ -2,7 +2,7 @@
 
 ## Context
 
-The application requires a backend compute layer to handle dynamic interactions, specifically incrementing the visitor counter and fetching live credential statuses. We need a solution that balances operational overhead, scalability, and strict cost controls.
+The application requires a backend compute layer to handle dynamic interactions, specifically incrementing the visitor counter. We need a solution that balances operational overhead, scalability, and strict cost controls.
 
 ## Options Considered
 
