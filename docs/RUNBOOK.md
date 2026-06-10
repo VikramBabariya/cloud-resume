@@ -1,4 +1,4 @@
-# Cloud Resume Project: Operational Runbook
+# Zero-Trust RaC Platform: Operational Runbook
 
 ## 1. System Design Implications (HLD/LLD) & Networking Principles
 

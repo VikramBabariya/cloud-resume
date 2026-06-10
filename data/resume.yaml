@@ -76,7 +76,7 @@ skills:
       - PostgreSQL, Redis
 
 projects:
-  - name: Zero-Trust RaC Delivery Platform
+  - name: Zero-Trust RaC Platform
     startDate: "2026-01-01"
     current: true
     url: https://vb-web.in

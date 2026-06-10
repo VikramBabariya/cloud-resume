@@ -1,6 +1,6 @@
 # Security Posture & Zero-Trust Architecture
 
-This document outlines the security architecture, threat mitigation strategies, and operational safeguards governing the "Zero-Trust RaC Delivery Platform". The infrastructure is engineered to comply with **SRE Maturity Level 3** standards, prioritizing **Blast Radius Containment**, strict transit encryption, and continuous cost governance.
+This document outlines the security architecture, threat mitigation strategies, and operational safeguards governing the "Zero-Trust RaC Platform". The infrastructure is engineered to comply with **SRE Maturity Level 3** standards, prioritizing **Blast Radius Containment**, strict transit encryption, and continuous cost governance.
 
 ## Core Security Pillars
 

@@ -1,6 +1,6 @@
-# Zero-Trust RaC Delivery Platform
+# Zero-Trust RaC Platform
 
-> An SRE-hardened Zero-Trust RaC Delivery Platform leveraging OIDC federation and idempotent CI/CD to mathematically enforce blast radius containment and the Principle of Least Privilege (PoLP) at the edge.
+> An SRE-hardened Zero-Trust RaC Platform leveraging OIDC federation and idempotent CI/CD to mathematically enforce blast radius containment and the Principle of Least Privilege (PoLP) at the edge.
 
 ## Executive Overview
 
@@ -36,7 +36,7 @@ This project transcends a standard static website by operating as a fully automa
 
 The solution relies on a highly decoupled client-server architecture hosted entirely on AWS, utilizing API Gateway to securely proxy requests to backend microservices.
 
-![cloud-resume-architecture-diagram](/docs/architecture/export/system-design.png)
+![architecture-diagram](/docs/architecture/export/system-design.png)
 _(Diagram source maintained via Diagrams as Code in `/docs/architecture/source`)_
 
 ### Operational Workflows
