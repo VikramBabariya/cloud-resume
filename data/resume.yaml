@@ -5,7 +5,7 @@ basics:
   label: Cloud Architect / DevOps Engineer
   email: vikram000712345@gmail.com
   phone: "+91 70482 63900"
-  url: https://vb-web.in
+  url: https://vikram-sre.dev/
   summary: |
     Software Engineer transitioning into Cloud Architecture and DevOps, specializing in AWS serverless ecosystems, CI/CD pipelines, and infrastructure as code. Proven track record of architecting highly available backend systems, optimizing data pipelines, and enforcing strict security boundaries in enterprise environments.
   location:
@@ -82,10 +82,10 @@ projects:
     url: https://vb-web.in
     description: A production-grade Resume-as-Code pipeline engineered for strict artifact hygiene and non-repudiation, utilizing ephemeral STS credentials and idempotent deployment to guarantee secure, zero-downtime delivery.
     highlights:
-      - Architected a high-availability frontend utilizing AWS CloudFront and S3, enforcing Origin Access Control (OAC) to serve content securely with ultra-low latency from 400+ global edge locations.
-      - Engineered a dual-path event-driven backend using API Gateway, Lambda, and DynamoDB, executing atomic database operations to handle concurrent user traffic.
-      - Implemented dynamic credential verification orchestrating external APIs, securely retrieving KMS-encrypted keys via AWS SSM Parameter Store.
-      - Designed a robust GitHub Actions CI/CD pipeline featuring automated YAML linting, Python/Jinja2 template compilation, and zero-downtime AWS deployments.
+      - Engineered a Zero-Trust CI/CD delivery pipeline by deprecating long-lived AWS IAM keys in favor of OIDC identity federation, enforcing strict Blast Radius Containment and establishing cryptographic non-repudiation across 100% of deployment events.
+      - Reduced Mean Time To Recovery (MTTR) and eliminated pipeline compute waste by engineering Shift-Left Quality Gates, utilizing `ajv-cli` and `yamllint` to enforce a strict "Fail Fast" data validation contract prior to artifact compilation.
+      - Achieved top-tier Time To First Contentful Paint (TTFCP) and a Zero-Downtime Deployment experience by orchestrating idempotent S3 storage syncing (`--delete`) coupled with automated CloudFront edge cache invalidation.
+      - Enforced rigorous **FinOps** guardrails by capping serverless AWS infrastructure at ₹500 INR/month to prevent Denial-of-Wallet attacks, and optimized total TCO by architecting a `.dev` **Zero-Trust** ingress (Cloudflare wholesale) to natively enforce **HSTS**.
 
   - name: Inventory Management Capstone
     startDate: "2026-02-01"
