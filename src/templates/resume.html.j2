@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Professional Portfolio and Cloud Resume of {{ basics.name | e }}" />
     <title>{{ basics.name | e }} | {{ basics.label | e }}</title>
-    
+
     <style>
       {{ inline_css }}
     </style>
@@ -17,18 +17,30 @@
         <h2>{{ basics.label | e }}</h2>
         <div class="contact-info">
           <p>
-            {{ basics.email | e }} | 
-            {{ basics.phone | default('', true) | e }} | 
+            {{ basics.email | e }} |
+            {{ basics.phone | default('', true) | e }} |
             {{ basics.location.city | e }}, {{ basics.location.countryCode | e }}
           </p>
           <div class="profiles">
             {% for profile in basics.profiles %}
-              <a href="{{ profile.url | e }}" target="_blank" rel="noopener noreferrer" 
-                 class="{% if profile.network | lower == 'linkedin' %}btn btn-primary{% else %}btn btn-secondary{% endif %}"
-                 aria-label="Visit my {{ profile.network | e }} profile">
+              <a
+                href="{{ profile.url | e }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="{% if profile.network | lower == 'linkedin' %}btn btn-primary{% else %}btn btn-secondary{% endif %}"
+                aria-label="Visit my {{ profile.network | e }} profile"
+              >
                 {{ profile.network | e }}
               </a>
             {% endfor %}
+            <a
+              href="resume.pdf"
+              download="Vikram_Babariya_Resume.pdf"
+              class="btn btn-download"
+              aria-label="Download resume as PDF"
+            >
+              ↓ Download PDF
+            </a>
           </div>
         </div>
       </header>
@@ -78,7 +90,13 @@
               <h4>
                 {{ project.name | e }}
                 {% if project.url is defined and project.url %}
-                  <a href="{{ project.url | e }}" target="_blank" rel="noopener noreferrer" class="demo-link" aria-label="Live demo for {{ project.name | e }}">[Live Demo]</a>
+                  <a
+                    href="{{ project.url | e }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="demo-link"
+                    aria-label="Live demo for {{ project.name | e }}"
+                  >[Live Demo]</a>
                 {% endif %}
               </h4>
               <span class="date">{{ project.startDate | e }} &mdash; {{ project.endDate | default('Present', true) | e }}</span>
@@ -104,12 +122,15 @@
             </p>
           {% endfor %}
         </article>
-        
+
         <article aria-labelledby="certs-heading">
           <h3 id="certs-heading">Certifications</h3>
           <ul>
             {% for cert in certificates %}
-              <li><strong>{{ cert.name | e }}</strong> ({{ cert.issuer | e }}) - <span class="date">{{ cert.date | e }}</span></li>
+              <li>
+                <strong>{{ cert.name | e }}</strong> ({{ cert.issuer | e }}) -
+                <span class="date">{{ cert.date | e }}</span>
+              </li>
             {% endfor %}
           </ul>
         </article>
@@ -130,19 +151,19 @@
           // SRE Constraint: Implement timeout/abort controller to prevent hanging fetch requests
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5-second hard timeout
-          
-          const response = await fetch(apiURL, { 
+
+          const response = await fetch(apiURL, {
             signal: controller.signal,
             method: 'GET',
-            mode: 'cors',               // Explicitly declare cross-origin intent
+            mode: 'cors', // Explicitly declare cross-origin intent
             headers: {
-              'Accept': 'application/json' // Explicitly request a JSON response
-            }
+              Accept: 'application/json', // Explicitly request a JSON response
+            },
           });
           clearTimeout(timeoutId);
-          
+
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          
+
           const data = await response.json();
           counterContainer.innerHTML = parseInt(data.count).toLocaleString();
         } catch (error) {
@@ -151,7 +172,7 @@
           counterContainer.innerHTML = 'System Active (Counter Offline)';
         }
       }
-      
+
       // Execute asynchronously without blocking the main render thread
       document.addEventListener('DOMContentLoaded', updateCounter);
     </script>

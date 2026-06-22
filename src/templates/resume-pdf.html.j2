@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ basics.name | e }} — Resume</title>
+    <style>
+      {{ pdf_css }}
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================
+         HEADER — name, title, single contact line
+         ================================================================ -->
+    <header>
+      <h1>{{ basics.name | e }}</h1>
+      <p class="label">{{ basics.label | e }}</p>
+      <p class="contact">
+        {{ basics.email | e }}
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        {{ basics.phone | default("", true) | e }}
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        {{ basics.location.city | e }}, {{ basics.location.countryCode | e }}
+        {% for profile in basics.profiles %}
+          &nbsp;&nbsp;|&nbsp;&nbsp;{{ profile.network | e }}:&nbsp;{{ profile.url | e }}
+        {% endfor %}
+      </p>
+    </header>
+
+    <!-- ================================================================
+         SUMMARY
+         ================================================================ -->
+    <section>
+      <h2>Summary</h2>
+      <p class="summary-text">{{ basics.summary | strip_md | e }}</p>
+    </section>
+
+    <!-- ================================================================
+         SKILLS
+         ================================================================ -->
+    <section>
+      <h2>Technical Skills</h2>
+      {% for skill_group in skills %}
+        <p class="skill-row">
+          <span class="skill-name">{{ skill_group.name | e }}:</span>
+          {{ skill_group.keywords | join(", ") | e }}
+        </p>
+      {% endfor %}
+    </section>
+
+    <!-- ================================================================
+         WORK EXPERIENCE
+         ================================================================ -->
+    <section>
+      <h2>Professional Experience</h2>
+      {% for job in work %}
+        <div class="entry">
+          <div class="entry-header">
+            <span class="entry-title">{{ job.position | e }}</span>
+            <span class="entry-date">
+              {{ job.startDate | format_date | e }} –
+              {{ job.endDate | default("Present", true) | format_date | e }}
+            </span>
+          </div>
+          <div class="entry-sub">
+            <span class="entry-org">{{ job.name | e }}</span>
+            <span class="entry-location">{{ job.location | e }}</span>
+          </div>
+          {% if job.summary is defined and job.summary %}
+            <p class="entry-summary">{{ job.summary | strip_md | e }}</p>
+          {% endif %}
+          <ul>
+            {% for highlight in job.highlights %}
+              <li>{{ highlight | strip_md | e }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </section>
+
+    <!-- ================================================================
+         PROJECTS
+         ================================================================ -->
+    <section>
+      <h2>Projects</h2>
+      {% for project in projects %}
+        <div class="entry">
+          <div class="entry-header">
+            <span class="entry-title">
+              {{ project.name | e }}
+              {% if project.url is defined and project.url %}
+                <span class="entry-url"> — {{ project.url | e }}</span>
+              {% endif %}
+            </span>
+            <span class="entry-date">
+              {{ project.startDate | format_date | e }} –
+              {{ project.endDate | default("Present", true) | format_date | e }}
+            </span>
+          </div>
+          {% if project.description is defined and project.description %}
+            <p class="entry-summary">{{ project.description | strip_md | e }}</p>
+          {% endif %}
+          <ul>
+            {% for highlight in project.highlights %}
+              <li>{{ highlight | strip_md | e }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </section>
+
+    <!-- ================================================================
+         EDUCATION + CERTIFICATIONS  (stacked — avoids WeasyPrint page-break issues
+         with any multi-column formatting context)
+         ================================================================ -->
+    <div class="bottom-grid">
+      <section>
+        <h2>Education</h2>
+        {% for edu in education %}
+          <div class="entry">
+            <div class="entry-header">
+              <span class="entry-title">{{ edu.studyType | e }} in {{ edu.area | e }}</span>
+              <span class="entry-date">
+                {{ edu.startDate | format_date | e }} – {{ edu.endDate | format_date | e }}
+              </span>
+            </div>
+            <div class="entry-sub">
+              <span class="entry-org">{{ edu.institution | e }}</span>
+              <span class="entry-location">{{ edu.score | e }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </section>
+
+      <section>
+        <h2>Certifications</h2>
+        {% for cert in certificates %}
+          <div class="entry">
+            <div class="entry-header">
+              <span class="entry-title">{{ cert.name | e }}</span>
+              <span class="entry-date">{{ cert.date | format_date | e }}</span>
+            </div>
+            <p class="entry-org-plain">{{ cert.issuer | e }}</p>
+          </div>
+        {% endfor %}
+      </section>
+    </div>
+  </body>
+</html>

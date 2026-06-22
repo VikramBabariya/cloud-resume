@@ -1,0 +1,206 @@
+/* ==========================================================================
+   Resume PDF Stylesheet — Overleaf / LaTeX-style typesetting
+   Target: WeasyPrint 69.x  |  Output: A4 single-page PDF
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Page geometry  (A4 = 210 × 297 mm)
+   Mirrors Overleaf default article margins
+   -------------------------------------------------------------------------- */
+@page {
+  size: A4;
+  margin: 7mm 14mm 7mm 14mm;
+}
+
+/* --------------------------------------------------------------------------
+   Base typography — Latin Modern Roman is the native TeX/Overleaf face.
+   Cascade to Georgia → serif for CI runners without the font installed.
+   -------------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    'Latin Modern Roman', 'Linux Libertine', Georgia, 'Times New Roman', serif;
+  font-size: 9pt;
+  line-height: 1.22;
+  color: #000;
+  background: #fff;
+  text-align: left;
+}
+
+/* --------------------------------------------------------------------------
+   HEADER — centred name block, mirrors Overleaf \maketitle
+   -------------------------------------------------------------------------- */
+header {
+  text-align: center;
+  padding-bottom: 4pt;
+  margin-bottom: 4pt;
+  border-bottom: 0.8pt solid #000;
+}
+
+header h1 {
+  font-size: 16pt;
+  font-weight: bold;
+  letter-spacing: 0.4pt;
+  margin-bottom: 1.5pt;
+}
+
+header .label {
+  font-size: 9pt;
+  font-style: italic;
+  color: #333;
+  margin-bottom: 2pt;
+}
+
+header .contact {
+  font-size: 7.5pt;
+  color: #222;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   Section headings — rule underline, all-caps, matches Overleaf \section{}
+   -------------------------------------------------------------------------- */
+h2 {
+  font-size: 9.5pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.7pt;
+  border-bottom: 0.7pt solid #000;
+  padding-bottom: 0.5pt;
+  margin-top: 4pt;
+  margin-bottom: 2pt;
+}
+
+/* --------------------------------------------------------------------------
+   Generic section wrapper
+   -------------------------------------------------------------------------- */
+section {
+  margin-bottom: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Entry block — one work / project / edu / cert item
+   -------------------------------------------------------------------------- */
+.entry {
+  margin-bottom: 2pt;
+}
+
+/* Bold title  ←→  Date on the same line */
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6pt;
+}
+
+.entry-title {
+  font-weight: bold;
+  font-size: 9.5pt;
+  flex: 1;
+}
+
+.entry-url {
+  font-weight: normal;
+  font-size: 8pt;
+  font-style: italic;
+}
+
+.entry-date {
+  font-size: 8.5pt;
+  color: #444;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Italic org name  ←→  Location */
+.entry-sub {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 0.5pt;
+  margin-bottom: 1pt;
+}
+
+.entry-org {
+  font-style: italic;
+  font-size: 9pt;
+}
+
+.entry-location {
+  font-style: normal;
+  font-size: 8.5pt;
+  color: #555;
+}
+
+.entry-org-plain {
+  font-style: italic;
+  font-size: 9pt;
+  margin-top: 1pt;
+}
+
+.entry-summary {
+  font-style: italic;
+  font-size: 8pt;
+  color: #333;
+  margin-top: 0.5pt;
+  margin-bottom: 1.5pt;
+  line-height: 1.25;
+}
+
+/* --------------------------------------------------------------------------
+   Bullet lists — compact LaTeX tight-itemize style
+   -------------------------------------------------------------------------- */
+ul {
+  padding-left: 10pt;
+  margin-top: 1pt;
+  margin-bottom: 0;
+}
+
+li {
+  font-size: 8.5pt;
+  margin-bottom: 0.5pt;
+  line-height: 1.28;
+}
+
+/* --------------------------------------------------------------------------
+   Skills — "Category: kw1, kw2, kw3" inline rows
+   -------------------------------------------------------------------------- */
+.skill-row {
+  font-size: 8.5pt;
+  margin-bottom: 1.5pt;
+  line-height: 1.3;
+}
+
+.skill-name {
+  font-weight: bold;
+}
+
+/* --------------------------------------------------------------------------
+   Summary paragraph
+   -------------------------------------------------------------------------- */
+.summary-text {
+  font-size: 8.5pt;
+  line-height: 1.38;
+}
+
+/* --------------------------------------------------------------------------
+   Bottom section — Education then Certifications stacked vertically.
+   Two-column layouts (flex, table, columns) all create atomic formatting
+   contexts that WeasyPrint refuses to break across pages; stacked blocks flow freely.
+   -------------------------------------------------------------------------- */
+.bottom-grid {
+  margin-top: 0;
+}
+
+.bottom-grid section {
+  margin-bottom: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Page-break helpers — allow WeasyPrint full freedom to fit content on one page
+   -------------------------------------------------------------------------- */

@@ -46,8 +46,20 @@ jobs:
           cache: 'npm'
 
       # 5. Decoupled Dependency Provisioning
-      # Strategic Reasoning: We create the .venv and install all linters/generators 
+      # Strategic Reasoning: We create the .venv and install all linters/generators
       # FIRST, making them globally available to subsequent steps in the runner.
+      # WeasyPrint requires Pango, Cairo, and Fontconfig system libraries for PDF rendering.
+      - name: Install WeasyPrint System Dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libpango-1.0-0 \
+            libpangoft2-1.0-0 \
+            libharfbuzz0b \
+            libfontconfig1 \
+            libcairo2 \
+            libgdk-pixbuf2.0-0
+
       - name: Provision Python Virtual Environment & Dependencies
         run: |
           python -m venv .venv
@@ -69,13 +81,14 @@ jobs:
 
 
       # 7. Compile Static Artifacts & Enforce Integrity
-      # Strategic Reasoning: Validation has passed. We reactivate the .venv, compile, 
-      # and mathematically verify the index.html artifact exists before deployment.
+      # Strategic Reasoning: Validation has passed. We reactivate the .venv, compile,
+      # and mathematically verify both the index.html and resume.pdf artifacts exist before deployment.
       - name: Compile Static Artifacts & Enforce Integrity
         run: |
           source .venv/bin/activate
           python build.py
-          test -f ./dist/index.html || { echo "Critical Failure: Artifact missing."; exit 1; }
+          test -f ./dist/index.html || { echo "Critical Failure: HTML artifact missing."; exit 1; }
+          test -f ./dist/resume.pdf || { echo "Critical Failure: PDF artifact missing."; exit 1; }
 
 
       # 8. Secure Authentication (Zero-Trust OIDC)
