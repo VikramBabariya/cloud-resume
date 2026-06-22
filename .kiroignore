@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+bower_components/
+vendor/
+
+# Build and Outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+target/
+bin/
+obj/
+
+# Logs and system files
+*.log
+.DS_Store
+.git/
+.idea/
+.vscode/
+
+
+# virtural envs
+.venv/
