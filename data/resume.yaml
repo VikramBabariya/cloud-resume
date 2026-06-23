@@ -2,12 +2,12 @@
 # resume.yaml - The Single Source of Truth
 basics:
   name: Vikram Babariya
-  label: Cloud Architect / DevOps Engineer
+  label: Cloud & DevSecOps Engineer | Site Reliability Engineering (SRE)
   email: vikram000712345@gmail.com
   phone: "+91 70482 63900"
-  url: https://vb-web.in
+  url: https://vikram-sre.dev/
   summary: |
-    Software Engineer transitioning into Cloud Architecture and DevOps, specializing in AWS serverless ecosystems, CI/CD pipelines, and infrastructure as code. Proven track record of architecting highly available backend systems, optimizing data pipelines, and enforcing strict security boundaries in enterprise environments.
+    Software Engineer transitioned to Cloud & DevSecOps, leveraging an 10-month strategic architectural sprint to engineer highly available, serverless AWS ecosystems. Specializes in mathematically enforcing blast radius containment via OIDC identity federation and integrating Shift-Left quality gates to strictly reduce Mean Time To Recovery (MTTR). Demonstrated execution maturity by architecting a production-grade Zero-Trust delivery platform that guarantees idempotent, zero-downtime delivery while enforcing aggressive FinOps governance with a ₹500 INR/month infrastructure TCO hard cap.
   location:
     city: Rajkot
     region: Gujarat
@@ -21,11 +21,24 @@ basics:
       url: https://github.com/VikramBabariya
 
 work:
+  - name: Independent Technical Sprint / Strategic Sabbatical
+    position: Cloud & DevSecOps Engineer
+    location: Gujarat, India
+    startDate: "2025-06-20"
+    current: true
+    summary: Executed a 12-month, full-time engineering sprint focused exclusively on mastering cloud-native architecture, DevSecOps, and SRE Maturity Level 3 principles, anchored by the development of a production-grade AWS serverless platform.
+    highlights:
+      - Engineered a Zero-Trust Resume-as-Code (RaC) delivery pipeline, mathematically enforcing blast radius containment and PoLP by deprecating long-lived IAM keys in favor of OIDC identity federation across 100% of deployments.
+      - Slashed Mean Time To Recovery (MTTR) and eliminated pipeline compute waste by architecting Shift-Left Quality Gates, utilizing semantic validation frameworks (ajv-cli, yamllint) to enforce a strict "Fail Fast" data contract.
+      - Guaranteed flawless artifact hygiene and zero-downtime delivery by orchestrating idempotent S3 state synchronizations (--delete) coupled with automated CloudFront edge network invalidations.
+      - Enforced rigorous FinOps guardrails by hard-capping serverless AWS infrastructure exposure at ₹500 INR/month, optimizing Total Cost of Ownership (TCO) and mitigating Layer 7 Denial-of-Wallet vulnerabilities.
+
+
   - name: Infineon Technologies
     position: Software Engineer (Backend & Automation)
     location: Gujarat, India
     startDate: "2024-06-01"
-    endDate: "2025-06-01"
+    endDate: "2025-06-20"
     summary: Engineered backend automation tools and optimized legacy I/O operations for enterprise hardware testing pipelines.
     highlights:
       - Architected and deployed the Unit Resolution System, automating the translation of analog values to digital registers, completely eliminating manual configuration errors.
@@ -37,7 +50,7 @@ work:
     position: Software Engineering Intern
     location: Gujarat, India
     startDate: "2023-12-01"
-    endDate: "2024-05-01"
+    endDate: "2024-06-01"
     summary: Developed highly scalable data ingestion pipelines and visualization dashboards for semiconductor failure analysis.
     highlights:
       - Architected a scalable Wafer Visualization Platform (SPA), accelerating defect pattern identification and reducing analysis time from hours to minutes.
@@ -49,7 +62,7 @@ education:
     area: Computer Science and Engineering
     studyType: Bachelor of Technology (BTech)
     startDate: "2020-10-01"
-    endDate: "2024-05-01"
+    endDate: "2024-05-09"
     score: "CGPA: 7.97"
     location: Nadiad, Gujarat
 
@@ -76,17 +89,6 @@ skills:
       - PostgreSQL, Redis
 
 projects:
-  - name: Zero-Trust RaC Platform
-    startDate: "2026-01-01"
-    current: true
-    url: https://vb-web.in
-    description: A production-grade Resume-as-Code pipeline engineered for strict artifact hygiene and non-repudiation, utilizing ephemeral STS credentials and idempotent deployment to guarantee secure, zero-downtime delivery.
-    highlights:
-      - Architected a high-availability frontend utilizing AWS CloudFront and S3, enforcing Origin Access Control (OAC) to serve content securely with ultra-low latency from 400+ global edge locations.
-      - Engineered a dual-path event-driven backend using API Gateway, Lambda, and DynamoDB, executing atomic database operations to handle concurrent user traffic.
-      - Implemented dynamic credential verification orchestrating external APIs, securely retrieving KMS-encrypted keys via AWS SSM Parameter Store.
-      - Designed a robust GitHub Actions CI/CD pipeline featuring automated YAML linting, Python/Jinja2 template compilation, and zero-downtime AWS deployments.
-
   - name: Inventory Management Capstone
     startDate: "2026-02-01"
     current: true
