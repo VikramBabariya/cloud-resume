@@ -25,7 +25,7 @@ work:
     position: Software Engineer (Backend & Automation)
     location: Gujarat, India
     startDate: "2024-06-01"
-    endDate: "2025-06-01"
+    endDate: "2025-06-20"
     summary: Engineered backend automation tools and optimized legacy I/O operations for enterprise hardware testing pipelines.
     highlights:
       - Architected and deployed the Unit Resolution System, automating the translation of analog values to digital registers, completely eliminating manual configuration errors.
@@ -37,7 +37,7 @@ work:
     position: Software Engineering Intern
     location: Gujarat, India
     startDate: "2023-12-01"
-    endDate: "2024-05-01"
+    endDate: "2024-06-01"
     summary: Developed highly scalable data ingestion pipelines and visualization dashboards for semiconductor failure analysis.
     highlights:
       - Architected a scalable Wafer Visualization Platform (SPA), accelerating defect pattern identification and reducing analysis time from hours to minutes.
@@ -49,7 +49,7 @@ education:
     area: Computer Science and Engineering
     studyType: Bachelor of Technology (BTech)
     startDate: "2020-10-01"
-    endDate: "2024-05-01"
+    endDate: "2024-05-09"
     score: "CGPA: 7.97"
     location: Nadiad, Gujarat
 
