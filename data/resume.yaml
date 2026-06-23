@@ -89,17 +89,6 @@ skills:
       - PostgreSQL, Redis
 
 projects:
-  - name: Zero-Trust RaC Platform
-    startDate: "2026-01-01"
-    current: true
-    url: https://vb-web.in
-    description: A production-grade Resume-as-Code pipeline engineered for strict artifact hygiene and non-repudiation, utilizing ephemeral STS credentials and idempotent deployment to guarantee secure, zero-downtime delivery.
-    highlights:
-      - Engineered a Zero-Trust CI/CD delivery pipeline by deprecating long-lived AWS IAM keys in favor of OIDC identity federation, enforcing strict Blast Radius Containment and establishing cryptographic non-repudiation across 100% of deployment events.
-      - Reduced Mean Time To Recovery (MTTR) and eliminated pipeline compute waste by engineering Shift-Left Quality Gates, utilizing `ajv-cli` and `yamllint` to enforce a strict "Fail Fast" data validation contract prior to artifact compilation.
-      - Achieved top-tier Time To First Contentful Paint (TTFCP) and a Zero-Downtime Deployment experience by orchestrating idempotent S3 storage syncing (`--delete`) coupled with automated CloudFront edge cache invalidation.
-      - Enforced rigorous **FinOps** guardrails by capping serverless AWS infrastructure at ₹500 INR/month to prevent Denial-of-Wallet attacks, and optimized total TCO by architecting a `.dev` **Zero-Trust** ingress (Cloudflare wholesale) to natively enforce **HSTS**.
-
   - name: Inventory Management Capstone
     startDate: "2026-02-01"
     current: true
