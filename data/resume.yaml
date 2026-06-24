@@ -66,27 +66,33 @@ education:
     score: "CGPA: 7.97"
     location: Nadiad, Gujarat
 
+
 skills:
-  - name: Cloud Computing & Serverless
-    level: Advanced
-    keywords:
-      - AWS (Lambda, API Gateway, S3, CloudFront, DynamoDB)
-      - AWS SSM Parameter Store (Secrets Management)
-      - IAM Least Privilege & Security Boundaries
-      - Route 53 & ACM (TLS/SSL)
-  - name: DevOps, CI/CD & Observability
+  - name: Cloud Architecture & Identity Guardrails
+    # Signals a transition away from standard application deployment into hardened infrastructure.
     level: Intermediate
     keywords:
-      - GitHub Actions (Automated Pipelines)
-      - Docker / Containerization
-      - AWS X-Ray & CloudWatch Synthetics
-      - GitOps Workflows
-  - name: Backend Engineering & Languages
-    level: Advanced
+      - AWS IAM (OIDC Federation, STS, PoLP)  # Elevates basic IAM to enterprise-grade identity management.
+      - AWS (Lambda, API Gateway, DynamoDB, S3)  # Core serverless compute and storage components substantiated by the RaC platform.
+      - CloudFront CDN, OAC & ACM (TLS/SSL)  # Validates edge security, zero-trust ingress, and transit encryption.
+      - Cloudflare DNS  # Demonstrates authoritative routing and network boundary control.
+
+  - name: DevSecOps & Automated Delivery
+    # Groups deployment velocity with quality control, proving an SRE "Fail Fast" mindset.
+    level: Intermediate
     keywords:
-      - Python, JavaScript (Node.js), C/C++, SQL
-      - Django, FastAPI, Express.js
-      - PostgreSQL, Redis
+      - GitHub Actions (CI/CD Automation)  # The primary deployment engine for the serverless platform.
+      - Docker / Containerization  # Substantiated by local environment parity and the Inventory Capstone architecture.
+      - Shift-Left Validation (ajv-cli, yamllint)  # Hard proof of semantic validation and pipeline quality gates.
+
+  - name: Reliability, FinOps & Backend Engineering
+    # Bridges previous software engineering tenure with current SRE outcomes, optimizing for lean SaaS markets.
+    level: Intermediate
+    keywords:
+      - AWS CloudWatch & Budgets (FinOps)  # Explicitly signals strict Total Cost of Ownership (TCO) optimization and operational alerting.
+      - Python, JavaScript (Node.js)  # Core programming languages utilized across both Infineon tenure and the strategic sprint.
+      - Django, FastAPI  # Substantiated high-concurrency backend frameworks.
+      - PostgreSQL, RDBMS  # Relational database architecture and management.
 
 projects:
   - name: Inventory Management Capstone
