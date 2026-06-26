@@ -76,13 +76,16 @@ skills:
       - AWS (Lambda, API Gateway, DynamoDB, S3)  # Core serverless compute and storage components substantiated by the RaC platform.
       - CloudFront CDN, OAC & ACM (TLS/SSL)  # Validates edge security, zero-trust ingress, and transit encryption.
       - Cloudflare DNS  # Demonstrates authoritative routing and network boundary control.
+      - Docker Network Segmentation (Zero-Trust)  # frontend_tier / backend_tier bridge isolation — docker-compose.yml
 
   - name: DevSecOps & Automated Delivery
     # Groups deployment velocity with quality control, proving an SRE "Fail Fast" mindset.
     level: Intermediate
     keywords:
       - GitHub Actions (CI/CD Automation)  # The primary deployment engine for the serverless platform.
-      - Docker / Containerization  # Substantiated by local environment parity and the Inventory Capstone architecture.
+      - Multi-Stage Docker Builds  # 90% artifact reduction; compiler-free runtime images
+      - Container Hardening (Non-Root, Minimal Base Images)  # appuser UID 1000, nginx:alpine, python:3.12-slim
+      - Nginx (Reverse Proxy, SPA Routing)   # Single ingress, API proxying, CORS resolution — nginx.conf
       - Shift-Left Validation (ajv-cli, yamllint)  # Hard proof of semantic validation and pipeline quality gates.
 
   - name: Reliability, FinOps & Backend Engineering
@@ -90,9 +93,10 @@ skills:
     level: Intermediate
     keywords:
       - AWS CloudWatch & Budgets (FinOps)  # Explicitly signals strict Total Cost of Ownership (TCO) optimization and operational alerting.
+      - Immutable Infrastructure Pattern   # Code baked into image; no runtime drift — docker-compose.prod.yml
       - Python, JavaScript (Node.js)  # Core programming languages utilized across both Infineon tenure and the strategic sprint.
-      - Django, FastAPI  # Substantiated high-concurrency backend frameworks.
-      - PostgreSQL, RDBMS  # Relational database architecture and management.
+      - Django, FastAPI (Async/ASGI, OpenAPI)  # Substantiated high-concurrency backend frameworks.
+      - PostgreSQL, RDBMS, ACID & Ledger Architecture   # Relational database architecture and management.
 
 projects:
   - name: Inventory System
