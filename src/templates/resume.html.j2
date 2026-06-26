@@ -19,7 +19,7 @@
           <p>
             {{ basics.email | e }} | 
             {{ basics.phone | default('', true) | e }} | 
-            {{ basics.location.city | e }}, {{ basics.location.countryCode | e }}
+            {{ basics.location.region | e }}, {{ basics.location.countryCode | e }}
           </p>
           <div class="profiles">
             {% for profile in basics.profiles %}
