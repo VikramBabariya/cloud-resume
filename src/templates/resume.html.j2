@@ -19,7 +19,7 @@
           <p>
             {{ basics.email | e }} | 
             {{ basics.phone | default('', true) | e }} | 
-            {{ basics.location.city | e }}, {{ basics.location.countryCode | e }}
+            {{ basics.location.region | e }}, {{ basics.location.countryCode | e }}
           </p>
           <div class="profiles">
             {% for profile in basics.profiles %}
@@ -78,11 +78,12 @@
               <h4>
                 {{ project.name | e }}
                 {% if project.url is defined and project.url %}
-                  <a href="{{ project.url | e }}" target="_blank" rel="noopener noreferrer" class="demo-link" aria-label="Live demo for {{ project.name | e }}">[Live Demo]</a>
+                  <a href="{{ project.url | e }}" target="_blank" rel="noopener noreferrer" class="demo-link" aria-label="Live demo for {{ project.name | e }}">GitHub</a>
                 {% endif %}
               </h4>
               <span class="date">{{ project.startDate | e }} &mdash; {{ project.endDate | default('Present', true) | e }}</span>
             </div>
+            {# #TODO: Consider adding a "Technologies Used" section for each project to highlight the tech stack. #}
             <p class="project-description">{{ project.description | e }}</p>
             <ul>
               {% for highlight in project.highlights %}

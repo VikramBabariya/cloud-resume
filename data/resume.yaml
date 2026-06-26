@@ -7,7 +7,7 @@ basics:
   phone: "+91 70482 63900"
   url: https://vikram-sre.dev/
   summary: |
-    Software Engineer transitioned to Cloud & DevSecOps, leveraging an 10-month strategic architectural sprint to engineer highly available, serverless AWS ecosystems. Specializes in mathematically enforcing blast radius containment via OIDC identity federation and integrating Shift-Left quality gates to strictly reduce Mean Time To Recovery (MTTR). Demonstrated execution maturity by architecting a production-grade Zero-Trust delivery platform that guarantees idempotent, zero-downtime delivery while enforcing aggressive FinOps governance with a ₹500 INR/month infrastructure TCO hard cap.
+    Software Engineer transitioned to Cloud & DevSecOps, leveraging an 12-month strategic architectural sprint to engineer highly available, serverless AWS ecosystems. Specializes in mathematically enforcing blast radius containment via OIDC identity federation and integrating Shift-Left quality gates to strictly reduce Mean Time To Recovery (MTTR). Demonstrated execution maturity by architecting a production-grade Zero-Trust delivery platform that guarantees idempotent, zero-downtime delivery while enforcing aggressive FinOps governance with a ₹500 INR/month infrastructure TCO hard cap.
   location:
     city: Rajkot
     region: Gujarat
@@ -66,37 +66,54 @@ education:
     score: "CGPA: 7.97"
     location: Nadiad, Gujarat
 
+
 skills:
-  - name: Cloud Computing & Serverless
-    level: Advanced
-    keywords:
-      - AWS (Lambda, API Gateway, S3, CloudFront, DynamoDB)
-      - AWS SSM Parameter Store (Secrets Management)
-      - IAM Least Privilege & Security Boundaries
-      - Route 53 & ACM (TLS/SSL)
-  - name: DevOps, CI/CD & Observability
+  - name: Cloud Architecture & Identity Guardrails
+    # Signals a transition away from standard application deployment into hardened infrastructure.
     level: Intermediate
     keywords:
-      - GitHub Actions (Automated Pipelines)
-      - Docker / Containerization
-      - AWS X-Ray & CloudWatch Synthetics
-      - GitOps Workflows
-  - name: Backend Engineering & Languages
-    level: Advanced
+      - AWS IAM (OIDC Federation, STS, PoLP)  # Elevates basic IAM to enterprise-grade identity management.
+      - AWS (Lambda, API Gateway, DynamoDB, S3)  # Core serverless compute and storage components substantiated by the RaC platform.
+      - CloudFront CDN, OAC & ACM (TLS/SSL)  # Validates edge security, zero-trust ingress, and transit encryption.
+      - Cloudflare DNS  # Demonstrates authoritative routing and network boundary control.
+      - Docker Network Segmentation (Zero-Trust)  # frontend_tier / backend_tier bridge isolation — docker-compose.yml
+
+  - name: DevSecOps & Automated Delivery
+    # Groups deployment velocity with quality control, proving an SRE "Fail Fast" mindset.
+    level: Intermediate
     keywords:
-      - Python, JavaScript (Node.js), C/C++, SQL
-      - Django, FastAPI, Express.js
-      - PostgreSQL, Redis
+      - GitHub Actions (CI/CD Automation)  # The primary deployment engine for the serverless platform.
+      - Multi-Stage Docker Builds  # 90% artifact reduction; compiler-free runtime images
+      - Container Hardening (Non-Root, Minimal Base Images)  # appuser UID 1000, nginx:alpine, python:3.12-slim
+      - Nginx (Reverse Proxy, SPA Routing)   # Single ingress, API proxying, CORS resolution — nginx.conf
+      - Shift-Left Validation (ajv-cli, yamllint)  # Hard proof of semantic validation and pipeline quality gates.
+
+  - name: Reliability, FinOps & Backend Engineering
+    # Bridges previous software engineering tenure with current SRE outcomes, optimizing for lean SaaS markets.
+    level: Intermediate
+    keywords:
+      - AWS CloudWatch & Budgets (FinOps)  # Explicitly signals strict Total Cost of Ownership (TCO) optimization and operational alerting.
+      - Immutable Infrastructure Pattern   # Code baked into image; no runtime drift — docker-compose.prod.yml
+      - Python, JavaScript (Node.js)  # Core programming languages utilized across both Infineon tenure and the strategic sprint.
+      - Django, FastAPI (Async/ASGI, OpenAPI)  # Substantiated high-concurrency backend frameworks.
+      - PostgreSQL, RDBMS, ACID & Ledger Architecture   # Relational database architecture and management.
 
 projects:
-  - name: Inventory Management Capstone
+  - name: Inventory System
     startDate: "2026-02-01"
     current: true
-    description: Containerized full-stack application demonstrating decoupled microservices and optimized caching.
+    description: Production-grade containerized system demonstrating defense-in-depth Docker architecture, immutable infrastructure patterns, and dual-environment orchestration (dev/prod). Achieved 90% artifact reduction via multi-stage builds and enforced database isolation through private bridge network segmentation.
+    keywords:
+      - FastAPI
+      - React
+      - PostgreSQL
+      - Docker
+    url: https://github.com/VikramBabariya/inventory-system
     highlights:
-      - Architected the backend using FastAPI and PostgreSQL, integrating a Redis caching layer to drastically reduce database read latency.
-      - Containerized the application lifecycle utilizing Docker to ensure strict environment parity between local development and production deployments.
-
+      - Designed multi-tier Docker bridge network architecture enforcing zero-route database isolation, restricting PostgreSQL access to the backend tier via network topology rather than configuration.  # Security Architecture: You think in security boundaries, not just firewalls
+      - Reduced production Docker artifacts by 90% (3.5 GB → 364 MB) using multi-stage builds — eliminating compilers from runtime images and running all containers as non-root users.  # Build Optimization & DevSecOps: You optimize for cost, attack surface, and deployment speed simultaneously
+      - Configured dual-environment Docker Compose orchestration with dependency-ordered service startup, container-level healthchecks, and immutable production images to eliminate environment drift.  # Infrastructure Reliability & Operational Maturity : You understand operational contracts between environments and build for consistency
+      - Implemented append-only ledger pattern in PostgreSQL to record all stock changes as signed delta transactions, ensuring concurrent-write safety and a complete audit trail without additional tooling.  # Data Integrity & Backend Reliability: You make deliberate data architecture decisions with reliability consequences
 certificates:
   - name: AWS Certified Cloud Practitioner
     date: "2025-12-01"
