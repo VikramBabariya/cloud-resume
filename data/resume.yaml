@@ -81,7 +81,7 @@ skills:
       - GitHub Actions (CI/CD Automation)  # The primary deployment engine for the serverless platform.
       - Multi-Stage Docker Builds  # 90% artifact reduction; compiler-free runtime images
       - Container Hardening (Non-Root, Minimal Base Images)  # appuser UID 1000, nginx:alpine, python:3.12-slim
-      - Nginx (Reverse Proxy, SPA Routing)   # Single ingress, API proxying, CORS resolution — nginx.conf
+      - Nginx (Reverse Proxy)   # Single ingress, API proxying, CORS resolution — nginx.conf
       - Shift-Left Validation (ajv-cli, yamllint)  # Hard proof of semantic validation and pipeline quality gates.
 
   - name: Reliability, FinOps & Backend Engineering
@@ -91,8 +91,8 @@ skills:
       - AWS CloudWatch & Budgets (FinOps)  # Explicitly signals strict Total Cost of Ownership (TCO) optimization and operational alerting.
       - Immutable Infrastructure Pattern   # Code baked into image; no runtime drift — docker-compose.prod.yml
       - Python, JavaScript (Node.js)  # Core programming languages utilized across both Infineon tenure and the strategic sprint.
-      - Django, FastAPI (Async/ASGI, OpenAPI)  # Substantiated high-concurrency backend frameworks.
-      - PostgreSQL, RDBMS, ACID & Ledger Architecture   # Relational database architecture and management.
+      - Django, FastAPI (Async/ASGI)  # Substantiated high-concurrency backend frameworks.
+      - PostgreSQL, RDBMS   # Relational database architecture and management.
 
 projects:
   - name: Inventory System
