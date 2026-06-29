@@ -49,11 +49,9 @@ work:
     location: Gujarat, India
     startDate: "2023-12-01"
     endDate: "2024-06-01"
-    summary: Developed highly scalable data ingestion pipelines and visualization dashboards for semiconductor failure analysis.
+    summary: ""
     highlights:
-      - Architected a scalable Wafer Visualization Platform (SPA), accelerating defect pattern identification and reducing analysis time from hours to minutes.
-      - Optimized backend performance by integrating Snowflake with Django, implementing multi-threading for data ingestion to process 100+ massive wafer datasets concurrently.
-      - Developed dynamic, data-driven dashboards using Plotly.js to visualize test data, directly influencing yield improvement strategies.
+      - Architected a scalable Wafer Visualization Platform by integrating Snowflake with Django, implementing multi-threaded data ingestion to process 100+ massive datasets concurrently and reducing defect analysis time from hours to minutes.
 
 education:
   - institution: Dharmsinh Desai University
