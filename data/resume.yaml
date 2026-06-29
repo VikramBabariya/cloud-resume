@@ -39,12 +39,10 @@ work:
     location: Gujarat, India
     startDate: "2024-06-01"
     endDate: "2025-06-20"
-    summary: Engineered backend automation tools and optimized legacy I/O operations for enterprise hardware testing pipelines.
+    summary: ""
     highlights:
-      - Architected and deployed the Unit Resolution System, automating the translation of analog values to digital registers, completely eliminating manual configuration errors.
-      - Optimized internal testing workflows by refactoring legacy I2C/UART functions to asynchronous concurrency models (async/await), drastically reducing test cycle times.
-      - Engineered comprehensive Unit Tests and server-side logging for visualization tools, achieving and maintaining 99.9% system availability during critical test phases.
-      - Developed a runtime inspection tool analyzing Python call stacks to prevent false-positive hardware failures, improving lab automation reliability.
+      - Architected a Django-based Unit Resolution module for an enterprise Register Map Platform, automating analog-to-digital data translations while integrating strict API quality gates and comprehensive server-side logging to guarantee data integrity.
+      - Engineered a Node.js orchestration engine to dynamically parse and execute Python test vectors within managed, ephemeral virtual environments, implementing runtime call-stack inspection to enforce “Fail Fast” validation on I2C/UART hardware operations.
 
   - name: Infineon Technologies
     position: Software Engineering Intern
