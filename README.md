@@ -51,6 +51,13 @@ _(Diagram source maintained via Diagrams as Code in `/docs/architecture/source`)
 1. **Federated Authentication:** The `.github/workflows/front-end-cicd.yml` pipeline assumes an ephemeral deployment role via the AWS OIDC Identity Provider.
 2. **Immutable Delivery:** The pipeline executes the SRE quality gates, compiles the HTML artifact, synchronizes exclusively the `./dist` folder to the S3 origin, and programmatically purges the CloudFront edge cache.
 
+**Flow C: IaC Deployment (Terraform Pipeline)**
+
+1. **Federated Authentication:** The `terraform-cicd.yml` pipeline authenticates to AWS via OIDC (`AssumeRoleWithWebIdentity`), using the same deployment role as the frontend pipeline with an isolated `role-session-name` per run.
+2. **Shift-Left Security Scan:** `checkov >= 3.2` scans all Terraform code for misconfigurations; HIGH/CRITICAL findings block the pipeline before any plan or apply executes.
+3. **Plan Review:** On pull requests, `terraform plan` output is posted as a PR comment (overwriting any prior comment from the same PR) so reviewers see the exact resource diff before approving.
+4. **Apply on Merge:** On merge to `main`, `terraform apply -auto-approve` provisions or updates all AWS and Cloudflare resources declared across the five modules.
+
 ---
 
 ## 📉 FinOps & Cloud Governance
@@ -63,15 +70,16 @@ By leveraging Cloudflare's zero-markup registrar and consolidating authoritative
 
 ## ⚙️ The DevSecOps Toolchain
 
-| Domain                    | Technology / Service                                                                   |
-| :------------------------ | :------------------------------------------------------------------------------------- |
-| **Content Management**    | Resume-as-Code (YAML + Python/Jinja2 Static Site Generator)                            |
-| **Frontend & Edge**       | AWS CloudFront, S3 (Origin Access Control), Cloudflare DNS (Authoritative, Grey Cloud) |
-| **Serverless Backend**    | AWS Lambda (Python 3.12), AWS API Gateway (REST/HTTP)                                  |
-| **Database & Secrets**    | Amazon DynamoDB (NoSQL)                                                                |
-| **Identity & Security**   | AWS IAM (Strict **PoLP**), AWS STS, AWS OIDC, AWS ACM                                  |
-| **CI/CD & Quality Gates** | GitHub Actions, `yamllint`, `ajv-cli` (Shift-Left Validation)                          |
-| **Observability**         | AWS CloudWatch (Logs, Alarms, Dashboards), AWS X-Ray                                   |
+| Domain                     | Technology / Service                                                                          |
+| :------------------------- | :-------------------------------------------------------------------------------------------- |
+| **Content Management**     | Resume-as-Code (YAML + Python/Jinja2 Static Site Generator)                                   |
+| **Frontend & Edge**        | AWS CloudFront, S3 (Origin Access Control), Cloudflare DNS (Authoritative, Grey Cloud)        |
+| **Serverless Backend**     | AWS Lambda (Python 3.12), AWS API Gateway (REST/HTTP)                                         |
+| **Database & Secrets**     | Amazon DynamoDB (NoSQL)                                                                       |
+| **Identity & Security**    | AWS IAM (Strict **PoLP**), AWS STS, AWS OIDC, AWS ACM                                         |
+| **CI/CD & Quality Gates**  | GitHub Actions, `yamllint`, `ajv-cli` (Shift-Left Validation), `checkov` (IaC SAST)           |
+| **Infrastructure as Code** | Terraform >= 1.9.0 (`hashicorp/aws ~> 5.0`, `cloudflare/cloudflare ~> 4.0`), `checkov >= 3.2` |
+| **Observability**          | AWS CloudWatch (Logs, Alarms, Dashboards), AWS X-Ray                                          |
 
 ---
 
@@ -95,13 +103,37 @@ Detailed architectural choices are documented as ADRs to maintain an immutable h
 - [ADR 0006: Local Data Integrity Tooling (Shift-Left Quality Gates)](docs/adr/0006-local-data-integrity-tooling.md)
 - [ADR 0007: GitHub Actions Authentication via AWS OpenID Connect (OIDC)](docs/adr/0007-aws-oidc-authentication.md)
 - [ADR 0008: Strategic Domain Name Ingress and Registrar Procurement Selection](docs/adr/0008-domain-and-registrar-selection.md)
+- [ADR 0009: Terraform IaC Adoption — Replacing ClickOps with Declarative Infrastructure](docs/adr/0009-terraform-iac-adoption.md)
 
 ---
 
-## Epic 5: Future Infrastructure-as-Code (IaC) Evolution
+## Infrastructure as Code
 
-The next phase of architectural maturity focuses on entirely deprecating manual AWS backend provisioning in favor of declarative Infrastructure-as-Code.
+All AWS and Cloudflare resources are managed declaratively via Terraform (>= 1.9.0), eliminating ClickOps and providing a full auditable change history for every infrastructure mutation.
 
-- **Remote State Management:** Implement an encrypted S3 backend with DynamoDB state locking to securely manage `.tfstate` and prevent concurrent deployment corruption.
-- **Declarative Compute & Data Layers:** Translate API Gateway, Lambda, DynamoDB, and IAM resources into modular Terraform (`.tf`) files.
-- **Shift-Left IaC Scanning:** Integrate static analysis security testing (SAST) tools (e.g., `tfsec`, `checkov`) into the GitHub Actions pipeline to validate infrastructure security compliance prior to execution.
+### Directory Structure
+
+The `terraform/` directory is a first-class project artifact alongside `src/` and `data/`, composed of five child modules:
+
+| Module                  | Responsibility                                                              |
+| :---------------------- | :-------------------------------------------------------------------------- |
+| `modules/state-backend` | S3 state bucket (SSE-KMS, versioning) + DynamoDB lock table                 |
+| `modules/cdn`           | S3 origin bucket, OAC, ACM certificate (us-east-1), CloudFront distribution |
+| `modules/compute`       | DynamoDB visitor-count table, Lambda function, API Gateway HTTP API         |
+| `modules/dns`           | Cloudflare CNAME records (apex, www, ACM validation)                        |
+| `modules/iam`           | Lambda execution role, GitHub OIDC provider, deployment role                |
+
+### CI/CD Pipelines
+
+Two GitHub Actions workflows operate independently:
+
+- **`front-end-cicd.yml`** — existing frontend pipeline (YAML → build → S3 sync → CloudFront invalidation), unchanged.
+- **`terraform-cicd.yml`** — new IaC pipeline, triggered on changes to `terraform/**`. Runs a shift-left gate sequence on every pull request and applies on merge to `main`.
+
+### Shift-Left Gate Sequence
+
+```
+fmt → validate → checkov → plan → apply
+```
+
+Each gate is sequential and blocking — a failure at any stage halts the pipeline immediately before the next step runs. `checkov >= 3.2` blocks apply on HIGH/CRITICAL findings; MEDIUM/LOW emit warning annotations only. The `terraform plan` output is posted (and overwritten on re-runs) as a PR comment before any apply executes.
