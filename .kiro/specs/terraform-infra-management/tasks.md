@@ -80,27 +80,27 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
   - [x] 2.4 Wire `modules/state-backend` into `terraform/main.tf` and add the `backend "s3"` block with `bucket = "zero-trust-rac-tfstate"`, `key = "prod/terraform.tfstate"`, `region = "ap-south-1"`, `encrypt = true`, `dynamodb_table = "zero-trust-rac-tfstate-lock"`, `kms_key_id = "alias/terraform-state"`
     - _Requirements: 1.5_
 
-- [ ] 3. Implement `modules/cdn` — S3 origin bucket, OAC, ACM certificate, CloudFront distribution
-  - [ ] 3.1 Write `modules/cdn/variables.tf` declaring `origin_bucket_name` (required, no default — missing causes plan-time error), `domain_name`, `san_domain`, and a `providers` pass-through map for the `us_east_1` alias
+- [x] 3. Implement `modules/cdn` — S3 origin bucket, OAC, ACM certificate, CloudFront distribution
+  - [x] 3.1 Write `modules/cdn/variables.tf` declaring `origin_bucket_name` (required, no default — missing causes plan-time error), `domain_name`, `san_domain`, and a `providers` pass-through map for the `us_east_1` alias
     - _Requirements: 3.5_
-  - [ ] 3.2 Implement S3 origin bucket resources in `modules/cdn/main.tf`:
+  - [x] 3.2 Implement S3 origin bucket resources in `modules/cdn/main.tf`:
     - `aws_s3_bucket` (private)
     - `aws_s3_bucket_public_access_block` with all four flags set to `true`
     - `aws_s3_bucket_versioning` with `status = "Enabled"`
     - `aws_cloudfront_origin_access_control` resource bound to the S3 origin
     - `aws_s3_bucket_policy` granting `s3:GetObject` to `cloudfront.amazonaws.com` conditioned on `AWS:SourceArn` matching the CloudFront distribution ARN (see design for exact OAC-only policy JSON)
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
-  - [ ] 3.3 Implement ACM certificate in `modules/cdn/main.tf` using the `aws.us_east_1` provider alias:
+  - [x] 3.3 Implement ACM certificate in `modules/cdn/main.tf` using the `aws.us_east_1` provider alias:
     - `aws_acm_certificate` with `domain_name = var.domain_name`, `subject_alternative_names = [var.san_domain]`, `validation_method = "DNS"`
     - `aws_acm_certificate_validation` with `timeouts { create = "45m" }` consuming CNAME records from `modules/dns`
     - _Requirements: 4.1, 4.2, 4.4_
-  - [ ] 3.4 Implement CloudFront distribution in `modules/cdn/main.tf`:
+  - [x] 3.4 Implement CloudFront distribution in `modules/cdn/main.tf`:
     - `aws_cloudfront_distribution` with `viewer_protocol_policy = "redirect-to-https"`, `minimum_protocol_version = "TLSv1.2_2021"`, OAC-bound S3 origin, `aliases = ["vikram-sre.dev", "www.vikram-sre.dev"]`, and the validated ACM certificate
     - Ensure `default_cache_behavior` (and any ordered cache behaviour) also has `viewer_protocol_policy = "redirect-to-https"`
     - _Requirements: 5.1, 5.2, 5.3, 5.4_
-  - [ ] 3.5 Write `modules/cdn/outputs.tf` exposing `cloudfront_domain_name`, `cloudfront_distribution_id`, `cloudfront_distribution_arn`, `origin_bucket_arn`, `acm_validation_options`, `acm_certificate_arn`
+  - [x] 3.5 Write `modules/cdn/outputs.tf` exposing `cloudfront_domain_name`, `cloudfront_distribution_id`, `cloudfront_distribution_arn`, `origin_bucket_arn`, `acm_validation_options`, `acm_certificate_arn`
     - _Requirements: 5.5_
-  - [ ] 3.6 Wire `modules/cdn` into `terraform/main.tf` passing all required variables and the `providers = { aws.us_east_1 = aws.us_east_1 }` alias map
+  - [x] 3.6 Wire `modules/cdn` into `terraform/main.tf` passing all required variables and the `providers = { aws.us_east_1 = aws.us_east_1 }` alias map
     - _Requirements: 2.2_
 
 - [ ] 4. Implement `modules/dns` — Cloudflare CNAME records

@@ -17,3 +17,16 @@ module "state_backend" {
   aws_region          = var.aws_region
 }
 
+module "cdn" {
+  source = "./modules/cdn"
+
+  origin_bucket_name = "zero-trust-rac-origin"
+  domain_name        = "vikram-sre.dev"
+  san_domain         = "*.vikram-sre.dev"
+
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
+}
+
