@@ -54,7 +54,7 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
     - Add a legend note that `GHRunner` (frontend pipeline) and `TF_Pipeline` (IaC pipeline) are separate workflow files sharing the same OIDC trust with different `role-session-name` values
     - _Requirements: 2.1_
 
-- [ ] 1. Scaffold Terraform repository layout and root configuration files
+- [x] 1. Scaffold Terraform repository layout and root configuration files
   - Create `terraform/` directory with the following files: `versions.tf`, `providers.tf`, `variables.tf`, `outputs.tf`, `main.tf`, `terraform.tfvars.example`
   - Create skeleton module directories: `terraform/modules/state-backend/`, `modules/cdn/`, `modules/compute/`, `modules/dns/`, `modules/iam/` — each with empty `main.tf`, `variables.tf`, `outputs.tf`
   - In `versions.tf`: declare `required_version = ">= 1.9.0"` and `required_providers` for `hashicorp/aws ~> 5.0`, `cloudflare/cloudflare ~> 4.0`, `hashicorp/archive ~> 2.0` using `~>` pessimistic constraint operators
