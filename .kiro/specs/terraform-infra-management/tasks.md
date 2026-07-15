@@ -103,16 +103,16 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
   - [x] 3.6 Wire `modules/cdn` into `terraform/main.tf` passing all required variables and the `providers = { aws.us_east_1 = aws.us_east_1 }` alias map
     - _Requirements: 2.2_
 
-- [ ] 4. Implement `modules/dns` — Cloudflare CNAME records
-  - [ ] 4.1 Write `modules/dns/variables.tf` declaring `cloudflare_zone_id` (required, no default — missing causes plan-time error), `cloudfront_domain_name`, `apex_domain`, `acm_validation_options`
+- [x] 4. Implement `modules/dns` — Cloudflare CNAME records
+  - [x] 4.1 Write `modules/dns/variables.tf` declaring `cloudflare_zone_id` (required, no default — missing causes plan-time error), `cloudfront_domain_name`, `apex_domain`, `acm_validation_options`
     - _Requirements: 4.5, 6.6_
-  - [ ] 4.2 Implement DNS records in `modules/dns/main.tf`:
+  - [x] 4.2 Implement DNS records in `modules/dns/main.tf`:
     - `cloudflare_record` for root apex (`@`) CNAME → `var.cloudfront_domain_name`, `proxied = false`, `ttl = 1`
     - `cloudflare_record` for `www` CNAME → `vikram-sre.dev`, `proxied = false`, `ttl = 1`
     - `cloudflare_record` resources for ACM validation CNAMEs using `for_each` over `var.acm_validation_options`, each with `proxied = false`, `ttl = 1`
     - _Requirements: 4.3, 6.1, 6.2, 6.3, 6.5_
-  - [ ] 4.3 Write `modules/dns/outputs.tf` exposing `apex_cname_id` and `www_cname_id`
-  - [ ] 4.4 Wire `modules/dns` into `terraform/main.tf` passing `cloudflare_zone_id = var.cloudflare_zone_id`, `cloudfront_domain_name = module.cdn.cloudfront_domain_name`, `acm_validation_options = module.cdn.acm_validation_options`
+  - [x] 4.3 Write `modules/dns/outputs.tf` exposing `apex_cname_id` and `www_cname_id`
+  - [x] 4.4 Wire `modules/dns` into `terraform/main.tf` passing `cloudflare_zone_id = var.cloudflare_zone_id`, `cloudfront_domain_name = module.cdn.cloudfront_domain_name`, `acm_validation_options = module.cdn.acm_validation_options`
     - _Requirements: 6.4, 2.2_
 
 - [ ] 5. Checkpoint — validate module wiring up to dns/cdn/state-backend

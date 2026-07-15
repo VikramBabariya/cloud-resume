@@ -30,3 +30,22 @@ module "cdn" {
   }
 }
 
+# -----------------------------------------------------------------------------
+# modules/dns — Cloudflare CNAME records
+#
+# Consumes outputs from modules/cdn:
+#   - cloudfront_domain_name   → root apex CNAME target
+#   - acm_validation_options   → ACM validation CNAMEs (for_each)
+#
+# cloudflare_zone_id comes from the root sensitive variable — sourced at
+# runtime via TF_VAR_cloudflare_zone_id (never hardcoded).
+# Requirements: 6.4, 2.2
+# -----------------------------------------------------------------------------
+module "dns" {
+  source = "./modules/dns"
+
+  cloudflare_zone_id     = var.cloudflare_zone_id
+  cloudfront_domain_name = module.cdn.cloudfront_domain_name
+  acm_validation_options = module.cdn.acm_validation_options
+  apex_domain            = "vikram-sre.dev"
+}
