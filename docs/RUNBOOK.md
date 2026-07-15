@@ -91,60 +91,74 @@ The Outer Loop governs the fully automated, immutable deployment of the verified
 
 ## 6. IaC Bootstrap Prerequisites (One-Time Manual Steps)
 
-> **Context:** Terraform cannot manage its own state backend — the S3 bucket, DynamoDB lock table, and KMS key must exist before `terraform init` can reference them. These steps are performed **once per environment** by a platform engineer with console access. All subsequent infrastructure changes are automated through the CI/CD pipeline (`terraform-cicd.yml`).
+> **Context:** Terraform cannot manage its own state backend — the S3 bucket, DynamoDB lock table, and KMS key must exist before `terraform init` can reference them. The bootstrap procedure below uses Terraform itself with a **local state** backend to create these resources, then migrates state to S3. This keeps everything declared as code from day one with no ClickOps. These steps are performed **once per environment** by a platform engineer with AWS credentials.
 
-### Step 1 — Create the KMS Key for State Encryption
+### Step 1 — Comment Out the Remote Backend Block
 
-In the **AWS Console → KMS → Customer managed keys** (`ap-south-1` region):
+Before running `terraform init` for the first time, open `terraform/main.tf` and comment out the `backend "s3"` block so Terraform falls back to local state:
 
-1. Create a **Symmetric** key with key usage `Encrypt and decrypt`.
-2. Set the alias to `alias/terraform-state`.
-3. Keep the default key policy (your AWS account as key administrator).
+```hcl
+terraform {
+  # backend "s3" {
+  #   bucket         = "zero-trust-rac-tfstate"
+  #   key            = "prod/terraform.tfstate"
+  #   region         = "ap-south-1"
+  #   encrypt        = true
+  #   dynamodb_table = "zero-trust-rac-tfstate-lock"
+  #   kms_key_id     = "alias/terraform-state"
+  # }
+}
+```
 
-> **Why manual?** The KMS key must exist before the S3 backend bucket can be configured with SSE-KMS. Terraform cannot create the key before it has a place to store state — this is an intentional bootstrap constraint.
+> Do not commit this change. It is a temporary local edit for bootstrap only.
 
-### Step 2 — Create the S3 State Bucket
+### Step 2 — Initialise and Apply with Local State
 
-In the **AWS Console → S3** (`ap-south-1` region), create a new bucket:
-
-- **Bucket name:** `zero-trust-rac-tfstate`
-- **Region:** `ap-south-1`
-- **Block all public access:** ✅ enabled (all four settings)
-- **Versioning:** ✅ `Enabled`
-- **Default encryption:** SSE-KMS using `alias/terraform-state`
-
-> Versioning is required so that a corrupted or accidentally overwritten state file can be rolled back to a known-good version.
-
-### Step 3 — Create the DynamoDB State Lock Table
-
-In the **AWS Console → DynamoDB → Tables** (`ap-south-1` region), create a new table:
-
-- **Table name:** `zero-trust-rac-tfstate-lock`
-- **Partition key:** `LockID` (type: **String**)
-- **Table class:** DynamoDB Standard
-- **Billing mode:** On-demand (PAY_PER_REQUEST)
-
-> The `LockID` partition key is the exact string Terraform's S3 backend writes to prevent concurrent `terraform apply` runs from corrupting the state file.
-
-### Step 4 — Run `terraform init`
-
-With the state backend resources in place, initialise Terraform from the `terraform/` directory:
+With the backend block commented out, initialise Terraform and apply only the `state_backend` module:
 
 ```bash
 cd terraform/
+
+export TF_VAR_cloudflare_api_token="placeholder"
+export TF_VAR_aws_account_id="<your-aws-account-id>"
+export TF_VAR_notification_email="placeholder"
+
 terraform init
+terraform apply -target=module.state_backend
 ```
 
-Terraform will connect to the S3 backend, verify the DynamoDB lock table, and download all provider plugins. A successful init confirms the bootstrap is complete.
+Using `-target=module.state_backend` scopes the apply exclusively to the KMS key, S3 bucket, and DynamoDB table — no other resources are created yet. Review the plan carefully before confirming.
 
-### Step 5 — Run `terraform apply` and Confirm SNS Subscription
+After apply completes, Terraform writes a local `terraform.tfstate` file. This file is gitignored (`*.tfstate` in `terraform/.gitignore`) — confirm it is not staged before continuing.
+
+### Step 3 — Uncomment the Remote Backend Block and Migrate State
+
+Restore the `backend "s3"` block in `terraform/main.tf` (undo the change from Step 1), then re-run init:
 
 ```bash
-terraform plan   # Review the execution plan first
+terraform init -migrate-state
+```
+
+Terraform detects the backend configuration has changed and prompts:
+
+```
+Do you want to copy existing state to the new backend? Only 'yes' will be accepted.
+```
+
+Enter `yes`. Terraform uploads the local state file to `s3://zero-trust-rac-tfstate/prod/terraform.tfstate` and acquires a DynamoDB lock for the transfer. Once migration completes, the local `terraform.tfstate` file can be deleted — the S3 backend is now authoritative.
+
+### Step 4 — Run Full `terraform apply`
+
+With state migrated to S3, apply the full configuration:
+
+```bash
+terraform plan   # Review the full execution plan
 terraform apply
 ```
 
-After `apply` completes, AWS will send a **subscription confirmation email** to the address supplied as `notification_email`. You must click the confirmation link in that email to activate cost alert notifications. This is a one-time manual step — SNS email subscriptions cannot be auto-confirmed via API.
+### Step 5 — Confirm SNS Subscription
+
+After `apply` completes, AWS will send a **subscription confirmation email** to the address supplied as `notification_email`. Click the confirmation link to activate cost alert notifications. This is a one-time manual step — SNS email subscriptions cannot be auto-confirmed via API.
 
 > Until the subscription is confirmed, the AWS Budgets alarm is provisioned but notifications will not be delivered.
 

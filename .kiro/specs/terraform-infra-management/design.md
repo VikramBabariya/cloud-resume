@@ -233,14 +233,14 @@ terraform {
 | --------------------- | -------- | -------- | --------- | ------------------------------------------------------ |
 | `bucket_name`         | `string` | yes      | no        | Globally unique name for the Terraform state S3 bucket |
 | `dynamodb_table_name` | `string` | yes      | no        | Name for the DynamoDB lock table                       |
-| `kms_key_arn`         | `string` | yes      | no        | ARN of the KMS key for S3 SSE-KMS encryption           |
 | `aws_region`          | `string` | yes      | no        | Deployment region (`ap-south-1`)                       |
 
-| Output              | Sensitive | Description                     |
-| ------------------- | --------- | ------------------------------- |
-| `state_bucket_arn`  | no        | ARN of the S3 state bucket      |
-| `state_bucket_name` | no        | Name of the S3 state bucket     |
-| `lock_table_name`   | no        | Name of the DynamoDB lock table |
+| Output              | Sensitive | Description                               |
+| ------------------- | --------- | ----------------------------------------- |
+| `state_bucket_arn`  | no        | ARN of the S3 state bucket                |
+| `state_bucket_name` | no        | Name of the S3 state bucket               |
+| `lock_table_name`   | no        | Name of the DynamoDB lock table           |
+| `kms_key_arn`       | no        | ARN of the KMS key used for state SSE-KMS |
 
 #### `modules/cdn`
 
@@ -637,13 +637,15 @@ The `.gitignore` in `terraform/` (and the root `.gitignore`) SHALL include:
 
 The `.terraform.lock.hcl` is an exception: it **should** be committed for reproducible provider installs. The gitignore entry above is a template; the actual `.gitignore` only excludes `*.tfstate`, `*.tfvars`, and `*.tfstate.backup`.
 
-### Bootstrap Sequence (One-Time Manual Steps)
+### Bootstrap Sequence (Local State → S3 Migration)
 
-The state backend cannot manage itself (Terraform cannot store state before the state bucket exists). The bootstrap order is:
+The state backend cannot manage itself (Terraform cannot store state before the state bucket exists). The bootstrap uses Terraform's local backend to create the state backend resources, then migrates state to S3:
 
-1. Create the KMS key, S3 state bucket, and DynamoDB lock table **manually or via a separate bootstrap script** in `ap-south-1`.
-2. Run `terraform init` with the `backend "s3"` block pointing to the bootstrapped bucket.
-3. Confirm SNS email subscription (one-time manual step after Budget Alarm is applied — documented in `docs/RUNBOOK.md`).
-4. All subsequent changes are fully automated through the CI pipeline.
+1. Comment out the `backend "s3"` block in `terraform/main.tf` temporarily (do not commit).
+2. Run `terraform init` — Terraform uses local state.
+3. Run `terraform apply -target=module.state_backend` — creates the KMS key, S3 bucket, and DynamoDB table. All three are declared as code in `modules/state-backend`; nothing is clicked in the console.
+4. Restore the `backend "s3"` block, then run `terraform init -migrate-state` — Terraform prompts to copy local state to S3; confirm with `yes`.
+5. Run `terraform apply` for the full configuration.
+6. Confirm SNS email subscription (one-time manual step after Budget Alarm is applied — documented in `docs/RUNBOOK.md`).
 
-This sequence is documented in `docs/RUNBOOK.md` as a prerequisite section titled "IaC Bootstrap Prerequisites."
+This approach keeps all resources declared as code from day one. No console clicks, no drift between what was clicked and what the module declares. The full procedure is documented step-by-step in `docs/RUNBOOK.md` Section 6.
