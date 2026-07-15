@@ -65,19 +65,19 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
   - Stub `main.tf` and `outputs.tf` as empty root files ready for module blocks
   - _Requirements: 2.1, 2.3, 2.4, 14.1, 14.2, 14.5_
 
-- [ ] 2. Implement `modules/state-backend` — S3 state bucket and DynamoDB lock table
-  - [ ] 2.1 Write `modules/state-backend/variables.tf` declaring `bucket_name`, `dynamodb_table_name`, `kms_key_arn`, and `aws_region` — all required with no defaults
+- [x] 2. Implement `modules/state-backend` — S3 state bucket and DynamoDB lock table
+  - [x] 2.1 Write `modules/state-backend/variables.tf` declaring `bucket_name`, `dynamodb_table_name`, `kms_key_arn`, and `aws_region` — all required with no defaults
     - _Requirements: 1.1, 1.2_
-  - [ ] 2.2 Write `modules/state-backend/main.tf`:
+  - [x] 2.2 Write `modules/state-backend/main.tf`:
     - `aws_s3_bucket` with `aws_s3_bucket_server_side_encryption_configuration` using SSE-KMS (`kms_master_key_id = var.kms_key_arn`, `sse_algorithm = "aws:kms"`)
     - `aws_s3_bucket_versioning` with `status = "Enabled"`
     - `aws_s3_bucket_public_access_block` with all four flags set to `true` (`block_public_acls`, `ignore_public_acls`, `block_public_policy`, `restrict_public_buckets`)
     - `aws_s3_bucket_policy` with a `Deny` statement on `s3:PutObject` when `StringNotEquals: s3:x-amz-server-side-encryption: "aws:kms"` (see design for exact policy JSON)
     - `aws_dynamodb_table` with `hash_key = "LockID"` (type `String`), `billing_mode = "PAY_PER_REQUEST"`
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
-  - [ ] 2.3 Write `modules/state-backend/outputs.tf` exposing `state_bucket_arn`, `state_bucket_name`, `lock_table_name`
+  - [x] 2.3 Write `modules/state-backend/outputs.tf` exposing `state_bucket_arn`, `state_bucket_name`, `lock_table_name`
     - _Requirements: 1.2_
-  - [ ] 2.4 Wire `modules/state-backend` into `terraform/main.tf` and add the `backend "s3"` block with `bucket = "zero-trust-rac-tfstate"`, `key = "prod/terraform.tfstate"`, `region = "ap-south-1"`, `encrypt = true`, `dynamodb_table = "zero-trust-rac-tfstate-lock"`, `kms_key_id = "alias/terraform-state"`
+  - [x] 2.4 Wire `modules/state-backend` into `terraform/main.tf` and add the `backend "s3"` block with `bucket = "zero-trust-rac-tfstate"`, `key = "prod/terraform.tfstate"`, `region = "ap-south-1"`, `encrypt = true`, `dynamodb_table = "zero-trust-rac-tfstate-lock"`, `kms_key_id = "alias/terraform-state"`
     - _Requirements: 1.5_
 
 - [ ] 3. Implement `modules/cdn` — S3 origin bucket, OAC, ACM certificate, CloudFront distribution

@@ -1,5 +1,3 @@
-# Root module — module blocks will be added in subsequent tasks.
-
 terraform {
   backend "s3" {
     bucket         = "zero-trust-rac-tfstate"
@@ -10,3 +8,12 @@ terraform {
     kms_key_id     = "alias/terraform-state"
   }
 }
+
+module "state_backend" {
+  source = "./modules/state-backend"
+
+  bucket_name         = "zero-trust-rac-tfstate"
+  dynamodb_table_name = "zero-trust-rac-tfstate-lock"
+  aws_region          = var.aws_region
+}
+
