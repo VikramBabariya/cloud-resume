@@ -78,3 +78,25 @@ python3 -m http.server 8000 --directory dist
 - **YAML:** 2-space indentation, trailing newline, no trailing spaces (enforced by `.yamllint.yaml`). Dates as `"YYYY-MM-DD"` strings.
 - **JS/CSS/HTML/JSON/MD:** Prettier enforced — `tabWidth: 2`, `singleQuote: true`, `semi: true`.
 - **Jinja2 templates:** `StrictUndefined` is active — every template variable must exist in the data or the build fails. Never disable this.
+
+## Terraform & Shell Execution
+
+**CRITICAL — applies to every task in this workspace:**
+
+- Terraform is installed in **WSL (Windows Subsystem for Linux)**, not on the native Windows PATH.
+- All `terraform`, `checkov`, and related IaC shell commands **MUST** be run via WSL.
+- The Windows project root `C:\Vikram\01_Projects\zero-trust-rac-platform` is mounted in WSL at `/mnt/c/Vikram/01_Projects/zero-trust-rac-platform`.
+- The Terraform working directory inside WSL is therefore `/mnt/c/Vikram/01_Projects/zero-trust-rac-platform/terraform`.
+
+### Correct invocation pattern
+
+```bash
+wsl -- bash -c "cd /mnt/c/Vikram/01_Projects/zero-trust-rac-platform/terraform && terraform <subcommand>"
+```
+
+### Never do this
+
+```cmd
+# Wrong — terraform is not on the Windows PATH
+terraform fmt -recursive
+```
