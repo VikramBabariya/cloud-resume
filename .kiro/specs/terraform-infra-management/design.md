@@ -206,6 +206,49 @@ provider "cloudflare" {
 }
 ```
 
+### Child Module Provider Declarations
+
+Any child module that directly instantiates resources from a non-default provider **must** declare that provider in its own `terraform { required_providers {} }` block. Without this, Terraform defaults to looking up the provider under the `hashicorp/` namespace (e.g. `registry.terraform.io/hashicorp/cloudflare`), which does not exist, causing `terraform init` to fail.
+
+**Rule:** Every module `main.tf` that uses `cloudflare_*` resources must include:
+
+```hcl
+terraform {
+  required_providers {
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
+    }
+  }
+}
+```
+
+Every module `main.tf` that uses a provider alias (e.g. `aws.us_east_1`) must declare it via `configuration_aliases`:
+
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source                = "hashicorp/aws"
+      version               = "~> 5.0"
+      configuration_aliases = [aws.us_east_1]
+    }
+  }
+}
+```
+
+Modules that only use the default `aws` provider (e.g. `modules/state-backend`, `modules/iam`, `modules/compute`) do not need a `required_providers` block — they inherit the root's default AWS provider automatically.
+
+**Provider declaration matrix:**
+
+| Module                  | Needs `required_providers`?           | Reason                                         |
+| ----------------------- | ------------------------------------- | ---------------------------------------------- |
+| `modules/state-backend` | No                                    | Default AWS provider only, inherited from root |
+| `modules/cdn`           | Yes (`aws` + `configuration_aliases`) | Uses `aws.us_east_1` alias for ACM             |
+| `modules/compute`       | No                                    | Default AWS provider only, inherited from root |
+| `modules/dns`           | Yes (`cloudflare/cloudflare`)         | Uses `cloudflare_record` resources             |
+| `modules/iam`           | No                                    | Default AWS provider only, inherited from root |
+
 ### Remote Backend Configuration (`main.tf`)
 
 ```hcl

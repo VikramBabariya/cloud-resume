@@ -14,6 +14,18 @@
 # Provider: cloudflare/cloudflare ~> 4.0
 # -----------------------------------------------------------------------------
 
+# Child modules that use a provider must declare it in required_providers so
+# Terraform resolves the correct source address (cloudflare/cloudflare) rather
+# than defaulting to the legacy hashicorp/ namespace which does not exist.
+terraform {
+  required_providers {
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
+    }
+  }
+}
+
 # -----------------------------------------------------------------------------
 # 1. Root apex CNAME → CloudFront domain
 #
