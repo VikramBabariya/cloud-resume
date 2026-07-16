@@ -86,3 +86,70 @@ module "compute" {
   lambda_execution_role_arn = module.iam.lambda_execution_role_arn
   cors_allow_origins        = ["https://vikram-sre.dev"]
 }
+
+# -----------------------------------------------------------------------------
+# FinOps: SNS topic for AWS Budgets cost alert notifications
+# Requirements: 13.5
+# -----------------------------------------------------------------------------
+resource "aws_sns_topic" "budget_alerts" {
+  name = "zero-trust-rac-budget-alerts"
+}
+
+resource "aws_sns_topic_subscription" "budget_alerts_email" {
+  topic_arn = aws_sns_topic.budget_alerts.arn
+  protocol  = "email"
+  endpoint  = var.notification_email
+}
+
+# -----------------------------------------------------------------------------
+# FinOps: SNS topic policy — allows budgets.amazonaws.com to publish
+# Requirements: 13.5
+# -----------------------------------------------------------------------------
+resource "aws_sns_topic_policy" "budget_alerts" {
+  arn = aws_sns_topic.budget_alerts.arn
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowBudgetsToPublish"
+        Effect = "Allow"
+        Principal = {
+          Service = "budgets.amazonaws.com"
+        }
+        Action   = "SNS:Publish"
+        Resource = aws_sns_topic.budget_alerts.arn
+      }
+    ]
+  })
+}
+
+# -----------------------------------------------------------------------------
+# FinOps: AWS Budget — $6/mo hard cap with two notification thresholds
+# Notification 1: actual costs > 35% ($2.10) — early warning
+# Notification 2: forecasted costs > 100% ($6.00) — full-cap forecast alert
+# Requirements: 13.1, 13.2, 13.3, 13.4
+# -----------------------------------------------------------------------------
+resource "aws_budgets_budget" "monthly_cost_cap" {
+  name         = "zero-trust-rac-monthly-budget"
+  budget_type  = "COST"
+  limit_amount = "6.00"
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
+
+  notification {
+    comparison_operator       = "GREATER_THAN"
+    threshold                 = 35
+    threshold_type            = "PERCENTAGE"
+    notification_type         = "ACTUAL"
+    subscriber_sns_topic_arns = [aws_sns_topic.budget_alerts.arn]
+  }
+
+  notification {
+    comparison_operator       = "GREATER_THAN"
+    threshold                 = 100
+    threshold_type            = "PERCENTAGE"
+    notification_type         = "FORECASTED"
+    subscriber_sns_topic_arns = [aws_sns_topic.budget_alerts.arn]
+  }
+}

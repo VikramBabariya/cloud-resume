@@ -164,21 +164,21 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
   - [x] 7.4 Write `modules/iam/outputs.tf` exposing `lambda_execution_role_arn` and `deployment_role_arn`
     - _Requirements: 10.5, 11.5_
 
-- [ ] 8. Complete cross-module wiring in `terraform/main.tf` and add FinOps budget resources
-  - [ ] 8.1 Finalise all cross-module variable bindings in `terraform/main.tf`:
+- [x] 8. Complete cross-module wiring in `terraform/main.tf` and add FinOps budget resources
+  - [x] 8.1 Finalise all cross-module variable bindings in `terraform/main.tf`:
     - Pass `module.compute.dynamodb_table_arn`, `module.cdn.origin_bucket_arn`, `module.cdn.cloudfront_distribution_arn`, `module.state_backend.state_bucket_arn`, `module.state_backend.lock_table_name` (as ARN) into `module.iam`
     - Pass `module.iam.lambda_execution_role_arn` into `module.compute`
     - Pass `module.cdn.cloudfront_domain_name` and `module.cdn.acm_validation_options` into `module.dns`
     - _Requirements: 2.2_
-  - [ ] 8.2 Add `aws_sns_topic` and `aws_sns_topic_subscription` (email protocol) to `terraform/main.tf`, sourcing the email from `var.notification_email` (`sensitive = true`)
+  - [x] 8.2 Add `aws_sns_topic` and `aws_sns_topic_subscription` (email protocol) to `terraform/main.tf`, sourcing the email from `var.notification_email` (`sensitive = true`)
     - _Requirements: 13.5_
-  - [ ] 8.3 Add `aws_sns_topic_policy` to `terraform/main.tf` allowing the `budgets.amazonaws.com` service principal to publish to the SNS topic
+  - [x] 8.3 Add `aws_sns_topic_policy` to `terraform/main.tf` allowing the `budgets.amazonaws.com` service principal to publish to the SNS topic
     - _Requirements: 13.5_
-  - [ ] 8.4 Add `aws_budgets_budget` to `terraform/main.tf`:
+  - [x] 8.4 Add `aws_budgets_budget` to `terraform/main.tf`:
     - `budget_type = "COST"`, `limit_amount = "6.00"`, `limit_unit = "USD"`, `time_unit = "MONTHLY"` — no service-level filter (account-wide scope)
     - Two `notification` blocks: actual costs at threshold `35` percent (GREATER_THAN), and forecasted costs at threshold `100` percent (GREATER_THAN), both publishing to the SNS topic ARN
     - _Requirements: 13.1, 13.2, 13.3, 13.4_
-  - [ ] 8.5 Write `terraform/outputs.tf` with all root-level outputs; any output that references a sensitive variable or propagates a sensitive value MUST include `sensitive = true`
+  - [x] 8.5 Write `terraform/outputs.tf` with all root-level outputs; any output that references a sensitive variable or propagates a sensitive value MUST include `sensitive = true`
     - _Requirements: 14.3_
 
 - [ ] 9. Checkpoint — full root validate and plan dry-run
