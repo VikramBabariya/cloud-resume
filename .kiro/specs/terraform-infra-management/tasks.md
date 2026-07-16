@@ -121,30 +121,30 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
   - Confirm all module input/output bindings compile cleanly with no unresolved references
   - Ask the user if any questions arise before continuing.
 
-- [ ] 6. Implement `modules/compute` — DynamoDB visitor-count table, Lambda function, and API Gateway
-  - [ ] 6.1 Write `modules/compute/variables.tf` declaring `dynamodb_table_name`, `lambda_handler`, `lambda_source_dir`, `lambda_execution_role_arn`, `cors_allow_origins` (type `list(string)`)
+- [x] 6. Implement `modules/compute` — DynamoDB visitor-count table, Lambda function, and API Gateway
+  - [x] 6.1 Write `modules/compute/variables.tf` declaring `dynamodb_table_name`, `lambda_handler`, `lambda_source_dir`, `lambda_execution_role_arn`, `cors_allow_origins` (type `list(string)`)
     - _Requirements: 8.1, 8.2, 9.1_
-  - [ ] 6.2 Implement DynamoDB visitor-count table in `modules/compute/main.tf`:
+  - [x] 6.2 Implement DynamoDB visitor-count table in `modules/compute/main.tf`:
     - `aws_dynamodb_table` with `name = "visitor-count"`, `billing_mode = "PAY_PER_REQUEST"`, `hash_key = "id"` (type `String`)
     - `server_side_encryption` block with `enabled = true` (AWS-owned KMS key, no customer-managed key ARN)
     - `point_in_time_recovery` block with `enabled = true`
     - `lifecycle { prevent_destroy = true }` to guard against accidental data loss
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.6_
-  - [ ] 6.3 Implement Lambda function in `modules/compute/main.tf`:
+  - [x] 6.3 Implement Lambda function in `modules/compute/main.tf`:
     - `data "archive_file"` with `type = "zip"`, `source_dir = var.lambda_source_dir`
     - `aws_lambda_function` with `runtime = "python3.12"`, `handler = var.lambda_handler`, `source_code_hash = filebase64sha256(data.archive_file.lambda.output_path)`, `role = var.lambda_execution_role_arn`
     - `environment { variables = { DYNAMODB_TABLE_NAME = var.dynamodb_table_name } }` — never a string literal
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
-  - [ ] 6.4 Implement API Gateway HTTP API in `modules/compute/main.tf`:
+  - [x] 6.4 Implement API Gateway HTTP API in `modules/compute/main.tf`:
     - `aws_apigatewayv2_api` with `protocol_type = "HTTP"` and `cors_configuration` block: `allow_origins = var.cors_allow_origins` (e.g. `["https://vikram-sre.dev"]`), `allow_methods = ["POST", "OPTIONS"]`, `allow_headers = ["Content-Type"]`, `max_age = 300`
     - `aws_apigatewayv2_integration` of type `AWS_PROXY` with `timeout_milliseconds = 29000`
     - `aws_apigatewayv2_route` for `POST /count`
     - `aws_apigatewayv2_stage` with `name = "$default"`, `auto_deploy = true`
     - `aws_lambda_permission` granting `lambda:InvokeFunction` with `source_arn = "${aws_apigatewayv2_api.this.execution_arn}/*/*"`
     - _Requirements: 9.1, 9.2, 9.3, 9.4_
-  - [ ] 6.5 Write `modules/compute/outputs.tf` exposing `dynamodb_table_arn`, `dynamodb_table_name`, `api_gateway_invoke_url`, `lambda_function_arn`
+  - [x] 6.5 Write `modules/compute/outputs.tf` exposing `dynamodb_table_arn`, `dynamodb_table_name`, `api_gateway_invoke_url`, `lambda_function_arn`
     - _Requirements: 7.5, 9.5_
-  - [ ] 6.6 Wire `modules/compute` into `terraform/main.tf`; stub `lambda_execution_role_arn` with `module.iam.lambda_execution_role_arn` (resolved in task 8)
+  - [x] 6.6 Wire `modules/compute` into `terraform/main.tf`; stub `lambda_execution_role_arn` with `module.iam.lambda_execution_role_arn` (resolved in task 8)
     - _Requirements: 2.2_
 
 - [ ] 7. Implement `modules/iam` — Lambda execution role, GitHub OIDC provider, and deployment role

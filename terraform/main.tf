@@ -49,3 +49,21 @@ module "dns" {
   acm_validation_options = module.cdn.acm_validation_options
   apex_domain            = "vikram-sre.dev"
 }
+
+# -----------------------------------------------------------------------------
+# modules/compute — DynamoDB visitor-count table, Lambda function, API Gateway
+#
+# lambda_execution_role_arn references module.iam.lambda_execution_role_arn
+# (modules/iam is wired in task 8; the forward reference resolves once modules/iam
+# is created and the root is complete)
+# Requirements: 2.2
+# -----------------------------------------------------------------------------
+module "compute" {
+  source = "./modules/compute"
+
+  dynamodb_table_name       = "visitor-count"
+  lambda_handler            = "visitor_counter.lambda_handler"
+  lambda_source_dir         = "${path.root}/../src/lambda"
+  lambda_execution_role_arn = module.iam.lambda_execution_role_arn
+  cors_allow_origins        = ["https://vikram-sre.dev"]
+}
