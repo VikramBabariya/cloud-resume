@@ -51,11 +51,30 @@ module "dns" {
 }
 
 # -----------------------------------------------------------------------------
+# modules/iam — Lambda execution role, GitHub OIDC provider, deployment role
+#
+# Consumes outputs from modules/compute (dynamodb_table_arn) and modules/cdn
+# (origin_bucket_arn, cloudfront_distribution_arn, state_bucket_arn). The
+# apparent circularity with modules/compute is resolved at the root level —
+# Terraform evaluates all module outputs before resolving inputs.
+# Requirements: 10.1–10.5, 11.1–11.5
+# -----------------------------------------------------------------------------
+module "iam" {
+  source = "./modules/iam"
+
+  dynamodb_table_arn          = module.compute.dynamodb_table_arn
+  s3_origin_bucket_arn        = module.cdn.origin_bucket_arn
+  cloudfront_distribution_arn = module.cdn.cloudfront_distribution_arn
+  state_bucket_arn            = module.state_backend.state_bucket_arn
+  state_lock_table_arn        = "arn:aws:dynamodb:${var.aws_region}:${var.aws_account_id}:table/zero-trust-rac-tfstate-lock"
+  github_repo                 = "VikramBabariya/zero-trust-rac-platform"
+  github_branch               = "main"
+}
+
+# -----------------------------------------------------------------------------
 # modules/compute — DynamoDB visitor-count table, Lambda function, API Gateway
 #
-# lambda_execution_role_arn references module.iam.lambda_execution_role_arn
-# (modules/iam is wired in task 8; the forward reference resolves once modules/iam
-# is created and the root is complete)
+# lambda_execution_role_arn resolved from module.iam output.
 # Requirements: 2.2
 # -----------------------------------------------------------------------------
 module "compute" {

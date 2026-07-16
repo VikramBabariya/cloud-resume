@@ -147,21 +147,21 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
   - [x] 6.6 Wire `modules/compute` into `terraform/main.tf`; stub `lambda_execution_role_arn` with `module.iam.lambda_execution_role_arn` (resolved in task 8)
     - _Requirements: 2.2_
 
-- [ ] 7. Implement `modules/iam` — Lambda execution role, GitHub OIDC provider, and deployment role
-  - [ ] 7.1 Write `modules/iam/variables.tf` declaring all required inputs with no defaults: `dynamodb_table_arn`, `s3_origin_bucket_arn`, `cloudfront_distribution_arn`, `state_bucket_arn`, `state_lock_table_arn`, `github_repo`, `github_branch`
+- [x] 7. Implement `modules/iam` — Lambda execution role, GitHub OIDC provider, and deployment role
+  - [x] 7.1 Write `modules/iam/variables.tf` declaring all required inputs with no defaults: `dynamodb_table_arn`, `s3_origin_bucket_arn`, `cloudfront_distribution_arn`, `state_bucket_arn`, `state_lock_table_arn`, `github_repo`, `github_branch`
     - The `dynamodb_table_arn` variable must be declared with no default — a missing value causes a plan-time error
     - _Requirements: 10.4_
-  - [ ] 7.2 Implement Lambda execution role in `modules/iam/main.tf`:
+  - [x] 7.2 Implement Lambda execution role in `modules/iam/main.tf`:
     - `aws_iam_role` with trust policy allowing `lambda.amazonaws.com` only (exactly one principal, no wildcards, no conditions)
     - `aws_iam_role_policy` inline policy granting exactly `dynamodb:UpdateItem` and `dynamodb:GetItem` scoped strictly to `var.dynamodb_table_arn` (no wildcard resource ARN)
     - `aws_iam_role_policy_attachment` attaching the AWS-managed `AWSLambdaBasicExecutionRole` policy ARN
     - _Requirements: 10.1, 10.2, 10.3_
-  - [ ] 7.3 Implement GitHub Actions OIDC provider and deployment role in `modules/iam/main.tf`:
+  - [x] 7.3 Implement GitHub Actions OIDC provider and deployment role in `modules/iam/main.tf`:
     - `aws_iam_openid_connect_provider` for `token.actions.githubusercontent.com` with both thumbprints: `6938fd4d98bab03faadb97b34396831e3780aea1` and `1c58a3a8518e8759bf075b76b750d4f2df264fcd`
     - `aws_iam_role` (deployment role) with trust policy: `sts:AssumeRoleWithWebIdentity`, `StringEquals` conditions on both `sub = "repo:${var.github_repo}:ref:refs/heads/${var.github_branch}"` AND `aud = "sts.amazonaws.com"`
     - `aws_iam_role_policy` inline policy granting frontend CI/CD permissions: `s3:ListBucket` on `var.s3_origin_bucket_arn`, `s3:PutObject` and `s3:DeleteObject` on `${var.s3_origin_bucket_arn}/*`, `cloudfront:CreateInvalidation` on `var.cloudfront_distribution_arn`; plus Terraform state permissions: `s3:GetObject`, `s3:PutObject`, `s3:DeleteObject` on `var.state_bucket_arn` and `${var.state_bucket_arn}/*`, `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:DeleteItem` on `var.state_lock_table_arn`
     - _Requirements: 11.1, 11.2, 11.3, 11.4_
-  - [ ] 7.4 Write `modules/iam/outputs.tf` exposing `lambda_execution_role_arn` and `deployment_role_arn`
+  - [x] 7.4 Write `modules/iam/outputs.tf` exposing `lambda_execution_role_arn` and `deployment_role_arn`
     - _Requirements: 10.5, 11.5_
 
 - [ ] 8. Complete cross-module wiring in `terraform/main.tf` and add FinOps budget resources
