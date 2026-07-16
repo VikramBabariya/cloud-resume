@@ -115,7 +115,7 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
   - [x] 4.4 Wire `modules/dns` into `terraform/main.tf` passing `cloudflare_zone_id = var.cloudflare_zone_id`, `cloudfront_domain_name = module.cdn.cloudfront_domain_name`, `acm_validation_options = module.cdn.acm_validation_options`
     - _Requirements: 6.4, 2.2_
 
-- [ ] 5. Checkpoint — validate module wiring up to dns/cdn/state-backend
+- [x] 5. Checkpoint — validate module wiring up to dns/cdn/state-backend
   - Run `terraform fmt -recursive` inside `terraform/` and confirm zero formatting errors
   - Run `terraform validate` (after `terraform init`) and confirm no schema, type, or reference errors
   - Confirm all module input/output bindings compile cleanly with no unresolved references
