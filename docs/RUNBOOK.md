@@ -114,18 +114,27 @@ terraform {
 
 ### Step 2 — Initialise and Apply with Local State
 
-With the backend block commented out, initialise Terraform and apply only the `state_backend` module:
+With the backend block commented out, initialise Terraform and apply only the `state_backend` module.
+
+**Why env vars are needed here:** Terraform evaluates all root-level `variable` blocks regardless of which module is targeted. Variables like `cloudflare_api_token`, `cloudflare_zone_id`, `aws_account_id`, and `notification_email` are declared in `variables.tf` with no defaults, so Terraform will prompt for them even when only `module.state_backend` is being applied. They are not used by the state backend module itself — supplying placeholder values is safe for this step.
+
+Terraform picks up any environment variable prefixed `TF_VAR_` and maps it directly to the matching variable (e.g. `TF_VAR_cloudflare_api_token` → `var.cloudflare_api_token`). This is the same mechanism used by the GitHub Actions CI pipeline via repository secrets — you are exercising the same injection path locally.
+
+**bash/zsh (Linux/macOS):**
 
 ```bash
 cd terraform/
 
 export TF_VAR_cloudflare_api_token="placeholder"
-export TF_VAR_aws_account_id="<your-aws-account-id>"
-export TF_VAR_notification_email="placeholder"
+export TF_VAR_cloudflare_zone_id="placeholder"
+export TF_VAR_notification_email="placeholder@placeholder.com"
+export TF_VAR_aws_account_id="placeholder"
 
 terraform init
 terraform apply -target=module.state_backend
 ```
+
+> These env vars exist only for the current shell session. They are never written to disk and are not committed. Close the terminal or open a new session to clear them.
 
 Using `-target=module.state_backend` scopes the apply exclusively to the KMS key, S3 bucket, and DynamoDB table — no other resources are created yet. Review the plan carefully before confirming.
 
@@ -222,15 +231,32 @@ This section covers routine operational tasks for platform engineers working wit
 
 A local plan lets you preview infrastructure changes before pushing to a PR. You need AWS credentials and the required Terraform variables available in your shell.
 
+Terraform automatically maps any environment variable prefixed `TF_VAR_` to the matching variable declaration (e.g. `TF_VAR_cloudflare_api_token` → `var.cloudflare_api_token`). These values exist only for the current shell session — never written to disk.
+
+**PowerShell (Windows):**
+
+```powershell
+cd terraform/
+
+# Set sensitive variables for the current session only
+$env:TF_VAR_cloudflare_api_token = "<your-cloudflare-api-token>"
+$env:TF_VAR_cloudflare_zone_id   = "<your-cloudflare-zone-id>"
+$env:TF_VAR_aws_account_id       = "<your-aws-account-id>"
+$env:TF_VAR_notification_email   = "<your-notification-email>"
+
+terraform plan
+```
+
+**bash/zsh (Linux/macOS):**
+
 ```bash
 cd terraform/
 
-# Export sensitive variables — never write these to a .tfvars file
 export TF_VAR_cloudflare_api_token="<your-cloudflare-api-token>"
+export TF_VAR_cloudflare_zone_id="<your-cloudflare-zone-id>"
 export TF_VAR_aws_account_id="<your-aws-account-id>"
 export TF_VAR_notification_email="<your-notification-email>"
 
-# Run the plan
 terraform plan
 ```
 
