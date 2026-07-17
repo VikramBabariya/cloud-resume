@@ -233,3 +233,264 @@ jobs:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
           TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
+
+      # ──────────────────────────────────────────────────────────────────────
+      # GATE 6 — POST-APPLY SMOKE TESTS  (push to main only)
+      # Runs after terraform apply to verify live infrastructure matches the
+      # declared configuration. Any failed assertion exits non-zero and fails
+      # the job, alerting the team to drift or misconfiguration.
+      #
+      # Dynamic values are resolved from Terraform state via `terraform output`
+      # so no ARNs or bucket names are hardcoded in this file.
+      # OIDC credentials from Gate 2 remain in scope for all AWS CLI calls.
+      # jq is pre-installed on ubuntu-latest runners.
+      # ──────────────────────────────────────────────────────────────────────
+
+      - name: Post-apply smoke tests
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+
+          echo "============================================================"
+          echo "  POST-APPLY SMOKE TESTS"
+          echo "============================================================"
+
+          # ── Resolve dynamic values from Terraform state ─────────────────
+          # Bucket name is derived from the origin_bucket_arn output because
+          # the cdn module does not expose a separate bucket-name output.
+          ORIGIN_BUCKET_ARN=$(terraform output -raw origin_bucket_arn)
+          ORIGIN_BUCKET_NAME=$(echo "$ORIGIN_BUCKET_ARN" | sed 's|arn:aws:s3:::||')
+
+          ACM_CERT_ARN=$(terraform output -raw acm_certificate_arn)
+
+          # Lambda function name extracted from the full function ARN
+          # ARN format: arn:aws:lambda:<region>:<account>:function:<name>
+          LAMBDA_FUNCTION_ARN=$(terraform output -raw lambda_function_arn)
+          LAMBDA_FUNCTION_NAME=$(echo "$LAMBDA_FUNCTION_ARN" | awk -F: '{print $NF}')
+
+          LAMBDA_EXEC_ROLE_ARN=$(terraform output -raw lambda_execution_role_arn)
+          DEPLOYMENT_ROLE_ARN=$(terraform output -raw deployment_role_arn)
+          DYNAMODB_TABLE_ARN=$(terraform output -raw dynamodb_table_arn)
+
+          # OIDC provider ARN is not a separate Terraform output; construct it
+          # from the account ID (extracted from the deployment role ARN).
+          # Deployment role ARN format: arn:aws:iam::<account_id>:role/<name>
+          AWS_ACCOUNT_ID_EXTRACTED=$(echo "$DEPLOYMENT_ROLE_ARN" | cut -d: -f5)
+          OIDC_PROVIDER_ARN="arn:aws:iam::${AWS_ACCOUNT_ID_EXTRACTED}:oidc-provider/token.actions.githubusercontent.com"
+
+          echo ""
+          echo "Resolved values:"
+          echo "  ORIGIN_BUCKET_NAME : $ORIGIN_BUCKET_NAME"
+          echo "  ACM_CERT_ARN       : $ACM_CERT_ARN"
+          echo "  LAMBDA_FUNCTION    : $LAMBDA_FUNCTION_NAME"
+          echo "  LAMBDA_EXEC_ROLE   : $LAMBDA_EXEC_ROLE_ARN"
+          echo "  DEPLOYMENT_ROLE    : $DEPLOYMENT_ROLE_ARN"
+          echo "  DYNAMODB_TABLE_ARN : $DYNAMODB_TABLE_ARN"
+          echo "  OIDC_PROVIDER_ARN  : $OIDC_PROVIDER_ARN"
+          echo ""
+
+          # ── CHECK 1: S3 Block Public Access ─────────────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 1: S3 Block Public Access — $ORIGIN_BUCKET_NAME"
+          echo "------------------------------------------------------------"
+          BPA=$(aws s3api get-public-access-block --bucket "$ORIGIN_BUCKET_NAME")
+          BLOCK_ACLS=$(echo "$BPA"       | jq -r '.PublicAccessBlockConfiguration.BlockPublicAcls')
+          IGNORE_ACLS=$(echo "$BPA"      | jq -r '.PublicAccessBlockConfiguration.IgnorePublicAcls')
+          BLOCK_POLICY=$(echo "$BPA"     | jq -r '.PublicAccessBlockConfiguration.BlockPublicPolicy')
+          RESTRICT_BUCKETS=$(echo "$BPA" | jq -r '.PublicAccessBlockConfiguration.RestrictPublicBuckets')
+
+          if [[ "$BLOCK_ACLS" == "true" && "$IGNORE_ACLS" == "true" && \
+                "$BLOCK_POLICY" == "true" && "$RESTRICT_BUCKETS" == "true" ]]; then
+            echo "  PASS — all 4 Block Public Access flags are true"
+          else
+            echo "  FAIL — one or more Block Public Access flags are not true"
+            echo "    BlockPublicAcls=$BLOCK_ACLS IgnorePublicAcls=$IGNORE_ACLS"
+            echo "    BlockPublicPolicy=$BLOCK_POLICY RestrictPublicBuckets=$RESTRICT_BUCKETS"
+            exit 1
+          fi
+
+          # ── CHECK 2: S3 Versioning ───────────────────────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 2: S3 Versioning — $ORIGIN_BUCKET_NAME"
+          echo "------------------------------------------------------------"
+          VERSIONING_STATUS=$(aws s3api get-bucket-versioning \
+            --bucket "$ORIGIN_BUCKET_NAME" | jq -r '.Status // "Disabled"')
+
+          if [[ "$VERSIONING_STATUS" == "Enabled" ]]; then
+            echo "  PASS — versioning is Enabled"
+          else
+            echo "  FAIL — versioning Status is '$VERSIONING_STATUS' (expected Enabled)"
+            exit 1
+          fi
+
+          # ── CHECK 3: CloudFront HTTPS enforcement ────────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 3: CloudFront HTTPS enforcement — http://vikram-sre.dev"
+          echo "------------------------------------------------------------"
+          LOCATION_HEADER=$(curl -sI --max-time 15 http://vikram-sre.dev | grep -i '^location:')
+
+          if echo "$LOCATION_HEADER" | grep -qi 'https://'; then
+            echo "  PASS — HTTP request redirects to https://"
+            echo "    Location: $LOCATION_HEADER"
+          else
+            echo "  FAIL — no HTTPS redirect found in Location header"
+            echo "    Location header: '${LOCATION_HEADER:-<not present>}'"
+            exit 1
+          fi
+
+          # ── CHECK 4: ACM Certificate status ─────────────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 4: ACM Certificate status — us-east-1"
+          echo "------------------------------------------------------------"
+          ACM_STATUS=$(aws acm describe-certificate \
+            --certificate-arn "$ACM_CERT_ARN" \
+            --region us-east-1 | jq -r '.Certificate.Status')
+
+          if [[ "$ACM_STATUS" == "ISSUED" ]]; then
+            echo "  PASS — certificate Status is ISSUED"
+          else
+            echo "  FAIL — certificate Status is '$ACM_STATUS' (expected ISSUED)"
+            exit 1
+          fi
+
+          # ── CHECK 5: DynamoDB Point-in-Time Recovery ─────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 5: DynamoDB PITR — visitor-count"
+          echo "------------------------------------------------------------"
+          PITR_STATUS=$(aws dynamodb describe-continuous-backups \
+            --table-name visitor-count \
+            | jq -r '.ContinuousBackupsDescription.PointInTimeRecoveryDescription.PointInTimeRecoveryStatus')
+
+          if [[ "$PITR_STATUS" == "ENABLED" ]]; then
+            echo "  PASS — PointInTimeRecoveryStatus is ENABLED"
+          else
+            echo "  FAIL — PointInTimeRecoveryStatus is '$PITR_STATUS' (expected ENABLED)"
+            exit 1
+          fi
+
+          # ── CHECK 6: Lambda runtime ──────────────────────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 6: Lambda runtime — $LAMBDA_FUNCTION_NAME"
+          echo "------------------------------------------------------------"
+          LAMBDA_RUNTIME=$(aws lambda get-function-configuration \
+            --function-name "$LAMBDA_FUNCTION_NAME" | jq -r '.Runtime')
+
+          if [[ "$LAMBDA_RUNTIME" == "python3.12" ]]; then
+            echo "  PASS — Lambda Runtime is python3.12"
+          else
+            echo "  FAIL — Lambda Runtime is '$LAMBDA_RUNTIME' (expected python3.12)"
+            exit 1
+          fi
+
+          # ── CHECK 7: OIDC provider thumbprints ──────────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 7: OIDC provider thumbprints"
+          echo "------------------------------------------------------------"
+          THUMBPRINTS=$(aws iam get-open-id-connect-provider \
+            --open-id-connect-provider-arn "$OIDC_PROVIDER_ARN" \
+            | jq -r '.ThumbprintList[]')
+
+          THUMBPRINT_1="6938fd4d98bab03faadb97b34396831e3780aea1"
+          THUMBPRINT_2="1c58a3a8518e8759bf075b76b750d4f2df264fcd"
+          MISSING_THUMBPRINT=0
+
+          if echo "$THUMBPRINTS" | grep -qi "$THUMBPRINT_1"; then
+            echo "  PASS — thumbprint $THUMBPRINT_1 present"
+          else
+            echo "  FAIL — thumbprint $THUMBPRINT_1 NOT found"
+            MISSING_THUMBPRINT=1
+          fi
+
+          if echo "$THUMBPRINTS" | grep -qi "$THUMBPRINT_2"; then
+            echo "  PASS — thumbprint $THUMBPRINT_2 present"
+          else
+            echo "  FAIL — thumbprint $THUMBPRINT_2 NOT found"
+            MISSING_THUMBPRINT=1
+          fi
+
+          if [[ "$MISSING_THUMBPRINT" -ne 0 ]]; then
+            exit 1
+          fi
+
+          # ── IAM SIMULATION 1: Lambda execution role ──────────────────────
+          echo "------------------------------------------------------------"
+          echo "IAM SIM 1: Lambda execution role — DynamoDB permissions"
+          echo "------------------------------------------------------------"
+
+          # 1a. dynamodb:UpdateItem — ALLOW expected
+          EVAL=$(aws iam simulate-principal-policy \
+            --policy-source-arn "$LAMBDA_EXEC_ROLE_ARN" \
+            --action-names "dynamodb:UpdateItem" \
+            --resource-arns "$DYNAMODB_TABLE_ARN" \
+            | jq -r '.EvaluationResults[0].EvalDecision')
+          if [[ "$EVAL" == "allowed" ]]; then
+            echo "  PASS — dynamodb:UpdateItem is allowed"
+          else
+            echo "  FAIL — dynamodb:UpdateItem EvalDecision='$EVAL' (expected allowed)"
+            exit 1
+          fi
+
+          # 1b. dynamodb:GetItem — ALLOW expected
+          EVAL=$(aws iam simulate-principal-policy \
+            --policy-source-arn "$LAMBDA_EXEC_ROLE_ARN" \
+            --action-names "dynamodb:GetItem" \
+            --resource-arns "$DYNAMODB_TABLE_ARN" \
+            | jq -r '.EvaluationResults[0].EvalDecision')
+          if [[ "$EVAL" == "allowed" ]]; then
+            echo "  PASS — dynamodb:GetItem is allowed"
+          else
+            echo "  FAIL — dynamodb:GetItem EvalDecision='$EVAL' (expected allowed)"
+            exit 1
+          fi
+
+          # 1c. dynamodb:DeleteTable — DENY expected
+          EVAL=$(aws iam simulate-principal-policy \
+            --policy-source-arn "$LAMBDA_EXEC_ROLE_ARN" \
+            --action-names "dynamodb:DeleteTable" \
+            --resource-arns "$DYNAMODB_TABLE_ARN" \
+            | jq -r '.EvaluationResults[0].EvalDecision')
+          if [[ "$EVAL" == "explicitDeny" || "$EVAL" == "implicitDeny" ]]; then
+            echo "  PASS — dynamodb:DeleteTable is denied ($EVAL)"
+          else
+            echo "  FAIL — dynamodb:DeleteTable EvalDecision='$EVAL' (expected explicitDeny or implicitDeny)"
+            exit 1
+          fi
+
+          # ── IAM SIMULATION 2: Deployment role ───────────────────────────
+          echo "------------------------------------------------------------"
+          echo "IAM SIM 2: Deployment role — S3 permissions"
+          echo "------------------------------------------------------------"
+
+          # Origin bucket object ARN for PutObject check
+          ORIGIN_BUCKET_OBJECTS_ARN="${ORIGIN_BUCKET_ARN}/*"
+
+          # 2a. s3:PutObject — ALLOW expected
+          EVAL=$(aws iam simulate-principal-policy \
+            --policy-source-arn "$DEPLOYMENT_ROLE_ARN" \
+            --action-names "s3:PutObject" \
+            --resource-arns "$ORIGIN_BUCKET_OBJECTS_ARN" \
+            | jq -r '.EvaluationResults[0].EvalDecision')
+          if [[ "$EVAL" == "allowed" ]]; then
+            echo "  PASS — s3:PutObject is allowed"
+          else
+            echo "  FAIL — s3:PutObject EvalDecision='$EVAL' (expected allowed)"
+            exit 1
+          fi
+
+          # 2b. s3:DeleteBucket — DENY expected (scoped to bucket ARN, not objects)
+          EVAL=$(aws iam simulate-principal-policy \
+            --policy-source-arn "$DEPLOYMENT_ROLE_ARN" \
+            --action-names "s3:DeleteBucket" \
+            --resource-arns "$ORIGIN_BUCKET_ARN" \
+            | jq -r '.EvaluationResults[0].EvalDecision')
+          if [[ "$EVAL" == "explicitDeny" || "$EVAL" == "implicitDeny" ]]; then
+            echo "  PASS — s3:DeleteBucket is denied ($EVAL)"
+          else
+            echo "  FAIL — s3:DeleteBucket EvalDecision='$EVAL' (expected explicitDeny or implicitDeny)"
+            exit 1
+          fi
+
+          echo ""
+          echo "============================================================"
+          echo "  ALL SMOKE TESTS PASSED"
+          echo "============================================================"

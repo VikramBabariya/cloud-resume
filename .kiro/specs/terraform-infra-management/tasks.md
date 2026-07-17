@@ -216,8 +216,8 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
     - Confirm no static `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY` values appear anywhere in the workflow file
     - _Requirements: 12.6_
 
-- [ ] 11. Add post-apply smoke test step to `terraform-cicd.yml`
-  - [ ] 11.1 Add an AWS CLI smoke-test step running after `terraform apply` on push to `main`, executing all seven checks:
+- [x] 11. Add post-apply smoke test step to `terraform-cicd.yml`
+  - [x] 11.1 Add an AWS CLI smoke-test step running after `terraform apply` on push to `main`, executing all seven checks:
     - S3 Block Public Access on origin bucket: `aws s3api get-public-access-block --bucket <BUCKET>` — all 4 flags must be `true`
     - S3 versioning on origin bucket: `aws s3api get-bucket-versioning --bucket <BUCKET>` — `Status: Enabled`
     - CloudFront HTTPS enforcement: `curl -sI http://vikram-sre.dev | grep -i location` — expect `301` redirect to `https://`
@@ -226,7 +226,7 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
     - Lambda runtime: `aws lambda get-function-configuration --function-name <FUNC>` — `Runtime: python3.12`
     - OIDC provider thumbprints: `aws iam get-open-id-connect-provider --open-id-connect-provider-arn <ARN>` — both thumbprints present
     - _Requirements: 3.1, 3.4, 5.1, 4.2, 7.4, 8.1, 11.1_
-  - [ ] 11.2 Add IAM policy simulation commands to the same post-apply step:
+  - [x] 11.2 Add IAM policy simulation commands to the same post-apply step:
     - `aws iam simulate-principal-policy` to verify Lambda execution role allows `dynamodb:UpdateItem` and `dynamodb:GetItem` on the visitor-count table ARN, and is denied `dynamodb:DeleteTable`
     - `aws iam simulate-principal-policy` to verify deployment role allows `s3:PutObject` on the origin bucket, and is denied `s3:DeleteBucket`
     - _Requirements: 10.1, 10.2, 11.2, 11.3_
