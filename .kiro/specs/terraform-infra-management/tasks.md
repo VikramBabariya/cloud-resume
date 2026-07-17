@@ -181,7 +181,7 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
   - [x] 8.5 Write `terraform/outputs.tf` with all root-level outputs; any output that references a sensitive variable or propagates a sensitive value MUST include `sensitive = true`
     - _Requirements: 14.3_
 
-- [ ] 9. Checkpoint — full root validate and plan dry-run
+- [x] 9. Checkpoint — full root validate and plan dry-run
   - Run `terraform fmt -check -recursive` and resolve any formatting issues
   - Run `terraform validate` and resolve all schema, type, and reference errors
   - Confirm all module input/output bindings are satisfied with no unresolved references
