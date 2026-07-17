@@ -187,31 +187,31 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
   - Confirm all module input/output bindings are satisfied with no unresolved references
   - Ask the user if any questions arise before continuing.
 
-- [ ] 10. Author GitHub Actions Terraform CI/CD pipeline (`terraform-cicd.yml`)
-  - [ ] 10.1 Create `.github/workflows/terraform-cicd.yml`:
+- [x] 10. Author GitHub Actions Terraform CI/CD pipeline (`terraform-cicd.yml`)
+  - [x] 10.1 Create `.github/workflows/terraform-cicd.yml`:
     - `on.push`: `branches: [main]`, `paths: ['terraform/**']`
     - `on.pull_request`: `branches: [main]`, `paths: ['terraform/**']`
     - Top-level `permissions: id-token: write, contents: read, pull-requests: write`
     - Job-level `defaults.run.working-directory: terraform`
     - `actions/checkout@v4` and `hashicorp/setup-terraform@v3` with `terraform_version: "~> 1.9"` steps
     - _Requirements: 12.6_
-  - [ ] 10.2 Add sequential quality-gate steps (in order, each exits immediately on failure):
+  - [x] 10.2 Add sequential quality-gate steps (in order, each exits immediately on failure):
     - `terraform fmt -check -recursive`
     - `Configure AWS Credentials (OIDC)` using `aws-actions/configure-aws-credentials@v4` with `role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}`, `aws-region: ap-south-1`, `role-session-name: terraform-${{ github.run_id }}`
     - `terraform init -input=false`
     - `terraform validate`
     - _Requirements: 12.1, 12.6_
-  - [ ] 10.3 Add checkov security scan step after validate and before plan:
+  - [x] 10.3 Add checkov security scan step after validate and before plan:
     - Install: `pip install "checkov>=3.2"` (quotes required for shell compatibility)
     - Scan: `checkov -d . --framework terraform --soft-fail-on MEDIUM,LOW --compact --output cli`
     - HIGH/CRITICAL findings cause non-zero exit and block apply; MEDIUM/LOW emit warning annotations only
     - _Requirements: 12.2, 12.3, 12.4_
-  - [ ] 10.4 Add `terraform plan` step (PR events only, `if: github.event_name == 'pull_request'`):
+  - [x] 10.4 Add `terraform plan` step (PR events only, `if: github.event_name == 'pull_request'`):
     - `terraform plan -no-color -input=false`
     - Inject `TF_VAR_cloudflare_api_token`, `TF_VAR_aws_account_id`, `TF_VAR_notification_email` from GitHub encrypted secrets
     - Add `actions/github-script@v7` step to post (or overwrite) a `### Terraform Plan` PR comment using the plan step output; overwrite any existing comment from a previous run on the same PR
     - _Requirements: 12.5_
-  - [ ] 10.5 Add `terraform apply -auto-approve -input=false` step (push to `main` only, `if: github.event_name == 'push' && github.ref == 'refs/heads/main'`):
+  - [x] 10.5 Add `terraform apply -auto-approve -input=false` step (push to `main` only, `if: github.event_name == 'push' && github.ref == 'refs/heads/main'`):
     - Same `TF_VAR_*` secret injections as the plan step
     - Confirm no static `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY` values appear anywhere in the workflow file
     - _Requirements: 12.6_
