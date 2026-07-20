@@ -231,14 +231,14 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
     - `aws iam simulate-principal-policy` to verify deployment role allows `s3:PutObject` on the origin bucket, and is denied `s3:DeleteBucket`
     - _Requirements: 10.1, 10.2, 11.2, 11.3_
 
-- [ ] 12. Add inline checkov suppression comments for documented architectural waivers
+- [x] 12. Add inline checkov suppression comments for documented architectural waivers
   - For each checkov finding that represents an intentional architectural decision, add an inline `# checkov:skip=CKV_ID:Reason` comment in the relevant `.tf` file; each suppression MUST reference the justifying ADR or FinOps constraint
   - Suppressions to add (based on design testing strategy — verify against actual checkov output and adjust CKV IDs as needed):
-    - [ ] 12.1 `CKV_AWS_86` / `CKV_AWS_68` — CloudFront logging and WAF not attached: skip with reason referencing FinOps hard cap ($6/mo) and ADR 0002
-    - [ ] 12.2 `CKV_AWS_116` — Lambda DLQ not configured: skip with reason referencing visitor-counter idempotency design and ADR 0001
-    - [ ] 12.3 `CKV_AWS_50` — Lambda X-Ray tracing not enabled: skip with reason referencing FinOps hard cap
-    - [ ] 12.4 `CKV_AWS_18` — S3 access logging on origin bucket: skip with reason referencing CloudFront access logs as the logging layer and FinOps constraint
-    - [ ] 12.5 `CKV_AWS_52` — S3 MFA delete: skip with reason referencing operational overhead and FinOps single-account constraint
+    - [x] 12.1 `CKV_AWS_86` / `CKV_AWS_68` — CloudFront logging and WAF not attached: skip with reason referencing FinOps hard cap ($6/mo) and ADR 0002
+    - [x] 12.2 `CKV_AWS_116` — Lambda DLQ not configured: skip with reason referencing visitor-counter idempotency design and ADR 0001
+    - [x] 12.3 `CKV_AWS_50` — Lambda X-Ray tracing not enabled: skip with reason referencing FinOps hard cap
+    - [x] 12.4 `CKV_AWS_18` — S3 access logging on origin bucket: skip with reason referencing CloudFront access logs as the logging layer and FinOps constraint
+    - [x] 12.5 `CKV_AWS_52` — S3 MFA delete: skip with reason referencing operational overhead and FinOps single-account constraint
   - _Requirements: 12.3_
 
 - [ ] 13. Update `docs/RUNBOOK.md` with IaC bootstrap prerequisites section

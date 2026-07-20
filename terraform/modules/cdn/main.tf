@@ -13,6 +13,7 @@ terraform {
 # ---------------------------------------------------------------------------
 
 resource "aws_s3_bucket" "origin" {
+  # checkov:skip=CKV_AWS_18:S3 access logging omitted; CloudFront access logs serve as the access-logging layer — enabling S3 server access logging would double storage cost, breaching the $6/mo FinOps hard cap
   bucket = var.origin_bucket_name
 }
 
@@ -28,6 +29,7 @@ resource "aws_s3_bucket_public_access_block" "origin" {
 }
 
 resource "aws_s3_bucket_versioning" "origin" {
+  # checkov:skip=CKV_AWS_52:MFA delete requires root account credentials and adds operational overhead disproportionate to a single-account personal portfolio; versioning + SSE-KMS provides sufficient data protection within the $6/mo FinOps constraint
   bucket = aws_s3_bucket.origin.id
 
   versioning_configuration {

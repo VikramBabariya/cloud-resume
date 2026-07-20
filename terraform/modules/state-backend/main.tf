@@ -25,6 +25,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
 }
 
 resource "aws_s3_bucket_versioning" "state" {
+  # checkov:skip=CKV_AWS_52:MFA delete requires root account credentials and adds operational overhead disproportionate to a single-account personal portfolio; versioning + SSE-KMS provides sufficient data protection within the $6/mo FinOps constraint
   bucket = aws_s3_bucket.state.id
 
   versioning_configuration {
