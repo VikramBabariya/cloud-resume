@@ -241,7 +241,7 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
     - [x] 12.5 `CKV_AWS_52` — S3 MFA delete: skip with reason referencing operational overhead and FinOps single-account constraint
   - _Requirements: 12.3_
 
-- [ ] 13. Update `docs/RUNBOOK.md` with IaC bootstrap prerequisites section
+- [x] 13. Update `docs/RUNBOOK.md` with IaC bootstrap prerequisites section
   - Add a new section titled "IaC Bootstrap Prerequisites" to `docs/RUNBOOK.md` covering:
     - Step 1: Manually create the KMS key (`alias/terraform-state`) in `ap-south-1`
     - Step 2: Manually create the S3 state bucket (`zero-trust-rac-tfstate`) with SSE-KMS and versioning before `terraform init` is run for the first time
@@ -250,6 +250,7 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
     - Step 5: After first `terraform apply`, confirm the SNS email subscription (one-time manual step to activate cost alerts)
     - State lock force-unlock procedure: `terraform force-unlock <LOCK_ID>` — use only when a failed apply leaves an orphaned lock
   - _Requirements: 13.5_
+  - _Note: Implemented as Section 6 ("IaC Bootstrap Prerequisites") in docs/RUNBOOK.md. The approach uses a Terraform local-state bootstrap with `terraform apply -target=module.state_backend` followed by `terraform init -migrate-state` — a superior pattern to manual ClickOps console steps. Section 8 ("IaC Day-2 Operations") also added covering local plan runs, new environment setup, and checkov suppression guidance._
 
 - [ ] 14. Final checkpoint — end-to-end validation
   - Run `terraform fmt -check -recursive` and resolve any formatting issues
