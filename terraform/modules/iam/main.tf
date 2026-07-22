@@ -4,6 +4,8 @@
 # no conditions (Requirement 10.1)
 # ---------------------------------------------------------------------------
 
+# adding a comment to trigger actions workflow
+
 data "aws_iam_policy_document" "lambda_trust" {
   statement {
     sid     = "AllowLambdaAssumeRole"
