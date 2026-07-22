@@ -20,12 +20,23 @@ output "origin_bucket_arn" {
 
 output "acm_validation_options" {
   description = "ACM domain validation options map — consumed by modules/dns for CNAME record creation"
+  # Key by resource_record_name (the actual CNAME label) rather than domain_name.
+  # ACM emits one entry per SAN (e.g. "vikram-sre.dev" and "*.vikram-sre.dev") but
+  # both SANs share a single validation CNAME record. Both SANs produce the same
+  # resource_record_name key, so Terraform's for expression would fail with
+  # "Duplicate object key" without the ellipsis (...) grouping operator.
+  #
+  # The ellipsis collapses duplicate keys into a list; values({})[0] picks the
+  # first (and only unique) entry per CNAME token, ensuring modules/dns creates
+  # exactly one Cloudflare record instead of two — avoiding "record already exists".
   value = {
-    for dvo in aws_acm_certificate.this.domain_validation_options : dvo.domain_name => {
-      name  = dvo.resource_record_name
-      type  = dvo.resource_record_type
-      value = dvo.resource_record_value
-    }
+    for record_name, dvos in {
+      for dvo in aws_acm_certificate.this.domain_validation_options : dvo.resource_record_name => {
+        name  = dvo.resource_record_name
+        type  = dvo.resource_record_type
+        value = dvo.resource_record_value
+      }...
+    } : record_name => dvos[0]
   }
 }
 
