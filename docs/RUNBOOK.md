@@ -67,7 +67,86 @@ python build.py
 python3 -m http.server 8000 --directory dist
 ```
 
-## 4. Outer Loop: Automated CI/CD Pipeline (Frontend)
+## 4. GitHub Repository Secrets Setup
+
+Both CI/CD pipelines (`front-end-cicd.yml` and `terraform-cicd.yml`) authenticate to AWS via OIDC and consume values injected as GitHub Encrypted Secrets. **Neither pipeline will run successfully without these secrets configured.** This is a one-time setup step performed after the initial `terraform apply` completes (Section 7).
+
+> **Where to configure:** GitHub → Your repository → **Settings → Secrets and variables → Actions → New repository secret**
+
+### 4.1. Complete Secrets Reference
+
+| Secret Name               | Required By          | Where to Get the Value                                                                               |
+| ------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------- |
+| `AWS_DEPLOYMENT_ROLE_ARN` | Both pipelines       | `terraform output -raw deployment_role_arn`                                                          |
+| `S3_BUCKET_NAME`          | `front-end-cicd.yml` | `terraform output -raw origin_bucket_arn \| sed 's\|arn:aws:s3:::\|\|'`                              |
+| `CDN_DISTRIBUTION_ID`     | `front-end-cicd.yml` | `terraform output -raw cloudfront_distribution_id`                                                   |
+| `CLOUDFLARE_API_TOKEN`    | `terraform-cicd.yml` | Cloudflare dashboard → **My Profile → API Tokens**                                                   |
+| `AWS_ACCOUNT_ID`          | `terraform-cicd.yml` | AWS Console → top-right account menu, or `aws sts get-caller-identity --query Account --output text` |
+| `NOTIFICATION_EMAIL`      | `terraform-cicd.yml` | The email address you want budget alerts sent to                                                     |
+
+### 4.2. How Each Secret Is Used
+
+**`AWS_DEPLOYMENT_ROLE_ARN`**
+Both pipelines use this to perform the OIDC token exchange with AWS STS. The role is provisioned by `module.iam` in Terraform with a trust policy locked to `repo:VikramBabariya/zero-trust-rac-platform:ref:refs/heads/main`. No static IAM keys are used anywhere.
+
+```yaml
+# Used in both workflows as:
+role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
+```
+
+**`S3_BUCKET_NAME`**
+The name (not ARN) of the private S3 origin bucket. The frontend pipeline syncs `./dist` here.
+
+```yaml
+aws s3 sync ./dist s3://${{ secrets.S3_BUCKET_NAME }} --delete
+```
+
+**`CDN_DISTRIBUTION_ID`**
+The CloudFront distribution ID. Used to issue a cache invalidation after each deploy so edge nodes serve the updated `index.html` immediately.
+
+```yaml
+--distribution-id ${{ secrets.CDN_DISTRIBUTION_ID }}
+```
+
+**`CLOUDFLARE_API_TOKEN`**, **`AWS_ACCOUNT_ID`**, **`NOTIFICATION_EMAIL`**
+Passed as `TF_VAR_*` environment variables into `terraform plan` and `terraform apply`. Terraform maps these to the `sensitive = true` variable declarations in `variables.tf`, so their values are **redacted** in all plan and apply output — you will see `(sensitive value)` rather than the actual secret.
+
+```yaml
+env:
+  TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+  TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
+```
+
+### 4.3. Step-by-Step: Retrieving Values After `terraform apply`
+
+Run these commands from the `terraform/` directory (via WSL on Windows — see Section 8):
+
+```bash
+# 1. Deployment role ARN → AWS_DEPLOYMENT_ROLE_ARN
+terraform output -raw deployment_role_arn
+
+# 2. S3 bucket name → S3_BUCKET_NAME (strips the arn:aws:s3::: prefix)
+terraform output -raw origin_bucket_arn | sed 's|arn:aws:s3:::||'
+
+# 3. CloudFront distribution ID → CDN_DISTRIBUTION_ID
+terraform output -raw cloudfront_distribution_id
+```
+
+For `CLOUDFLARE_API_TOKEN`: in the Cloudflare dashboard, go to **My Profile → API Tokens → Create Token**. Use the **Edit zone DNS** template scoped to the `vikram-sre.dev` zone. This is the same token stored in your local `terraform.tfvars` under `cloudflare_api_token`.
+
+### 4.4. Verification
+
+After all secrets are set, trigger a dry-run to confirm the pipelines can authenticate:
+
+1. Open a PR against `main` with any trivial change under `terraform/` — the Terraform pipeline should run `terraform plan` and post a comment on the PR.
+2. Merge a trivial change to `main` (e.g., a comment in `data/resume.yaml`) — the frontend pipeline should run the full quality gate and deploy.
+
+If either pipeline fails at the **Configure AWS Credentials (OIDC)** step, the most likely cause is `AWS_DEPLOYMENT_ROLE_ARN` being set incorrectly or the OIDC trust policy not yet applied (i.e., `terraform apply` has not been run for `module.iam`).
+
+---
+
+## 5. Outer Loop: Automated CI/CD Pipeline (Frontend)
 
 The Outer Loop governs the fully automated, immutable deployment of the verified frontend artifact to the AWS cloud environment via GitHub Actions (`.github/workflows/front-end-cicd.yml`).
 
@@ -75,21 +154,21 @@ The Outer Loop governs the fully automated, immutable deployment of the verified
 - **Idempotent Deployment:** Execution relies on `aws s3 sync ./dist s3://${{ secrets.S3_BUCKET_NAME }} --delete`. By targeting strictly the `./dist` folder, we enforce Artifact Hygiene, preventing backend scripts from leaking to the public internet.
 - **Zero-Downtime Edge Invalidation:** The pipeline automatically executes `aws cloudfront create-invalidation` to purge global edge caches, ensuring immediate content freshness.
 
-## 5. Backend Resource Provisioning (The ClickOps Foundation)
+## 6. Backend Resource Provisioning (The ClickOps Foundation)
 
 > ⚠️ **DEPRECATED — Superseded by Terraform IaC**
 >
-> This section describes the original manual ("ClickOps") provisioning steps. These steps are **no longer the authoritative procedure**. All backend resources (DynamoDB, Lambda, API Gateway, IAM roles, OIDC provider, CloudFront, ACM, S3 origin, Cloudflare DNS, and the FinOps budget alarm) are now fully managed by Terraform under `terraform/`. For the current bootstrap and operational procedures, see **Section 6: IaC Bootstrap Prerequisites** and **Section 8: IaC Day-2 Operations**.
+> This section describes the original manual ("ClickOps") provisioning steps. These steps are **no longer the authoritative procedure**. All backend resources (DynamoDB, Lambda, API Gateway, IAM roles, OIDC provider, CloudFront, ACM, S3 origin, Cloudflare DNS, and the FinOps budget alarm) are now fully managed by Terraform under `terraform/`. For the current bootstrap and operational procedures, see **Section 7: IaC Bootstrap Prerequisites** and **Section 9: IaC Day-2 Operations**.
 >
 > The steps below are retained as a **historical reference only** to document the pre-Terraform state of the platform. Do not follow them for new deployments.
 
-### 5.1. Historical ClickOps Steps (Deprecated — Do Not Follow)
+### 6.1. Historical ClickOps Steps (Deprecated — Do Not Follow)
 
 1. **Provision the Data Layer (DynamoDB):** Create a DynamoDB table named `VisitorCount` with a primary partition key `id` (String). Set billing mode to On-Demand to optimize for free-tier usage.
 2. **Configure Compute (Lambda):** Create the Counter Lambda (Python) and assign a least-privilege IAM role scoped strictly to `dynamodb:UpdateItem` and `dynamodb:GetItem` for the specific table ARN.
 3. **Establish the API Boundary (API Gateway):** Create an HTTP API. Map routes to integrate with their respective Lambda functions. Configure the CORS policy to strictly allow origins from your registered domain (`https://vikram-sre.dev`).
 
-## 6. IaC Bootstrap Prerequisites (One-Time Manual Steps)
+## 7. IaC Bootstrap Prerequisites (One-Time Manual Steps)
 
 > **Context:** Terraform cannot manage its own state backend — the S3 bucket, DynamoDB lock table, and KMS key must exist before `terraform init` can reference them. The bootstrap procedure below uses Terraform itself with a **local state** backend to create these resources, then migrates state to S3. This keeps everything declared as code from day one with no ClickOps. These steps are performed **once per environment** by a platform engineer with AWS credentials.
 
@@ -189,11 +268,11 @@ terraform force-unlock <LOCK_ID>
 
 ---
 
-## 7. Disaster Recovery: Ingress & Edge Routing (Layer 7)
+## 8. Disaster Recovery: Ingress & Edge Routing (Layer 7)
 
 **Objective:** To achieve near-zero **MTTR** in the event of accidental Cloudflare zone deletion, registrar compromise, or TLS certificate revocation. This section codifies the exact state required to rebuild the **Zero-Trust** public boundary natively within Cloudflare and AWS ACM.
 
-### 7.1. Registrar & Authoritative DNS Recovery (`vikram-sre.dev`)
+### 8.1. Registrar & Authoritative DNS Recovery (`vikram-sre.dev`)
 
 If the Cloudflare DNS zone is purged or corrupted, DNS resolution will fail globally. Execute the following to restore authoritative routing and edge security policies:
 
@@ -208,7 +287,7 @@ If the Cloudflare DNS zone is purged or corrupted, DNS resolution will fail glob
    - Navigate to **SSL/TLS > Edge Certificates**.
    - Set **Minimum TLS Version** to **TLS 1.3** to isolate the cryptographic perimeter and block legacy handshake downgrade attacks.
 
-### 7.2. Cryptographic Identity Recovery (ACM TLS)
+### 8.2. Cryptographic Identity Recovery (ACM TLS)
 
 If the TLS certificate is accidentally revoked or deleted, the native **HSTS** preload on the `.dev` TLD will cause browsers to hard-block your site, causing a total ingress failure.
 
@@ -223,11 +302,11 @@ If the TLS certificate is accidentally revoked or deleted, the native **HSTS** p
 
 ---
 
-## 8. IaC Day-2 Operations
+## 9. IaC Day-2 Operations
 
-This section covers routine operational tasks for platform engineers working with the Terraform codebase after the initial bootstrap (Section 6) is complete.
+This section covers routine operational tasks for platform engineers working with the Terraform codebase after the initial bootstrap (Section 7) is complete.
 
-### 8.1. Running `terraform plan` Locally
+### 9.1. Running `terraform plan` Locally
 
 A local plan lets you preview infrastructure changes before pushing to a PR. You need AWS credentials and the required Terraform variables available in your shell.
 
@@ -264,7 +343,7 @@ The plan output shows exactly which resources will be created, modified, or dest
 
 > Sensitive variable values are redacted from all plan and apply output (`sensitive = true` is set on each variable declaration). You will see `(sensitive value)` in the output rather than the actual token or email.
 
-### 8.2. Adding a New Environment
+### 9.2. Adding a New Environment
 
 The Terraform root supports multiple environments via [workspaces](https://developer.hashicorp.com/terraform/language/state/workspaces). Each workspace gets its own isolated state file in the S3 backend.
 
@@ -293,7 +372,7 @@ To add a new environment (e.g., `staging`):
 
 > **Rule:** No file under `modules/` should be created, modified, or deleted when adding a new environment. Environment differences are expressed entirely through workspace selection and `terraform.tfvars` values. If a new environment requires a structural module change, open a PR and document it in an ADR first.
 
-### 8.3. Reading Checkov Suppression Comments
+### 9.3. Reading Checkov Suppression Comments
 
 The Terraform codebase uses inline checkov suppression comments for findings that are intentional architectural decisions — not oversights. Every suppression follows this exact format:
 
