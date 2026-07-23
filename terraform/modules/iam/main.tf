@@ -182,9 +182,9 @@ data "aws_iam_policy_document" "deployment_permissions" {
 
   # ── CloudFront: cache invalidation ───────────────────────────────────────
   statement {
-    sid     = "CloudFrontInvalidation"
-    effect  = "Allow"
-    actions = ["cloudfront:CreateInvalidation"]
+    sid       = "CloudFrontInvalidation"
+    effect    = "Allow"
+    actions   = ["cloudfront:CreateInvalidation"]
     resources = [var.cloudfront_distribution_arn]
   }
 
@@ -234,8 +234,8 @@ data "aws_iam_policy_document" "deployment_permissions" {
   # kms:ListAliases is a list operation — AWS does not support scoping it to
   # a specific key ARN; the resource must be "*". Read-only, no write risk.
   statement {
-    sid    = "TerraformKMSListAliases"
-    effect = "Allow"
+    sid     = "TerraformKMSListAliases"
+    effect  = "Allow"
     actions = ["kms:ListAliases"]
     # checkov:skip=CKV_AWS_356: kms:ListAliases does not support resource-level
     # ARN restrictions — AWS requires "*" for all KMS list operations per the
@@ -293,15 +293,15 @@ data "aws_iam_policy_document" "deployment_permissions" {
   # requires "*". Keeping both in one statement scoped to the certificate ARN
   # for the restrictable action; ListTags uses a separate statement below.
   statement {
-    sid    = "TerraformReadACMCertificate"
-    effect = "Allow"
-    actions = ["acm:DescribeCertificate"]
+    sid       = "TerraformReadACMCertificate"
+    effect    = "Allow"
+    actions   = ["acm:DescribeCertificate"]
     resources = [var.acm_certificate_arn]
   }
 
   statement {
-    sid    = "TerraformReadACMTags"
-    effect = "Allow"
+    sid     = "TerraformReadACMTags"
+    effect  = "Allow"
     actions = ["acm:ListTagsForCertificate"]
     # checkov:skip=CKV_AWS_356: acm:ListTagsForCertificate does not support
     # resource-level ARN restrictions per AWS ACM IAM documentation.
@@ -327,8 +327,8 @@ data "aws_iam_policy_document" "deployment_permissions" {
   # ── API Gateway: plan refresh ─────────────────────────────────────────────
   # apigateway:GET does not support resource-level ARN restrictions.
   statement {
-    sid    = "TerraformReadAPIGateway"
-    effect = "Allow"
+    sid     = "TerraformReadAPIGateway"
+    effect  = "Allow"
     actions = ["apigateway:GET"]
     # checkov:skip=CKV_AWS_356: apigateway:GET does not support resource-level
     # ARN restrictions — AWS API Gateway IAM documentation requires "*".
@@ -379,8 +379,8 @@ data "aws_iam_policy_document" "deployment_permissions" {
   }
 
   statement {
-    sid    = "TerraformReadSNSSubscription"
-    effect = "Allow"
+    sid     = "TerraformReadSNSSubscription"
+    effect  = "Allow"
     actions = ["sns:GetSubscriptionAttributes"]
     # checkov:skip=CKV_AWS_356: sns:GetSubscriptionAttributes requires the
     # subscription ARN, which is only known after apply and cannot be
