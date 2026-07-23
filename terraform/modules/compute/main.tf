@@ -57,7 +57,7 @@ resource "aws_lambda_function" "this" {
   role          = var.lambda_execution_role_arn
 
   filename         = data.archive_file.lambda.output_path
-  source_code_hash = filebase64sha256(data.archive_file.lambda.output_path)
+  source_code_hash = data.archive_file.lambda.output_base64sha256
 
   environment {
     variables = {
