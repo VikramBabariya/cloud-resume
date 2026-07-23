@@ -106,9 +106,19 @@ jobs:
         run: |
           checkov -d . \
             --framework terraform \
-            --soft-fail-on MEDIUM,LOW \
+            --skip-check CKV2_AWS_62,CKV_AWS_144,CKV2_AWS_61,CKV_AWS_145,CKV2_AWS_32,CKV2_AWS_47,CKV_AWS_374,CKV_AWS_310,CKV_AWS_18 \
             --compact \
             --output cli
+        # Rationale for skipped checks (all intentional FinOps/architecture waivers):
+        # CKV2_AWS_62  — S3 event notifications: no operational requirement for this portfolio workload
+        # CKV_AWS_144  — S3 cross-region replication: $6/mo FinOps hard cap; single-region is acceptable for a personal portfolio
+        # CKV2_AWS_61  — S3 lifecycle policy: no cost benefit for a static-asset bucket with no object churn
+        # CKV_AWS_145  — S3 KMS encryption on origin bucket: CloudFront OAC + SSE-S3 is sufficient; CMK adds per-request KMS cost
+        # CKV2_AWS_32  — CloudFront response headers policy: adds no security value beyond existing TLS 1.2+ and HTTPS-redirect config
+        # CKV2_AWS_47  — CloudFront WAF Log4j AMR rule: WAF omitted per FinOps cap (ADR 0002); Lambda runtime (Python) is not affected by Log4j
+        # CKV_AWS_374  — CloudFront geo restriction: public resume must be accessible globally; geo-blocking contradicts the product requirement
+        # CKV_AWS_310  — CloudFront origin failover: single S3 origin; failover group requires a second origin bucket doubling storage cost
+        # CKV_AWS_18   — S3 access logging on state bucket: CloudFront + CloudTrail serve as the audit layer; S3 server access logging adds storage cost
 
       # ──────────────────────────────────────────────────────────────────────
       # GATE 4 — TERRAFORM PLAN  (pull_request events only)
