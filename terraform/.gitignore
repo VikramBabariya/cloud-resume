@@ -1,0 +1,12 @@
+# Terraform variable files — may contain secrets, never commit
+*.tfvars
+
+# Terraform state files — always stored in the remote S3 backend
+*.tfstate
+*.tfstate.backup
+
+# Local Terraform working directory — contains provider binaries and cached data
+.terraform/
+
+# NOTE: .terraform.lock.hcl is intentionally NOT listed here.
+# It should be committed for reproducible provider installs across environments.

@@ -1,0 +1,23 @@
+# terraform.tfvars.example
+# Copy this file to terraform.tfvars and fill in real values.
+# NEVER commit terraform.tfvars — it is covered by .gitignore.
+# Secrets are injected at runtime via TF_VAR_* environment variables in CI.
+
+# Cloudflare API token with DNS edit permissions for vikram-sre.dev.
+# In CI: sourced from GitHub Secret CLOUDFLARE_API_TOKEN via TF_VAR_cloudflare_api_token.
+cloudflare_api_token = "your-cloudflare-api-token-here"
+
+# AWS account ID used in IAM ARN constructions (e.g. "123456789012").
+# In CI: sourced from GitHub Secret AWS_ACCOUNT_ID via TF_VAR_aws_account_id.
+aws_account_id = "123456789012"
+
+# Email address for AWS Budget SNS alarm notifications.
+# In CI: sourced from GitHub Secret NOTIFICATION_EMAIL via TF_VAR_notification_email.
+notification_email = "your-email@example.com"
+
+# Cloudflare zone ID for the vikram-sre.dev DNS zone.
+# Find this in the Cloudflare dashboard → your domain → Overview → Zone ID.
+cloudflare_zone_id = "your-cloudflare-zone-id-here"
+
+# Primary AWS deployment region. Defaults to ap-south-1 if not set.
+aws_region = "ap-south-1"

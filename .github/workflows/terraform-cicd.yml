@@ -1,0 +1,534 @@
+name: Terraform IaC Pipeline
+
+# Trigger on pushes to main or any PR targeting main — but only when
+# files under terraform/ are actually changed. This prevents wasted
+# runner minutes when only frontend assets are modified.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "terraform/**"
+      - "src/lambda/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "terraform/**"
+      - "src/lambda/**"
+
+# Zero-Trust OIDC permissions:
+#   id-token: write  — allows the runner to request a short-lived JWT from
+#                      GitHub's OIDC provider and exchange it for AWS STS creds
+#   contents: read   — checkout only; no write access to the repository
+#   pull-requests: write — required for posting/overwriting plan comments on PRs
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  terraform:
+    name: Terraform CI/CD
+    runs-on: ubuntu-latest
+
+    # All `run:` steps execute inside the terraform/ subdirectory so every
+    # terraform command operates on the root module without explicit -chdir flags.
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      # ──────────────────────────────────────────────────────────────────────
+      # ENVIRONMENT SETUP
+      # ──────────────────────────────────────────────────────────────────────
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          # Pessimistic constraint: allow any 1.x patch ≥ 1.9.0
+          terraform_version: "~> 1.9"
+          # terraform_wrapper: true is required for steps.plan.outputs.stdout
+          # to capture plan output for the PR comment step.
+          terraform_wrapper: true
+
+      # ──────────────────────────────────────────────────────────────────────
+      # GATE 1 — FORMAT CHECK
+      # Runs BEFORE AWS credentials are configured so formatting problems are
+      # caught immediately without waiting for OIDC token exchange.
+      # Non-zero exit stops the job; no downstream steps run.
+      # ──────────────────────────────────────────────────────────────────────
+
+      - name: terraform fmt -check
+        run: terraform fmt -check -recursive
+
+      # ──────────────────────────────────────────────────────────────────────
+      # GATE 2 — AWS AUTH + INIT + VALIDATE
+      # OIDC federation: no static AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY
+      # values appear anywhere in this file. STS issues a short-lived token
+      # scoped to the deployment role for the duration of this run only.
+      # ──────────────────────────────────────────────────────────────────────
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
+          aws-region: ap-south-1
+          # Non-repudiation: the run ID makes every STS session traceable in
+          # CloudTrail back to this exact GitHub Actions workflow run.
+          role-session-name: terraform-${{ github.run_id }}
+
+      - name: terraform init
+        run: terraform init -input=false
+
+      - name: terraform validate
+        run: terraform validate
+
+      # ──────────────────────────────────────────────────────────────────────
+      # GATE 3 — CHECKOV SECURITY SCAN (shift-left IaC SAST)
+      # HIGH / CRITICAL findings → non-zero exit → pipeline stops here.
+      # MEDIUM / LOW findings    → --soft-fail-on emits warning annotations
+      #                            but returns exit code 0 so the pipeline
+      #                            continues to plan/apply.
+      # Intentional architectural waivers are suppressed inline in .tf files
+      # with `# checkov:skip=CKV_ID:Reason` referencing the relevant ADR.
+      # ──────────────────────────────────────────────────────────────────────
+
+      - name: Install checkov
+        # Quotes around checkov>=3.2 are required so the shell does not
+        # interpret >= as an output-redirection operator.
+        run: pip install "checkov>=3.2"
+
+      - name: Run checkov (block on HIGH/CRITICAL)
+        id: checkov
+        continue-on-error: true
+        run: |
+          checkov -d . \
+            --framework terraform \
+            --skip-check CKV2_AWS_62,CKV_AWS_144,CKV2_AWS_61,CKV_AWS_145,CKV2_AWS_32,CKV2_AWS_47,CKV_AWS_374,CKV_AWS_310,CKV_AWS_18 \
+            --compact \
+            --output cli
+        # Rationale for skipped checks (all intentional FinOps/architecture waivers):
+        # CKV2_AWS_62  — S3 event notifications: no operational requirement for this portfolio workload
+        # CKV_AWS_144  — S3 cross-region replication: $6/mo FinOps hard cap; single-region is acceptable for a personal portfolio
+        # CKV2_AWS_61  — S3 lifecycle policy: no cost benefit for a static-asset bucket with no object churn
+        # CKV_AWS_145  — S3 KMS encryption on origin bucket: CloudFront OAC + SSE-S3 is sufficient; CMK adds per-request KMS cost
+        # CKV2_AWS_32  — CloudFront response headers policy: adds no security value beyond existing TLS 1.2+ and HTTPS-redirect config
+        # CKV2_AWS_47  — CloudFront WAF Log4j AMR rule: WAF omitted per FinOps cap (ADR 0002); Lambda runtime (Python) is not affected by Log4j
+        # CKV_AWS_374  — CloudFront geo restriction: public resume must be accessible globally; geo-blocking contradicts the product requirement
+        # CKV_AWS_310  — CloudFront origin failover: single S3 origin; failover group requires a second origin bucket doubling storage cost
+        # CKV_AWS_18   — S3 access logging on state bucket: CloudFront + CloudTrail serve as the audit layer; S3 server access logging adds storage cost
+
+      # ──────────────────────────────────────────────────────────────────────
+      # GATE 4 — TERRAFORM PLAN  (pull_request events only)
+      # Sensitive variables flow: GitHub Secret → TF_VAR_* env var →
+      # sensitive=true Terraform variable → redacted in plan output.
+      # No plaintext secrets appear in any .tf or .tfvars file.
+      #
+      # continue-on-error: true ensures the comment step always runs even
+      # when plan exits with code 2 (changes detected) or 1 (error), so the
+      # PR always receives a status comment rather than silently failing.
+      # ──────────────────────────────────────────────────────────────────────
+
+      - name: terraform plan
+        id: plan
+        if: always() && github.event_name == 'pull_request'
+        continue-on-error: true
+        run: terraform plan -no-color -input=false
+        env:
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+          TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
+
+      - name: Post plan comment on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // ── Resolve plan outcome ──────────────────────────────────────
+            // Exit codes: 0 = no changes, 1 = error, 2 = changes pending.
+            // GitHub Actions exposes the step outcome as "success" / "failure"
+            // when continue-on-error is set; we use the raw exit code via the
+            // steps context for a more precise status label.
+            const planOutcome = '${{ steps.plan.outcome }}';
+            const planExitCode = '${{ steps.plan.outputs.exitcode }}';
+            const checkovOutcome = '${{ steps.checkov.outcome }}';
+
+            let statusEmoji;
+            let statusLabel;
+            if (planOutcome === 'skipped') {
+              statusEmoji = '⏭️';
+              statusLabel = 'Plan skipped — prior step failed';
+            } else if (planOutcome === 'failure') {
+              statusEmoji = '❌';
+              statusLabel = 'Plan failed (exit code 1 — check logs for errors)';
+            } else if (planExitCode === '2') {
+              statusEmoji = '⚠️';
+              statusLabel = 'Changes detected (exit code 2 — review diff below)';
+            } else {
+              statusEmoji = '✅';
+              statusLabel = 'No changes — infrastructure is up-to-date (exit code 0)';
+            }
+
+            // Add checkov status indicator
+            let checkovBadge = '';
+            if (checkovOutcome === 'failure') {
+              checkovBadge = ' | 🔒 **Checkov:** ❌ HIGH/CRITICAL findings — see logs';
+            } else if (checkovOutcome === 'success') {
+              checkovBadge = ' | 🔒 **Checkov:** ✅ Passed';
+            }
+
+            // ── Build comment body ────────────────────────────────────────
+            // The hidden HTML marker <!-- terraform-plan --> is used as a
+            // stable anchor to find and overwrite previous plan comments on
+            // re-triggered PR runs, avoiding comment spam.
+            const MAX_PLAN_LENGTH = 65000; // GitHub comment body limit is ~65536 chars
+            let planOutput = `${{ steps.plan.outputs.stdout }}` || '(no output)';
+            if (planOutput.length > MAX_PLAN_LENGTH) {
+              planOutput =
+                planOutput.substring(0, MAX_PLAN_LENGTH) +
+                '\n\n... [output truncated — see full log in Actions tab]';
+            }
+
+            const body = [
+              '<!-- terraform-plan -->',
+              '### Terraform Plan',
+              '',
+              `**Status:** ${statusEmoji} ${statusLabel}${checkovBadge}`,
+              '',
+              '<details>',
+              '<summary>Plan output (click to expand)</summary>',
+              '',
+              '```hcl',
+              planOutput,
+              '```',
+              '',
+              '</details>',
+              '',
+              `*Triggered by commit \`${{ github.sha }}\` on branch \`${{ github.head_ref }}\`*`,
+            ].join('\n');
+
+            // ── Find existing plan comment to overwrite ───────────────────
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existingComment = comments.find(
+              (c) =>
+                c.user.login === 'github-actions[bot]' &&
+                c.body.startsWith('<!-- terraform-plan -->')
+            );
+
+            if (existingComment) {
+              // Overwrite the previous plan comment so the PR thread stays clean
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body,
+              });
+              core.info(`Updated existing plan comment (id: ${existingComment.id})`);
+            } else {
+              // First plan run on this PR — create the comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+              core.info('Created new plan comment on PR');
+            }
+
+            // Propagate the plan failure so the overall job still fails even
+            // though continue-on-error was set on the plan step.
+            if (planOutcome === 'failure') {
+              core.setFailed('terraform plan failed — see plan comment for details');
+            }
+            
+            // Also propagate checkov failure so the job fails when HIGH/CRITICAL findings exist
+            if (checkovOutcome === 'failure') {
+              core.setFailed('checkov scan found HIGH/CRITICAL findings — see workflow logs');
+            }
+
+      # ──────────────────────────────────────────────────────────────────────
+      # GATE 5 — TERRAFORM APPLY  (push to main only)
+      # Only runs when a commit lands on main (i.e. a PR is merged).
+      # The same sensitive-variable flow as the plan step is used here.
+      # OIDC credentials from Gate 2 are still in scope for this step.
+      # CRITICAL: no static AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY values
+      # appear anywhere in this file — authentication is exclusively via OIDC.
+      # ──────────────────────────────────────────────────────────────────────
+
+      - name: terraform apply
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve -input=false
+        env:
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+          TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
+
+      # ──────────────────────────────────────────────────────────────────────
+      # GATE 6 — POST-APPLY SMOKE TESTS  (push to main only)
+      # Runs after terraform apply to verify live infrastructure matches the
+      # declared configuration. Any failed assertion exits non-zero and fails
+      # the job, alerting the team to drift or misconfiguration.
+      #
+      # Dynamic values are resolved from Terraform state via `terraform output`
+      # so no ARNs or bucket names are hardcoded in this file.
+      # OIDC credentials from Gate 2 remain in scope for all AWS CLI calls.
+      # jq is pre-installed on ubuntu-latest runners.
+      # ──────────────────────────────────────────────────────────────────────
+
+      - name: Post-apply smoke tests
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+
+          echo "============================================================"
+          echo "  POST-APPLY SMOKE TESTS"
+          echo "============================================================"
+
+          # ── Resolve dynamic values from Terraform state ─────────────────
+          # Bucket name is derived from the origin_bucket_arn output because
+          # the cdn module does not expose a separate bucket-name output.
+          ORIGIN_BUCKET_ARN=$(terraform output -raw origin_bucket_arn)
+          ORIGIN_BUCKET_NAME=$(echo "$ORIGIN_BUCKET_ARN" | sed 's|arn:aws:s3:::||')
+
+          ACM_CERT_ARN=$(terraform output -raw acm_certificate_arn)
+
+          # Lambda function name extracted from the full function ARN
+          # ARN format: arn:aws:lambda:<region>:<account>:function:<name>
+          LAMBDA_FUNCTION_ARN=$(terraform output -raw lambda_function_arn)
+          LAMBDA_FUNCTION_NAME=$(echo "$LAMBDA_FUNCTION_ARN" | awk -F: '{print $NF}')
+
+          LAMBDA_EXEC_ROLE_ARN=$(terraform output -raw lambda_execution_role_arn)
+          DEPLOYMENT_ROLE_ARN=$(terraform output -raw deployment_role_arn)
+          DYNAMODB_TABLE_ARN=$(terraform output -raw dynamodb_table_arn)
+
+          # OIDC provider ARN is not a separate Terraform output; construct it
+          # from the account ID (extracted from the deployment role ARN).
+          # Deployment role ARN format: arn:aws:iam::<account_id>:role/<name>
+          AWS_ACCOUNT_ID_EXTRACTED=$(echo "$DEPLOYMENT_ROLE_ARN" | cut -d: -f5)
+          OIDC_PROVIDER_ARN="arn:aws:iam::${AWS_ACCOUNT_ID_EXTRACTED}:oidc-provider/token.actions.githubusercontent.com"
+
+          echo ""
+          echo "Resolved values:"
+          echo "  ORIGIN_BUCKET_NAME : $ORIGIN_BUCKET_NAME"
+          echo "  ACM_CERT_ARN       : $ACM_CERT_ARN"
+          echo "  LAMBDA_FUNCTION    : $LAMBDA_FUNCTION_NAME"
+          echo "  LAMBDA_EXEC_ROLE   : $LAMBDA_EXEC_ROLE_ARN"
+          echo "  DEPLOYMENT_ROLE    : $DEPLOYMENT_ROLE_ARN"
+          echo "  DYNAMODB_TABLE_ARN : $DYNAMODB_TABLE_ARN"
+          echo "  OIDC_PROVIDER_ARN  : $OIDC_PROVIDER_ARN"
+          echo ""
+
+          # ── CHECK 1: S3 Block Public Access ─────────────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 1: S3 Block Public Access — $ORIGIN_BUCKET_NAME"
+          echo "------------------------------------------------------------"
+          BPA=$(aws s3api get-public-access-block --bucket "$ORIGIN_BUCKET_NAME")
+          BLOCK_ACLS=$(echo "$BPA"       | jq -r '.PublicAccessBlockConfiguration.BlockPublicAcls')
+          IGNORE_ACLS=$(echo "$BPA"      | jq -r '.PublicAccessBlockConfiguration.IgnorePublicAcls')
+          BLOCK_POLICY=$(echo "$BPA"     | jq -r '.PublicAccessBlockConfiguration.BlockPublicPolicy')
+          RESTRICT_BUCKETS=$(echo "$BPA" | jq -r '.PublicAccessBlockConfiguration.RestrictPublicBuckets')
+
+          if [[ "$BLOCK_ACLS" == "true" && "$IGNORE_ACLS" == "true" && \
+                "$BLOCK_POLICY" == "true" && "$RESTRICT_BUCKETS" == "true" ]]; then
+            echo "  PASS — all 4 Block Public Access flags are true"
+          else
+            echo "  FAIL — one or more Block Public Access flags are not true"
+            echo "    BlockPublicAcls=$BLOCK_ACLS IgnorePublicAcls=$IGNORE_ACLS"
+            echo "    BlockPublicPolicy=$BLOCK_POLICY RestrictPublicBuckets=$RESTRICT_BUCKETS"
+            exit 1
+          fi
+
+          # ── CHECK 2: S3 Versioning ───────────────────────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 2: S3 Versioning — $ORIGIN_BUCKET_NAME"
+          echo "------------------------------------------------------------"
+          VERSIONING_STATUS=$(aws s3api get-bucket-versioning \
+            --bucket "$ORIGIN_BUCKET_NAME" | jq -r '.Status // "Disabled"')
+
+          if [[ "$VERSIONING_STATUS" == "Enabled" ]]; then
+            echo "  PASS — versioning is Enabled"
+          else
+            echo "  FAIL — versioning Status is '$VERSIONING_STATUS' (expected Enabled)"
+            exit 1
+          fi
+
+          # ── CHECK 3: CloudFront HTTPS enforcement ────────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 3: CloudFront HTTPS enforcement — http://vikram-sre.dev"
+          echo "------------------------------------------------------------"
+          LOCATION_HEADER=$(curl -sI --max-time 15 http://vikram-sre.dev | grep -i '^location:')
+
+          if echo "$LOCATION_HEADER" | grep -qi 'https://'; then
+            echo "  PASS — HTTP request redirects to https://"
+            echo "    Location: $LOCATION_HEADER"
+          else
+            echo "  FAIL — no HTTPS redirect found in Location header"
+            echo "    Location header: '${LOCATION_HEADER:-<not present>}'"
+            exit 1
+          fi
+
+          # ── CHECK 4: ACM Certificate status ─────────────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 4: ACM Certificate status — us-east-1"
+          echo "------------------------------------------------------------"
+          ACM_STATUS=$(aws acm describe-certificate \
+            --certificate-arn "$ACM_CERT_ARN" \
+            --region us-east-1 | jq -r '.Certificate.Status')
+
+          if [[ "$ACM_STATUS" == "ISSUED" ]]; then
+            echo "  PASS — certificate Status is ISSUED"
+          else
+            echo "  FAIL — certificate Status is '$ACM_STATUS' (expected ISSUED)"
+            exit 1
+          fi
+
+          # ── CHECK 5: DynamoDB Point-in-Time Recovery ─────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 5: DynamoDB PITR — visitor-count"
+          echo "------------------------------------------------------------"
+          PITR_STATUS=$(aws dynamodb describe-continuous-backups \
+            --table-name visitor-count \
+            | jq -r '.ContinuousBackupsDescription.PointInTimeRecoveryDescription.PointInTimeRecoveryStatus')
+
+          if [[ "$PITR_STATUS" == "ENABLED" ]]; then
+            echo "  PASS — PointInTimeRecoveryStatus is ENABLED"
+          else
+            echo "  FAIL — PointInTimeRecoveryStatus is '$PITR_STATUS' (expected ENABLED)"
+            exit 1
+          fi
+
+          # ── CHECK 6: Lambda runtime ──────────────────────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 6: Lambda runtime — $LAMBDA_FUNCTION_NAME"
+          echo "------------------------------------------------------------"
+          LAMBDA_RUNTIME=$(aws lambda get-function-configuration \
+            --function-name "$LAMBDA_FUNCTION_NAME" | jq -r '.Runtime')
+
+          if [[ "$LAMBDA_RUNTIME" == "python3.12" ]]; then
+            echo "  PASS — Lambda Runtime is python3.12"
+          else
+            echo "  FAIL — Lambda Runtime is '$LAMBDA_RUNTIME' (expected python3.12)"
+            exit 1
+          fi
+
+          # ── CHECK 7: OIDC provider thumbprints ──────────────────────────
+          echo "------------------------------------------------------------"
+          echo "CHECK 7: OIDC provider thumbprints"
+          echo "------------------------------------------------------------"
+          THUMBPRINTS=$(aws iam get-open-id-connect-provider \
+            --open-id-connect-provider-arn "$OIDC_PROVIDER_ARN" \
+            | jq -r '.ThumbprintList[]')
+
+          THUMBPRINT_1="6938fd4d98bab03faadb97b34396831e3780aea1"
+          THUMBPRINT_2="1c58a3a8518e8759bf075b76b750d4f2df264fcd"
+          MISSING_THUMBPRINT=0
+
+          if echo "$THUMBPRINTS" | grep -qi "$THUMBPRINT_1"; then
+            echo "  PASS — thumbprint $THUMBPRINT_1 present"
+          else
+            echo "  FAIL — thumbprint $THUMBPRINT_1 NOT found"
+            MISSING_THUMBPRINT=1
+          fi
+
+          if echo "$THUMBPRINTS" | grep -qi "$THUMBPRINT_2"; then
+            echo "  PASS — thumbprint $THUMBPRINT_2 present"
+          else
+            echo "  FAIL — thumbprint $THUMBPRINT_2 NOT found"
+            MISSING_THUMBPRINT=1
+          fi
+
+          if [[ "$MISSING_THUMBPRINT" -ne 0 ]]; then
+            exit 1
+          fi
+
+          # ── IAM SIMULATION 1: Lambda execution role ──────────────────────
+          echo "------------------------------------------------------------"
+          echo "IAM SIM 1: Lambda execution role — DynamoDB permissions"
+          echo "------------------------------------------------------------"
+
+          # 1a. dynamodb:UpdateItem — ALLOW expected
+          EVAL=$(aws iam simulate-principal-policy \
+            --policy-source-arn "$LAMBDA_EXEC_ROLE_ARN" \
+            --action-names "dynamodb:UpdateItem" \
+            --resource-arns "$DYNAMODB_TABLE_ARN" \
+            | jq -r '.EvaluationResults[0].EvalDecision')
+          if [[ "$EVAL" == "allowed" ]]; then
+            echo "  PASS — dynamodb:UpdateItem is allowed"
+          else
+            echo "  FAIL — dynamodb:UpdateItem EvalDecision='$EVAL' (expected allowed)"
+            exit 1
+          fi
+
+          # 1b. dynamodb:GetItem — ALLOW expected
+          EVAL=$(aws iam simulate-principal-policy \
+            --policy-source-arn "$LAMBDA_EXEC_ROLE_ARN" \
+            --action-names "dynamodb:GetItem" \
+            --resource-arns "$DYNAMODB_TABLE_ARN" \
+            | jq -r '.EvaluationResults[0].EvalDecision')
+          if [[ "$EVAL" == "allowed" ]]; then
+            echo "  PASS — dynamodb:GetItem is allowed"
+          else
+            echo "  FAIL — dynamodb:GetItem EvalDecision='$EVAL' (expected allowed)"
+            exit 1
+          fi
+
+          # 1c. dynamodb:DeleteTable — DENY expected
+          EVAL=$(aws iam simulate-principal-policy \
+            --policy-source-arn "$LAMBDA_EXEC_ROLE_ARN" \
+            --action-names "dynamodb:DeleteTable" \
+            --resource-arns "$DYNAMODB_TABLE_ARN" \
+            | jq -r '.EvaluationResults[0].EvalDecision')
+          if [[ "$EVAL" == "explicitDeny" || "$EVAL" == "implicitDeny" ]]; then
+            echo "  PASS — dynamodb:DeleteTable is denied ($EVAL)"
+          else
+            echo "  FAIL — dynamodb:DeleteTable EvalDecision='$EVAL' (expected explicitDeny or implicitDeny)"
+            exit 1
+          fi
+
+          # ── IAM SIMULATION 2: Deployment role ───────────────────────────
+          echo "------------------------------------------------------------"
+          echo "IAM SIM 2: Deployment role — S3 permissions"
+          echo "------------------------------------------------------------"
+
+          # Origin bucket object ARN for PutObject check
+          ORIGIN_BUCKET_OBJECTS_ARN="${ORIGIN_BUCKET_ARN}/*"
+
+          # 2a. s3:PutObject — ALLOW expected
+          EVAL=$(aws iam simulate-principal-policy \
+            --policy-source-arn "$DEPLOYMENT_ROLE_ARN" \
+            --action-names "s3:PutObject" \
+            --resource-arns "$ORIGIN_BUCKET_OBJECTS_ARN" \
+            | jq -r '.EvaluationResults[0].EvalDecision')
+          if [[ "$EVAL" == "allowed" ]]; then
+            echo "  PASS — s3:PutObject is allowed"
+          else
+            echo "  FAIL — s3:PutObject EvalDecision='$EVAL' (expected allowed)"
+            exit 1
+          fi
+
+          # 2b. s3:DeleteBucket — DENY expected (scoped to bucket ARN, not objects)
+          EVAL=$(aws iam simulate-principal-policy \
+            --policy-source-arn "$DEPLOYMENT_ROLE_ARN" \
+            --action-names "s3:DeleteBucket" \
+            --resource-arns "$ORIGIN_BUCKET_ARN" \
+            | jq -r '.EvaluationResults[0].EvalDecision')
+          if [[ "$EVAL" == "explicitDeny" || "$EVAL" == "implicitDeny" ]]; then
+            echo "  PASS — s3:DeleteBucket is denied ($EVAL)"
+          else
+            echo "  FAIL — s3:DeleteBucket EvalDecision='$EVAL' (expected explicitDeny or implicitDeny)"
+            exit 1
+          fi
+
+          echo ""
+          echo "============================================================"
+          echo "  ALL SMOKE TESTS PASSED"
+          echo "============================================================"

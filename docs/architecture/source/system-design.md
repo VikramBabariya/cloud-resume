@@ -56,6 +56,12 @@ classDef idp fill:#24292E,stroke:#FFF,stroke-width:2px,color:#FFF;
         GHIdP[GitHub OIDC IdP <br> Identity Provider]:::idp
         STS[AWS STS <br> Security Token Service]:::sec
         IAM[IAM Trust Policy <br> Condition Gatekeeper]:::sec
+
+        subgraph TF_IaC ["Terraform IaC Pipeline"]
+            TF_Pipeline["terraform-cicd.yml<br>fmt → validate → checkov → plan → apply"]:::cicd
+            TF_State["S3 State Backend<br>(SSE-KMS, versioning)"]:::db
+            TF_Lock["DynamoDB Lock<br>(LockID)"]:::db
+        end
     end
 
     subgraph Layer_Observability ["Observability & Telemetry"]
@@ -92,4 +98,13 @@ classDef idp fill:#24292E,stroke:#FFF,stroke-width:2px,color:#FFF;
 
     GHRunner -- "6. Idempotent Deployment <br> (aws s3 sync --delete)" --> S3
     GHRunner -- 7. Cache Invalidation <br> (create-invalidation) --> CF
+
+    %% --- Terraform IaC Pipeline Flows ---
+    TF_Pipeline -->|"OIDC AssumeRoleWithWebIdentity"| IAM
+    TF_Pipeline -->|"terraform state r/w"| TF_State
+    TF_Pipeline -->|"state lock/unlock"| TF_Lock
+    TF_Pipeline -->|"provisions all AWS resources"| CF
+    TF_Pipeline -->|"provisions all AWS resources"| S3
 ```
+
+> **Pipeline separation note:** `GHRunner` (frontend pipeline, `front-end-cicd.yml`) and `TF_Pipeline` (IaC pipeline, `terraform-cicd.yml`) are separate GitHub Actions workflow files. Both authenticate via the same OIDC trust relationship with AWS, but use different `role-session-name` values (`github-actions-<run_id>` vs `terraform-<run_id>`) to distinguish sessions in CloudTrail and IAM condition evaluation.
