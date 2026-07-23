@@ -209,8 +209,132 @@ data "aws_iam_policy_document" "deployment_permissions" {
       "kms:DescribeKey",
       "kms:Encrypt",
       "kms:GenerateDataKey",
+      "kms:GetKeyPolicy",
     ]
     resources = [var.state_kms_key_arn]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Terraform plan/refresh read permissions
+  # Terraform must describe every managed resource during state refresh to
+  # compute the diff. These are all read-only actions scoped to the specific
+  # resources this role already manages — no wildcard resource ARNs.
+  # ---------------------------------------------------------------------------
+
+  statement {
+    sid    = "TerraformReadS3Origin"
+    effect = "Allow"
+    actions = [
+      "s3:GetBucketPolicy",
+      "s3:GetBucketVersioning",
+      "s3:GetBucketPublicAccessBlock",
+      "s3:GetEncryptionConfiguration",
+      "s3:GetBucketAcl",
+      "s3:GetBucketCORS",
+      "s3:GetBucketWebsite",
+      "s3:GetBucketLogging",
+      "s3:GetBucketObjectLockConfiguration",
+      "s3:GetBucketRequestPayment",
+      "s3:GetLifecycleConfiguration",
+      "s3:GetReplicationConfiguration",
+      "s3:GetAccelerateConfiguration",
+      "s3:GetBucketTagging",
+    ]
+    resources = [
+      var.s3_origin_bucket_arn,
+      var.state_bucket_arn,
+    ]
+  }
+
+  statement {
+    sid    = "TerraformReadCloudFront"
+    effect = "Allow"
+    actions = [
+      "cloudfront:GetDistribution",
+      "cloudfront:GetOriginAccessControl",
+      "cloudfront:ListTagsForResource",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "TerraformReadACM"
+    effect = "Allow"
+    actions = [
+      "acm:DescribeCertificate",
+      "acm:ListTagsForCertificate",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "TerraformReadDynamoDB"
+    effect = "Allow"
+    actions = [
+      "dynamodb:DescribeTable",
+      "dynamodb:DescribeTimeToLive",
+      "dynamodb:DescribeContinuousBackups",
+      "dynamodb:ListTagsOfResource",
+    ]
+    resources = [
+      var.dynamodb_table_arn,
+      var.state_lock_table_arn,
+    ]
+  }
+
+  statement {
+    sid    = "TerraformReadAPIGateway"
+    effect = "Allow"
+    actions = [
+      "apigateway:GET",
+    ]
+    resources = ["arn:aws:apigateway:*::/*"]
+  }
+
+  statement {
+    sid    = "TerraformReadIAM"
+    effect = "Allow"
+    actions = [
+      "iam:GetRole",
+      "iam:GetRolePolicy",
+      "iam:ListRolePolicies",
+      "iam:ListAttachedRolePolicies",
+      "iam:GetOpenIDConnectProvider",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "TerraformReadSNS"
+    effect = "Allow"
+    actions = [
+      "sns:GetTopicAttributes",
+      "sns:ListTagsForResource",
+      "sns:GetSubscriptionAttributes",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "TerraformReadLambda"
+    effect = "Allow"
+    actions = [
+      "lambda:GetFunction",
+      "lambda:GetFunctionCodeSigningConfig",
+      "lambda:GetPolicy",
+      "lambda:ListVersionsByFunction",
+      "lambda:GetAlias",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "TerraformReadBudgets"
+    effect = "Allow"
+    actions = [
+      "budgets:ViewBudget",
+    ]
+    resources = ["*"]
   }
 }
 
