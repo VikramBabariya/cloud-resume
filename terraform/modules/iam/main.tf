@@ -402,6 +402,20 @@ data "aws_iam_policy_document" "deployment_permissions" {
     resources = [var.lambda_function_arn]
   }
 
+  # ── Lambda: apply (code + config updates) ────────────────────────────────
+  statement {
+    sid    = "TerraformApplyLambda"
+    effect = "Allow"
+    actions = [
+      "lambda:UpdateFunctionCode",
+      "lambda:UpdateFunctionConfiguration",
+      "lambda:PublishVersion",
+      "lambda:AddPermission",
+      "lambda:RemovePermission",
+    ]
+    resources = [var.lambda_function_arn]
+  }
+
   # ── Budgets: plan refresh ─────────────────────────────────────────────────
   statement {
     sid    = "TerraformReadBudgets"
