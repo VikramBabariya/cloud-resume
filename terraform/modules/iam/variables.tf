@@ -28,6 +28,32 @@ variable "state_kms_key_arn" {
   type        = string
 }
 
+variable "acm_certificate_arn" {
+  description = "ARN of the ACM TLS certificate (us-east-1) — scoped into the deployment role for terraform plan refresh"
+  type        = string
+}
+
+variable "lambda_function_arn" {
+  description = "ARN of the visitor-counter Lambda function — scoped into the deployment role for terraform plan refresh"
+  type        = string
+}
+
+variable "sns_topic_arn" {
+  description = "ARN of the budget alerts SNS topic — scoped into the deployment role for terraform plan refresh"
+  type        = string
+}
+
+variable "aws_account_id" {
+  description = "AWS account ID — used to construct budget ARN for IAM scoping"
+  type        = string
+  sensitive   = true
+}
+
+variable "aws_region" {
+  description = "AWS region — used to construct API Gateway ARN for IAM scoping"
+  type        = string
+}
+
 variable "github_repo" {
   description = "GitHub repository in org/repo format used to construct the OIDC sub claim (e.g. VikramBabariya/zero-trust-rac-platform)"
   type        = string

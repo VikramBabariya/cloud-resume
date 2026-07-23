@@ -68,6 +68,11 @@ module "iam" {
   state_bucket_arn            = module.state_backend.state_bucket_arn
   state_kms_key_arn           = module.state_backend.kms_key_arn
   state_lock_table_arn        = "arn:aws:dynamodb:${var.aws_region}:${var.aws_account_id}:table/zero-trust-rac-tfstate-lock"
+  acm_certificate_arn         = module.cdn.acm_certificate_arn
+  lambda_function_arn         = module.compute.lambda_function_arn
+  sns_topic_arn               = aws_sns_topic.budget_alerts.arn
+  aws_account_id              = var.aws_account_id
+  aws_region                  = var.aws_region
   github_repo                 = "VikramBabariya/zero-trust-rac-platform"
   github_branch               = "main"
 }
