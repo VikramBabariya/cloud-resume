@@ -84,7 +84,7 @@ resource "aws_iam_openid_connect_provider" "github_actions" {
 
 data "aws_iam_policy_document" "deployment_trust" {
   statement {
-    sid     = "AllowGitHubOIDC"
+    sid     = "AllowGitHubOIDCPushToMain"
     effect  = "Allow"
     actions = ["sts:AssumeRoleWithWebIdentity"]
 
@@ -93,10 +93,37 @@ data "aws_iam_policy_document" "deployment_trust" {
       identifiers = [aws_iam_openid_connect_provider.github_actions.arn]
     }
 
+    # Locked to push events on the main branch only — apply runs here.
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
       values   = ["repo:${var.github_repo}:ref:refs/heads/${var.github_branch}"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+  }
+
+  statement {
+    sid     = "AllowGitHubOIDCPullRequest"
+    effect  = "Allow"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.github_actions.arn]
+    }
+
+    # Allows PR-triggered runs (terraform plan only — apply is gated by
+    # github.event_name == 'push' in the workflow, not by this policy).
+    # Scoped to this repository only — no cross-repo token reuse possible.
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = ["repo:${var.github_repo}:pull_request"]
     }
 
     condition {
