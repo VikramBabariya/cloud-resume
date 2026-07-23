@@ -152,6 +152,7 @@ data "aws_iam_policy_document" "deployment_permissions" {
     actions = ["s3:ListBucket"]
     resources = [
       var.s3_origin_bucket_arn,
+      var.state_bucket_arn,
     ]
   }
 
@@ -210,6 +211,8 @@ data "aws_iam_policy_document" "deployment_permissions" {
       "kms:Encrypt",
       "kms:GenerateDataKey",
       "kms:GetKeyPolicy",
+      "kms:GetKeyRotationStatus",
+      "kms:ListResourceTags",
     ]
     resources = [var.state_kms_key_arn]
   }
@@ -225,6 +228,7 @@ data "aws_iam_policy_document" "deployment_permissions" {
     sid    = "TerraformReadS3Origin"
     effect = "Allow"
     actions = [
+      "s3:GetBucketLocation",
       "s3:GetBucketPolicy",
       "s3:GetBucketVersioning",
       "s3:GetBucketPublicAccessBlock",
@@ -239,6 +243,8 @@ data "aws_iam_policy_document" "deployment_permissions" {
       "s3:GetReplicationConfiguration",
       "s3:GetAccelerateConfiguration",
       "s3:GetBucketTagging",
+      "s3:GetBucketNotification",
+      "s3:ListBucketVersions",
     ]
     resources = [
       var.s3_origin_bucket_arn,
@@ -300,6 +306,8 @@ data "aws_iam_policy_document" "deployment_permissions" {
       "iam:ListRolePolicies",
       "iam:ListAttachedRolePolicies",
       "iam:GetOpenIDConnectProvider",
+      "iam:GetPolicy",
+      "iam:GetPolicyVersion",
     ]
     resources = ["*"]
   }
@@ -311,6 +319,7 @@ data "aws_iam_policy_document" "deployment_permissions" {
       "sns:GetTopicAttributes",
       "sns:ListTagsForResource",
       "sns:GetSubscriptionAttributes",
+      "sns:ListSubscriptionsByTopic",
     ]
     resources = ["*"]
   }
@@ -320,6 +329,7 @@ data "aws_iam_policy_document" "deployment_permissions" {
     effect = "Allow"
     actions = [
       "lambda:GetFunction",
+      "lambda:GetFunctionConfiguration",
       "lambda:GetFunctionCodeSigningConfig",
       "lambda:GetPolicy",
       "lambda:ListVersionsByFunction",
@@ -333,6 +343,7 @@ data "aws_iam_policy_document" "deployment_permissions" {
     effect = "Allow"
     actions = [
       "budgets:ViewBudget",
+      "budgets:ListTagsForResource",
     ]
     resources = ["*"]
   }
