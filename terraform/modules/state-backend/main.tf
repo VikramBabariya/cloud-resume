@@ -1,4 +1,5 @@
 resource "aws_kms_key" "state" {
+  # checkov:skip=CKV2_AWS_64: Explicit KMS key policy omitted — default policy allows root account full access, which is appropriate for a single-account bootstrap KMS key; adding an explicit policy would require hardcoding the account ID or introducing circular dependencies with IAM roles that depend on this key
   description             = "KMS key for Terraform state bucket SSE-KMS encryption"
   deletion_window_in_days = 30
   enable_key_rotation     = true
@@ -66,6 +67,8 @@ resource "aws_s3_bucket_policy" "state" {
 }
 
 resource "aws_dynamodb_table" "lock" {
+  # checkov:skip=CKV_AWS_119: CMK encryption on the state lock table adds per-request KMS costs that breach the $6/mo FinOps hard cap; AWS-owned KMS key provides sufficient at-rest encryption for a lock-only table containing no business data
+  # checkov:skip=CKV_AWS_28: PITR on the state lock table is not required — the lock table stores only ephemeral lock entries (LockID + metadata); no business data is at risk of loss and PITR would add unnecessary cost
   name         = var.dynamodb_table_name
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"

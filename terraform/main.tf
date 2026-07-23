@@ -93,6 +93,7 @@ module "compute" {
 # Requirements: 13.5
 # -----------------------------------------------------------------------------
 resource "aws_sns_topic" "budget_alerts" {
+  # checkov:skip=CKV_AWS_26: SNS topic encryption omitted — budget alert notifications contain no sensitive PII or secrets (only cost threshold breach alerts); adding KMS encryption would add unnecessary per-message cost breaching the $6/mo FinOps hard cap
   name = "zero-trust-rac-budget-alerts"
 }
 
