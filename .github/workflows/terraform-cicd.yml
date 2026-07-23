@@ -49,6 +49,9 @@ jobs:
         with:
           # Pessimistic constraint: allow any 1.x patch ≥ 1.9.0
           terraform_version: "~> 1.9"
+          # terraform_wrapper: true is required for steps.plan.outputs.stdout
+          # to capture plan output for the PR comment step.
+          terraform_wrapper: true
 
       # ──────────────────────────────────────────────────────────────────────
       # GATE 1 — FORMAT CHECK
@@ -98,6 +101,8 @@ jobs:
         run: pip install "checkov>=3.2"
 
       - name: Run checkov (block on HIGH/CRITICAL)
+        id: checkov
+        continue-on-error: true
         run: |
           checkov -d . \
             --framework terraform \
@@ -118,7 +123,7 @@ jobs:
 
       - name: terraform plan
         id: plan
-        if: github.event_name == 'pull_request'
+        if: always() && github.event_name == 'pull_request'
         continue-on-error: true
         run: terraform plan -no-color -input=false
         env:
@@ -127,7 +132,7 @@ jobs:
           TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
 
       - name: Post plan comment on PR
-        if: github.event_name == 'pull_request'
+        if: always() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
@@ -136,20 +141,32 @@ jobs:
             // GitHub Actions exposes the step outcome as "success" / "failure"
             // when continue-on-error is set; we use the raw exit code via the
             // steps context for a more precise status label.
-            const outcome = '${{ steps.plan.outcome }}';
-            const exitCode = '${{ steps.plan.outputs.exitcode }}';
+            const planOutcome = '${{ steps.plan.outcome }}';
+            const planExitCode = '${{ steps.plan.outputs.exitcode }}';
+            const checkovOutcome = '${{ steps.checkov.outcome }}';
 
             let statusEmoji;
             let statusLabel;
-            if (outcome === 'failure') {
+            if (planOutcome === 'skipped') {
+              statusEmoji = '⏭️';
+              statusLabel = 'Plan skipped — prior step failed';
+            } else if (planOutcome === 'failure') {
               statusEmoji = '❌';
               statusLabel = 'Plan failed (exit code 1 — check logs for errors)';
-            } else if (exitCode === '2') {
+            } else if (planExitCode === '2') {
               statusEmoji = '⚠️';
               statusLabel = 'Changes detected (exit code 2 — review diff below)';
             } else {
               statusEmoji = '✅';
               statusLabel = 'No changes — infrastructure is up-to-date (exit code 0)';
+            }
+
+            // Add checkov status indicator
+            let checkovBadge = '';
+            if (checkovOutcome === 'failure') {
+              checkovBadge = ' | 🔒 **Checkov:** ❌ HIGH/CRITICAL findings — see logs';
+            } else if (checkovOutcome === 'success') {
+              checkovBadge = ' | 🔒 **Checkov:** ✅ Passed';
             }
 
             // ── Build comment body ────────────────────────────────────────
@@ -168,7 +185,7 @@ jobs:
               '<!-- terraform-plan -->',
               '### Terraform Plan',
               '',
-              `**Status:** ${statusEmoji} ${statusLabel}`,
+              `**Status:** ${statusEmoji} ${statusLabel}${checkovBadge}`,
               '',
               '<details>',
               '<summary>Plan output (click to expand)</summary>',
@@ -217,8 +234,13 @@ jobs:
 
             // Propagate the plan failure so the overall job still fails even
             // though continue-on-error was set on the plan step.
-            if (outcome === 'failure') {
+            if (planOutcome === 'failure') {
               core.setFailed('terraform plan failed — see plan comment for details');
+            }
+            
+            // Also propagate checkov failure so the job fails when HIGH/CRITICAL findings exist
+            if (checkovOutcome === 'failure') {
+              core.setFailed('checkov scan found HIGH/CRITICAL findings — see workflow logs');
             }
 
       # ──────────────────────────────────────────────────────────────────────
