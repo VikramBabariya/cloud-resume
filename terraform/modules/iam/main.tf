@@ -199,6 +199,19 @@ data "aws_iam_policy_document" "deployment_permissions" {
     ]
     resources = [var.state_lock_table_arn]
   }
+
+  # KMS permissions for state bucket encryption (Req 11.4)
+  statement {
+    sid    = "TerraformStateKMSDecryptEncrypt"
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt",
+      "kms:DescribeKey",
+      "kms:Encrypt",
+      "kms:GenerateDataKey",
+    ]
+    resources = [var.state_kms_key_arn]
+  }
 }
 
 resource "aws_iam_role_policy" "deployment" {

@@ -23,6 +23,11 @@ variable "state_lock_table_arn" {
   type        = string
 }
 
+variable "state_kms_key_arn" {
+  description = "ARN of the KMS key used for Terraform state S3 bucket encryption — scoped into the deployment role for state decrypt/encrypt"
+  type        = string
+}
+
 variable "github_repo" {
   description = "GitHub repository in org/repo format used to construct the OIDC sub claim (e.g. VikramBabariya/zero-trust-rac-platform)"
   type        = string

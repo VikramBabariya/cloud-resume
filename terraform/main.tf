@@ -66,6 +66,7 @@ module "iam" {
   s3_origin_bucket_arn        = module.cdn.origin_bucket_arn
   cloudfront_distribution_arn = module.cdn.cloudfront_distribution_arn
   state_bucket_arn            = module.state_backend.state_bucket_arn
+  state_kms_key_arn           = module.state_backend.kms_key_arn
   state_lock_table_arn        = "arn:aws:dynamodb:${var.aws_region}:${var.aws_account_id}:table/zero-trust-rac-tfstate-lock"
   github_repo                 = "VikramBabariya/zero-trust-rac-platform"
   github_branch               = "main"
