@@ -138,6 +138,7 @@ jobs:
         run: terraform plan -no-color -input=false
         env:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
           TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
           TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
 
@@ -267,6 +268,7 @@ jobs:
         run: terraform apply -auto-approve -input=false
         env:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
           TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
           TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
 

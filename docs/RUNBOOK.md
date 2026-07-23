@@ -81,6 +81,7 @@ Both CI/CD pipelines (`front-end-cicd.yml` and `terraform-cicd.yml`) authenticat
 | `S3_BUCKET_NAME`          | `front-end-cicd.yml` | `terraform output -raw origin_bucket_arn \| sed 's\|arn:aws:s3:::\|\|'`                              |
 | `CDN_DISTRIBUTION_ID`     | `front-end-cicd.yml` | `terraform output -raw cloudfront_distribution_id`                                                   |
 | `CLOUDFLARE_API_TOKEN`    | `terraform-cicd.yml` | Cloudflare dashboard → **My Profile → API Tokens**                                                   |
+| `CLOUDFLARE_ZONE_ID`      | `terraform-cicd.yml` | Cloudflare dashboard → your domain → **Overview → Zone ID** (right sidebar)                          |
 | `AWS_ACCOUNT_ID`          | `terraform-cicd.yml` | AWS Console → top-right account menu, or `aws sts get-caller-identity --query Account --output text` |
 | `NOTIFICATION_EMAIL`      | `terraform-cicd.yml` | The email address you want budget alerts sent to                                                     |
 
