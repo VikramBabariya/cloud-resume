@@ -30,7 +30,7 @@ The deployment architecture mathematically prevents supply chain pollution and o
 To defend against Layer 7 Denial-of-Wallet (DoW) attacks and ensure lean operational sustainability, rigorous FinOps mechanisms are hardcoded into the platform.
 
 - **CORS Restrictions:** The API Gateway enforces strict Cross-Origin Resource Sharing (CORS) rules, rejecting unauthorized invocations and ensuring the backend API can only be successfully called by the legitimate `vikram-sre.dev` frontend domain.
-- **Proactive Budget Alarms:** AWS CloudWatch Billing Alarms are firmly tied to a strict $6.00 monthly budget threshold. Automated notifications are dispatched to the administrative email immediately when actual costs exceed 35% of the budget, or when forecasted costs hit 100%, enabling rapid **MTTR** for anomalous compute spikes.
+- **Proactive Budget Alarms:** AWS Budgets provides a monthly hard-capped alarm at $6.00 USD (₹500 INR) with two notification thresholds: actual costs at 35% ($2.10) and forecasted costs at 100%. Notifications are delivered via an SNS topic subscribed to the administrative email, enabling rapid **MTTR** for anomalous compute spikes.
 
 ### 5. Infrastructure-as-Code Security Controls
 

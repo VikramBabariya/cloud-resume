@@ -88,7 +88,12 @@ Both CI/CD pipelines (`front-end-cicd.yml` and `terraform-cicd.yml`) authenticat
 ### 4.2. How Each Secret Is Used
 
 **`AWS_DEPLOYMENT_ROLE_ARN`**
-Both pipelines use this to perform the OIDC token exchange with AWS STS. The role is provisioned by `module.iam` in Terraform with a trust policy locked to `repo:VikramBabariya/zero-trust-rac-platform:ref:refs/heads/main`. No static IAM keys are used anywhere.
+Both pipelines use this to perform the OIDC token exchange with AWS STS. The role is provisioned by `module.iam` in Terraform with a **two-statement trust policy**:
+
+- **Statement 1 (push events):** `sub` claim locked to `repo:VikramBabariya/zero-trust-rac-platform:ref:refs/heads/main` — permits `terraform apply` and frontend deploys on merge to `main`.
+- **Statement 2 (pull request events):** `sub` claim locked to `repo:VikramBabariya/zero-trust-rac-platform:pull_request` — permits `terraform plan` and read-only state access on PRs.
+
+Both statements enforce `StringEquals` on `aud = "sts.amazonaws.com"`. No static IAM keys are used anywhere. See [INC-002](../incidents/INC-002-oidc-pr-trust-policy-rejection.md) for the incident that led to the two-statement design.
 
 ```yaml
 # Used in both workflows as:
@@ -313,18 +318,22 @@ A local plan lets you preview infrastructure changes before pushing to a PR. You
 
 Terraform automatically maps any environment variable prefixed `TF_VAR_` to the matching variable declaration (e.g. `TF_VAR_cloudflare_api_token` → `var.cloudflare_api_token`). These values exist only for the current shell session — never written to disk.
 
-**PowerShell (Windows):**
+> **Windows users:** Terraform is installed in WSL, not on the native Windows PATH. All `terraform` commands must be run inside WSL. The commands below use `$(wslpath "$(pwd)")` to convert your current Windows working directory to its WSL mount path automatically — no hardcoded paths needed.
 
-```powershell
-cd terraform/
+**WSL (Windows):**
 
-# Set sensitive variables for the current session only
-$env:TF_VAR_cloudflare_api_token = "<your-cloudflare-api-token>"
-$env:TF_VAR_cloudflare_zone_id   = "<your-cloudflare-zone-id>"
-$env:TF_VAR_aws_account_id       = "<your-aws-account-id>"
-$env:TF_VAR_notification_email   = "<your-notification-email>"
+```bash
+# Run from the repo root in PowerShell or CMD
+wsl -- bash -c "
+  cd \$(wslpath '\$(pwd)')/terraform
 
-terraform plan
+  export TF_VAR_cloudflare_api_token='<your-cloudflare-api-token>'
+  export TF_VAR_cloudflare_zone_id='<your-cloudflare-zone-id>'
+  export TF_VAR_aws_account_id='<your-aws-account-id>'
+  export TF_VAR_notification_email='<your-notification-email>'
+
+  terraform plan
+"
 ```
 
 **bash/zsh (Linux/macOS):**
@@ -353,8 +362,8 @@ To add a new environment (e.g., `staging`):
 1. **Create a new workspace:**
 
    ```bash
-   cd terraform/
-   terraform workspace new staging
+   # Run from the repo root in PowerShell or CMD
+   wsl -- bash -c "cd \$(wslpath '\$(pwd)')/terraform && terraform workspace new staging"
    ```
 
 2. **Create a corresponding `terraform.tfvars` file for the new environment** (never commit this file — it is covered by `.gitignore`):
@@ -367,8 +376,8 @@ To add a new environment (e.g., `staging`):
 3. **Plan and apply with the environment-specific vars:**
 
    ```bash
-   terraform plan -var-file="terraform.staging.tfvars"
-   terraform apply -var-file="terraform.staging.tfvars"
+   wsl -- bash -c "cd \$(wslpath '\$(pwd)')/terraform && terraform plan -var-file='terraform.staging.tfvars'"
+   wsl -- bash -c "cd \$(wslpath '\$(pwd)')/terraform && terraform apply -var-file='terraform.staging.tfvars'"
    ```
 
 > **Rule:** No file under `modules/` should be created, modified, or deleted when adding a new environment. Environment differences are expressed entirely through workspace selection and `terraform.tfvars` values. If a new environment requires a structural module change, open a PR and document it in an ADR first.

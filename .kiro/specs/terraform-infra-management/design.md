@@ -336,15 +336,21 @@ terraform {
 
 #### `modules/iam`
 
-| Variable                      | Type     | Required | Sensitive | Description                                                                           |
-| ----------------------------- | -------- | -------- | --------- | ------------------------------------------------------------------------------------- |
-| `dynamodb_table_arn`          | `string` | yes      | no        | ARN of the visitor-count table — no default, plan fails if unset                      |
-| `s3_origin_bucket_arn`        | `string` | yes      | no        | ARN of the S3 origin bucket                                                           |
-| `cloudfront_distribution_arn` | `string` | yes      | no        | ARN of the CloudFront distribution                                                    |
-| `state_bucket_arn`            | `string` | yes      | no        | ARN of the Terraform state bucket                                                     |
-| `state_lock_table_arn`        | `string` | yes      | no        | ARN of the state lock DynamoDB table                                                  |
-| `github_repo`                 | `string` | yes      | no        | `org/repo` string for OIDC sub claim (e.g., `VikramBabariya/zero-trust-rac-platform`) |
-| `github_branch`               | `string` | yes      | no        | Branch for OIDC sub claim (e.g., `main`)                                              |
+| Variable                      | Type     | Required | Sensitive | Description                                                                                           |
+| ----------------------------- | -------- | -------- | --------- | ----------------------------------------------------------------------------------------------------- |
+| `dynamodb_table_arn`          | `string` | yes      | no        | ARN of the visitor-count table — no default, plan fails if unset                                      |
+| `s3_origin_bucket_arn`        | `string` | yes      | no        | ARN of the S3 origin bucket                                                                           |
+| `cloudfront_distribution_arn` | `string` | yes      | no        | ARN of the CloudFront distribution                                                                    |
+| `state_bucket_arn`            | `string` | yes      | no        | ARN of the Terraform state bucket                                                                     |
+| `state_lock_table_arn`        | `string` | yes      | no        | ARN of the state lock DynamoDB table                                                                  |
+| `state_kms_key_arn`           | `string` | yes      | no        | ARN of the KMS key used for state S3 bucket encryption — deployment role needs decrypt/encrypt        |
+| `acm_certificate_arn`         | `string` | yes      | no        | ARN of the ACM certificate (us-east-1) — deployment role needs read access for terraform plan refresh |
+| `lambda_function_arn`         | `string` | yes      | no        | ARN of the visitor-counter Lambda function — deployment role needs read + update access               |
+| `sns_topic_arn`               | `string` | yes      | no        | ARN of the budget alerts SNS topic — deployment role needs read access for terraform plan refresh     |
+| `aws_account_id`              | `string` | yes      | yes       | AWS account ID — used to construct budget ARN for IAM scoping                                         |
+| `aws_region`                  | `string` | yes      | no        | AWS region — used to construct API Gateway ARN for IAM scoping                                        |
+| `github_repo`                 | `string` | yes      | no        | `org/repo` string for OIDC sub claim (e.g., `VikramBabariya/zero-trust-rac-platform`)                 |
+| `github_branch`               | `string` | yes      | no        | Branch for OIDC sub claim (e.g., `main`)                                                              |
 
 | Output                      | Sensitive | Description                                                   |
 | --------------------------- | --------- | ------------------------------------------------------------- |
@@ -420,6 +426,7 @@ terraform {
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "AllowGitHubOIDCPushToMain",
       "Effect": "Allow",
       "Principal": {
         "Federated": "arn:aws:iam::ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"
@@ -431,10 +438,26 @@ terraform {
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
         }
       }
+    },
+    {
+      "Sid": "AllowGitHubOIDCPullRequest",
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "token.actions.githubusercontent.com:sub": "repo:VikramBabariya/zero-trust-rac-platform:pull_request",
+          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+        }
+      }
     }
   ]
 }
 ```
+
+> **Two-statement design:** GitHub issues a different `sub` claim value depending on the triggering event type. Push-to-main and pull_request events both need to authenticate (push for apply, PR for plan), but use different `sub` values. A single-statement policy scoped to `ref:refs/heads/main` blocks PR-triggered runs. This was discovered operationally — see INC-002. The workflow itself gates `terraform apply` to push events only via `if: github.event_name == 'push'`, providing defense-in-depth.
 
 #### Root `variables.tf` (Sensitive Variables)
 

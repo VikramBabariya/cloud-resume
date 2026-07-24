@@ -123,8 +123,9 @@ data "aws_iam_policy_document" "deployment_trust" {
 Since the trust policy change was in Terraform but the pipeline itself was broken (chicken-and-egg problem), the fix was applied via a targeted local `terraform apply`:
 
 ```bash
+# Run from the repo root in PowerShell or CMD
 wsl -- bash -c "
-  cd /mnt/c/Vikram/01_Projects/zero-trust-rac-platform/terraform &&
+  cd \$(wslpath '\$(pwd)')/terraform &&
   export TF_VAR_cloudflare_api_token='<redacted>' &&
   export TF_VAR_cloudflare_zone_id='<redacted>' &&
   export TF_VAR_aws_account_id='<redacted>' &&
