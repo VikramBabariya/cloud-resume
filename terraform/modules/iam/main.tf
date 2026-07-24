@@ -335,7 +335,7 @@ data "aws_iam_policy_document" "deployment_permissions" {
     resources = ["*"]
   }
 
-  # ── IAM: plan refresh ────────────────────────────────────────────────────
+  # ── IAM: plan refresh and Policy Simulation ────────────────────────────────────────────────────
   # IAM read actions (GetRole, GetRolePolicy, etc.) do support ARN scoping for
   # roles, but GetOpenIDConnectProvider and List* require "*".
   statement {
@@ -346,6 +346,7 @@ data "aws_iam_policy_document" "deployment_permissions" {
       "iam:GetRolePolicy",
       "iam:ListRolePolicies",
       "iam:ListAttachedRolePolicies",
+      "iam:SimulatePrincipalPolicy",
     ]
     resources = [
       aws_iam_role.lambda_execution.arn,
