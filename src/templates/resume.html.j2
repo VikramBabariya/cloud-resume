@@ -123,8 +123,8 @@
 
     <script>
       const counterContainer = document.getElementById('counter');
-      // Replace with active API Gateway Invoke URL during AWS provisioning
-      const apiURL = 'https://kj49hc8y0a.execute-api.ap-south-1.amazonaws.com/count';
+      // API Gateway Invoke URL sourced from data/resume.yaml via build pipeline
+      const apiURL = '{{ basics.api_gateway_url | e }}/count';
 
       async function updateCounter() {
         try {
@@ -134,7 +134,7 @@
           
           const response = await fetch(apiURL, { 
             signal: controller.signal,
-            method: 'GET',
+            method: 'POST',
             mode: 'cors',               // Explicitly declare cross-origin intent
             headers: {
               'Accept': 'application/json' // Explicitly request a JSON response

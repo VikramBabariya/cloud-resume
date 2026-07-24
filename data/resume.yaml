@@ -8,6 +8,7 @@ basics:
   url: https://vikram-sre.dev/
   summary: |
     Cloud & DevSecOps Engineer transitioning from a Python backend foundation to high-availability infrastructure. Specializes in architecting zero-trust AWS serverless ecosystems, enforcing immutable CI/CD delivery pipelines, and applying Shift-Left SRE quality gates to strictly reduce TCO and MTTR.
+  api_gateway_url: https://vu82wyjtqk.execute-api.ap-south-1.amazonaws.com
   location:
     city: Rajkot
     region: Gujarat
