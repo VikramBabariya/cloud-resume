@@ -252,7 +252,7 @@ This is pure Infrastructure-as-Code. There are no pure functions with randomised
   - _Requirements: 13.5_
   - _Note: Implemented as Section 6 ("IaC Bootstrap Prerequisites") in docs/RUNBOOK.md. The approach uses a Terraform local-state bootstrap with `terraform apply -target=module.state_backend` followed by `terraform init -migrate-state` — a superior pattern to manual ClickOps console steps. Section 8 ("IaC Day-2 Operations") also added covering local plan runs, new environment setup, and checkov suppression guidance._
 
-- [ ] 14. Final checkpoint — end-to-end validation
+- [x] 14. Final checkpoint — end-to-end validation
   - Run `terraform fmt -check -recursive` and resolve any formatting issues
   - Run `terraform validate` and confirm clean output
   - Run a local checkov scan: `checkov -d terraform/ --framework terraform --compact` — confirm all HIGH/CRITICAL findings are either resolved or suppressed with documented inline waivers
