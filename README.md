@@ -1,10 +1,10 @@
 # Zero-Trust RaC Platform
 
-> An SRE-hardened Zero-Trust RaC Platform leveraging OIDC federation and idempotent CI/CD to mathematically enforce blast radius containment and the Principle of Least Privilege (PoLP) at the edge.
+> An SRE-hardened Zero-Trust RaC Platform with fully declarative Terraform IaC, OIDC-federated pipelines, and idempotent CI/CD — mathematically enforcing blast radius containment and the Principle of Least Privilege (PoLP) across every infrastructure layer.
 
 ## Executive Overview
 
-This project is a fully automated, serverless full-stack application hosting a professional web portfolio on AWS. It demonstrates enterprise-grade cloud-native architecture, automated Site Reliability Engineering (SRE) quality gates, and advanced observability. The frontend utilizes a "Resume-as-Code" methodology for deterministic artifact compilation, while the backend features a purely serverless real-time visitor counter.
+This project is a fully automated, serverless full-stack application hosting a professional web portfolio on AWS. It demonstrates enterprise-grade cloud-native architecture, automated Site Reliability Engineering (SRE) quality gates, and advanced observability. The frontend utilizes a "Resume-as-Code" methodology for deterministic artifact compilation, while the backend features a purely serverless real-time visitor counter. The **entire AWS and Cloudflare infrastructure** — CloudFront, S3, ACM, API Gateway, Lambda, DynamoDB, IAM, OIDC provider, and DNS records — is provisioned and managed declaratively via **Terraform**, with a dedicated IaC CI/CD pipeline enforcing shift-left security scanning (`checkov`), pull-request plan reviews, and zero-ClickOps deployments.
 
 **Live Production Environment:** [https://vikram-sre.dev/](https://vikram-sre.dev/)
 
@@ -20,6 +20,9 @@ This project transcends a standard static website by operating as a fully automa
 - **Zero-Trust Identity Federation & Non-Repudiation**
   - _Implementation:_ Long-lived AWS IAM Access Keys have been strictly deprecated. The GitHub Actions CI/CD runner authenticates against AWS utilizing an OpenID Connect (OIDC) Identity Provider to assume a short-lived, ephemeral STS session token.
   - _Strategic Value:_ This Zero-Trust architecture mathematically enforces **Blast Radius Containment**; in the event of a runner compromise, the credential automatically expires. Furthermore, dynamic STS session naming (via GitHub Run IDs) guarantees absolute **Non-Repudiation**, ensuring every deployment mutation is cryptographically traceable within AWS CloudTrail.
+- **Declarative Infrastructure as Code (Zero-ClickOps)**
+  - _Implementation:_ Every AWS and Cloudflare resource — CloudFront, S3, ACM, API Gateway, Lambda, DynamoDB, IAM roles, OIDC provider, and DNS records — is declared in Terraform (>= 1.9.0) across five focused child modules. A dedicated `terraform-cicd.yml` pipeline runs a sequential gate sequence (`fmt → validate → checkov → plan → apply`), posts the exact resource diff as a PR comment before any apply, and uses the same OIDC federation as the frontend pipeline — no static credentials anywhere.
+  - _Strategic Value:_ This eliminates configuration drift and makes every infrastructure mutation a peer-reviewed, auditable Git commit. `checkov >= 3.2` runs as a required shift-left gate blocking HIGH/CRITICAL misconfigurations before they reach AWS. The result is a **fully reproducible infrastructure** — any environment can be rebuilt from a single `terraform apply` with no console intervention.
 - **Shift-Left Quality Gates & The "Fail Fast" Principle**
   - _Implementation:_ The pipeline explicitly decouples data (`resume.yaml`) from presentation. Before the Python SSG build engine compiles the artifact, the data layer undergoes rigorous local and CI/CD validation utilizing `yamllint`, `ajv-cli` (JSON Schema semantic validation), and Prettier.
   - _Strategic Value:_ Enforcing these Shift-Left Quality Gates applies the SRE **"Fail Fast"** principle. By terminating the build pipeline within seconds upon detecting a malformed data contract or syntax error, we preserve CI/CD compute budgets and drastically lower the **Mean Time To Recovery (MTTR)**.
@@ -62,7 +65,7 @@ _(Diagram source maintained via Diagrams as Code in `/docs/architecture/source`)
 
 ## 📉 FinOps & Cloud Governance
 
-Enterprise-grade architecture must respect lean economics. This platform is governed by strict AWS CloudWatch and AWS Budgets alarms, hard-capping maximum monthly exposure to **$6.00 USD (approx. ₹500 INR)**.
+Enterprise-grade architecture must respect lean economics. This platform is governed by **AWS Budgets** with two notification thresholds, hard-capping maximum monthly exposure to **$6.00 USD (approx. ₹500 INR)**.
 
 By leveraging Cloudflare's zero-markup registrar and consolidating authoritative DNS, we eliminated AWS Route 53 hosted zone fees, reducing the foundational Layer 7 routing TCO to $0.00/month. Furthermore, API Gateway is configured with rate limiting to drop malicious traffic spikes before they trigger excessive Lambda compute durations, protecting against Denial-of-Wallet attacks.
 
