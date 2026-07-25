@@ -29,11 +29,10 @@ work:
     current: true
     summary: Executed a 12-month, full-time engineering sprint focused exclusively on mastering cloud-native architecture, DevSecOps, and SRE Maturity Level 3 principles, anchored by the development of a production-grade AWS serverless platform.
     highlights:
-      - Engineered a Zero-Trust Resume-as-Code (RaC) delivery platform (GitHub Actions, Terraform-managed AWS infrastructure), mathematically enforcing blast radius containment and PoLP by deprecating long-lived IAM keys in favor of OIDC identity federation across 100% of deployments.
+      - Engineered a Zero-Trust Resume-as-Code (RaC) delivery platform (GitHub Actions, Terraform-managed AWS infrastructure), deprecating long-lived IAM keys in favor of OIDC identity federation across 100% of deployments — guaranteeing zero-downtime delivery via automated CloudFront edge cache invalidation.
       - Eliminated all ClickOps provisioning by authoring a fully declarative Terraform codebase across five focused modules, bringing every AWS and Cloudflare resource under version-controlled, peer-reviewed infrastructure — reducing DR recovery to a single terraform apply.
-      - Slashed Mean Time To Recovery (MTTR) and eliminated pipeline compute waste by architecting Shift-Left Quality Gates, utilizing semantic validation frameworks (ajv-cli, yamllint) to enforce a strict "Fail Fast" data contract.
-      - Guaranteed flawless artifact hygiene and zero-downtime delivery by orchestrating idempotent S3 state synchronizations (--delete) coupled with automated CloudFront edge network invalidations.
-      - Enforced rigorous FinOps guardrails by hard-capping serverless AWS infrastructure exposure at ₹500 INR/month, optimizing Total Cost of Ownership (TCO) and mitigating Layer 7 Denial-of-Wallet vulnerabilities.
+      - Slashed MTTR and eliminated pipeline compute waste by architecting Shift-Left Quality Gates, utilizing semantic validation frameworks (ajv-cli, yamllint) to enforce a strict "Fail Fast" data contract before any artifact compilation.
+      - Enforced rigorous FinOps guardrails by hard-capping serverless AWS infrastructure exposure at ₹500 INR/month, optimizing Total Cost of Ownership (TCO) across the full stack.
 
 
   - name: Infineon Technologies
