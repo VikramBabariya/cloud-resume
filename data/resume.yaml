@@ -7,7 +7,7 @@ basics:
   phone: "+91 70482 63900"
   url: https://vikram-sre.dev/
   summary: |
-    Cloud & DevSecOps Engineer transitioning from a Python backend foundation to high-availability infrastructure. Specializes in architecting zero-trust AWS serverless ecosystems, enforcing immutable CI/CD delivery pipelines, and applying Shift-Left SRE quality gates to strictly reduce TCO and MTTR.
+    Cloud & DevSecOps Engineer transitioning from a Python backend foundation to high-availability infrastructure. Specializes in architecting zero-trust AWS serverless ecosystems, managing 100% of infrastructure declaratively via Terraform (IaC), enforcing immutable CI/CD delivery pipelines, and applying Shift-Left SRE quality gates to strictly reduce TCO and MTTR.
   api_gateway_url: https://vu82wyjtqk.execute-api.ap-south-1.amazonaws.com
   location:
     city: Rajkot
@@ -29,7 +29,8 @@ work:
     current: true
     summary: Executed a 12-month, full-time engineering sprint focused exclusively on mastering cloud-native architecture, DevSecOps, and SRE Maturity Level 3 principles, anchored by the development of a production-grade AWS serverless platform.
     highlights:
-      - Engineered a Zero-Trust Resume-as-Code (RaC) delivery pipeline (GitHub Actions, AWS S3), mathematically enforcing blast radius containment and PoLP by deprecating long-lived IAM keys in favor of OIDC identity federation across 100% of deployments.
+      - Engineered a Zero-Trust Resume-as-Code (RaC) delivery platform (GitHub Actions, Terraform-managed AWS infrastructure), mathematically enforcing blast radius containment and PoLP by deprecating long-lived IAM keys in favor of OIDC identity federation across 100% of deployments.
+      - Eliminated all ClickOps provisioning by authoring a fully declarative Terraform codebase across five focused modules, bringing every AWS and Cloudflare resource under version-controlled, peer-reviewed infrastructure — reducing DR recovery to a single terraform apply.
       - Slashed Mean Time To Recovery (MTTR) and eliminated pipeline compute waste by architecting Shift-Left Quality Gates, utilizing semantic validation frameworks (ajv-cli, yamllint) to enforce a strict "Fail Fast" data contract.
       - Guaranteed flawless artifact hygiene and zero-downtime delivery by orchestrating idempotent S3 state synchronizations (--delete) coupled with automated CloudFront edge network invalidations.
       - Enforced rigorous FinOps guardrails by hard-capping serverless AWS infrastructure exposure at ₹500 INR/month, optimizing Total Cost of Ownership (TCO) and mitigating Layer 7 Denial-of-Wallet vulnerabilities.
@@ -74,6 +75,15 @@ skills:
       - CloudFront CDN, OAC & ACM (TLS/SSL)  # Validates edge security, zero-trust ingress, and transit encryption.
       - Cloudflare DNS  # Demonstrates authoritative routing and network boundary control.
       - Docker Network Segmentation (Zero-Trust)  # frontend_tier / backend_tier bridge isolation — docker-compose.yml
+
+  - name: Infrastructure as Code
+    # Dedicated IaC group signals Terraform as a first-class competency, not an afterthought.
+    level: Intermediate
+    keywords:
+      - "Terraform (Multi-Provider: AWS, Cloudflare)"  # Full provider breadth — AWS resources and Cloudflare DNS managed in one codebase.
+      - Terraform Remote State & State Locking  # Production-grade state management with concurrent-write protection.
+      - checkov (IaC SAST)  # Shift-left security scanning for Terraform — blocks HIGH/CRITICAL misconfigurations pre-apply.
+      - Modular IaC Design  # Demonstrates modular IaC design at system scope.
 
   - name: DevSecOps & Automated Delivery
     # Groups deployment velocity with quality control, proving an SRE "Fail Fast" mindset.
