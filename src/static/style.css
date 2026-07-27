@@ -119,6 +119,18 @@ a:hover {
   text-decoration: none;
 }
 
+.btn-download {
+  background: transparent;
+  color: #27ae60;
+  border: 1px solid #27ae60;
+}
+
+.btn-download:hover {
+  background: rgba(39, 174, 96, 0.1);
+  text-decoration: none;
+  color: #27ae60;
+}
+
 .demo-link {
   font-size: 0.85rem;
   font-weight: normal;
@@ -153,6 +165,13 @@ a:hover {
   align-items: baseline;
 }
 
+.job-location {
+  font-style: italic;
+  color: #666;
+  font-size: 0.9em;
+  margin: 2px 0 8px 0;
+}
+
 .job-summary,
 .project-description {
   margin: 5px 0 10px 0;
@@ -178,6 +197,13 @@ li {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+}
+
+.bottom-grid h4 {
+  color: var(--accent-color);
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  margin-top: 0;
 }
 
 /* Observability Footer */

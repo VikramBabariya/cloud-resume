@@ -46,8 +46,20 @@ jobs:
           cache: 'npm'
 
       # 5. Decoupled Dependency Provisioning
-      # Strategic Reasoning: We create the .venv and install all linters/generators 
+      # Strategic Reasoning: We create the .venv and install all linters/generators
       # FIRST, making them globally available to subsequent steps in the runner.
+      # WeasyPrint requires Pango, Cairo, and Fontconfig system libraries for PDF rendering.
+      - name: Install WeasyPrint System Dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libpango-1.0-0 \
+            libpangoft2-1.0-0 \
+            libharfbuzz0b \
+            libfontconfig1 \
+            libcairo2 \
+            libgdk-pixbuf2.0-0
+
       - name: Provision Python Virtual Environment & Dependencies
         run: |
           python -m venv .venv
@@ -69,13 +81,14 @@ jobs:
 
 
       # 7. Compile Static Artifacts & Enforce Integrity
-      # Strategic Reasoning: Validation has passed. We reactivate the .venv, compile, 
-      # and mathematically verify the index.html artifact exists before deployment.
+      # Strategic Reasoning: Validation has passed. We reactivate the .venv, compile,
+      # and mathematically verify both the index.html and resume.pdf artifacts exist before deployment.
       - name: Compile Static Artifacts & Enforce Integrity
         run: |
           source .venv/bin/activate
           python build.py
-          test -f ./dist/index.html || { echo "Critical Failure: Artifact missing."; exit 1; }
+          test -f ./dist/index.html || { echo "Critical Failure: HTML artifact missing."; exit 1; }
+          test -f ./dist/resume.pdf || { echo "Critical Failure: PDF artifact missing."; exit 1; }
 
 
       # 8. Secure Authentication (Zero-Trust OIDC)
@@ -91,12 +104,22 @@ jobs:
           role-session-name: ${{ github.event.repository.name }}-${{ github.run_id }}
 
       # 9. Idempotent Deployment & Artifact Hygiene
-      # Strategic Reasoning: Targets ONLY the /dist directory, mathematically preventing raw source code 
-      # (Python, YAML) from leaking to the public. The --delete flag enforces Idempotency, ensuring 
+      # Strategic Reasoning: Targets ONLY the /dist directory, mathematically preventing raw source code
+      # (Python, YAML) from leaking to the public. The --delete flag enforces Idempotency, ensuring
       # the S3 bucket is a perfect, hygienic mirror of the current build.
+      # Content-Disposition: attachment on the PDF ensures browsers download it rather than
+      # attempting to open it inline, matching the intent of the ↓ Download PDF button.
       - name: Deploy Compiled Artifact to S3 Origin
         run: |
-          aws s3 sync ./dist s3://${{ secrets.S3_BUCKET_NAME }} --delete
+          # Sync all artifacts except the PDF first
+          aws s3 sync ./dist s3://${{ secrets.S3_BUCKET_NAME }} \
+            --delete \
+            --exclude "*.pdf"
+
+          # Upload PDF explicitly with correct Content-Type and Content-Disposition
+          aws s3 cp ./dist/resume.pdf s3://${{ secrets.S3_BUCKET_NAME }}/resume.pdf \
+            --content-type "application/pdf" \
+            --content-disposition "attachment; filename=\"Vikram_Babariya_Cloud_DevSecOps_Engineer.pdf\""
 
       # 10. Zero-Downtime Deployment & Cache Invalidation
       # Strategic Reasoning: Forces the global CDN to purge stale assets, ensuring hiring managers 

@@ -27,13 +27,12 @@ work:
     location: Gujarat, India
     startDate: "2025-06-20"
     current: true
-    summary: Executed a 12-month, full-time engineering sprint focused exclusively on mastering cloud-native architecture, DevSecOps, and SRE Maturity Level 3 principles, anchored by the development of a production-grade AWS serverless platform.
+    summary: Executed a 12-month, full-time engineering sprint focused exclusively on mastering cloud-native architecture, DevSecOps, and SRE Maturity Level 3 principles, anchored by the development of a **production-grade AWS serverless platform**.
     highlights:
-      - Engineered a Zero-Trust Resume-as-Code (RaC) delivery platform (GitHub Actions, Terraform-managed AWS infrastructure), deprecating long-lived IAM keys in favor of OIDC identity federation across 100% of deployments — guaranteeing zero-downtime delivery via automated CloudFront edge cache invalidation.
-      - Eliminated all ClickOps provisioning by authoring a fully declarative Terraform codebase across five focused modules, bringing every AWS and Cloudflare resource under version-controlled, peer-reviewed infrastructure — reducing DR recovery to a single terraform apply.
-      - Slashed MTTR and eliminated pipeline compute waste by architecting Shift-Left Quality Gates, utilizing semantic validation frameworks (ajv-cli, yamllint) to enforce a strict "Fail Fast" data contract before any artifact compilation.
-      - Enforced rigorous FinOps guardrails by hard-capping serverless AWS infrastructure exposure at ₹500 INR/month, optimizing Total Cost of Ownership (TCO) across the full stack.
-
+      - Engineered a **Zero-Trust Resume-as-Code (RaC)** delivery platform (GitHub Actions, Terraform-managed AWS infrastructure), deprecating long-lived IAM keys in favor of **OIDC identity federation** across **100%** of deployments — guaranteeing **zero-downtime delivery** via automated CloudFront edge cache invalidation.
+      - Eliminated **all ClickOps provisioning** by authoring a fully declarative Terraform codebase across five focused modules, bringing every AWS and Cloudflare resource under version-controlled, peer-reviewed infrastructure — reducing DR recovery to a **single terraform apply**.
+      - Slashed **MTTR** and eliminated pipeline compute waste by architecting **Shift-Left Quality Gates**, utilizing semantic validation frameworks (ajv-cli, yamllint) to enforce a strict "Fail Fast" data contract before any artifact compilation.
+      - Enforced rigorous **FinOps guardrails** by hard-capping serverless AWS infrastructure exposure at **₹500 INR/month**, optimizing **Total Cost of Ownership (TCO)** across the full stack.
 
   - name: Infineon Technologies
     position: Software Engineer (Backend & Automation)
@@ -42,8 +41,8 @@ work:
     endDate: "2025-06-20"
     summary: ""
     highlights:
-      - Architected a Django-based Unit Resolution module for an enterprise Register Map Platform, automating analog-to-digital data translations while integrating strict API quality gates and comprehensive server-side logging to guarantee data integrity.
-      - Engineered a Node.js orchestration engine to dynamically parse and execute Python test vectors within managed, ephemeral virtual environments, implementing runtime call-stack inspection to enforce “Fail Fast” validation on I2C/UART hardware operations.
+      - Architected a **Django-based Unit Resolution module** for an enterprise Register Map Platform, automating analog-to-digital data translations while integrating strict API quality gates and comprehensive server-side logging to **guarantee data integrity**.
+      - Engineered a **Node.js orchestration engine** to dynamically parse and execute Python test vectors within managed, ephemeral virtual environments, implementing runtime call-stack inspection to enforce **"Fail Fast" validation** on I2C/UART hardware operations.
 
   - name: Infineon Technologies
     position: Software Engineering Intern
@@ -52,7 +51,7 @@ work:
     endDate: "2024-06-01"
     summary: ""
     highlights:
-      - Architected a scalable Wafer Visualization Platform by integrating Snowflake with Django, implementing multi-threaded data ingestion to process 100+ massive datasets concurrently and reducing defect analysis time from hours to minutes.
+      - Architected a scalable **Wafer Visualization Platform** by integrating Snowflake with Django, implementing multi-threaded data ingestion to process **100+** massive datasets concurrently and reducing defect analysis time from **hours to minutes**.
 
 education:
   - institution: Dharmsinh Desai University
@@ -62,7 +61,6 @@ education:
     endDate: "2024-05-09"
     score: "CGPA: 7.97"
     location: Nadiad, Gujarat
-
 
 skills:
   - name: Cloud & Infrastructure
@@ -103,9 +101,10 @@ projects:
       - Docker
     url: https://github.com/VikramBabariya/inventory-system
     highlights:
-      - Designed multi-tier Docker bridge network architecture enforcing zero-route database isolation, restricting PostgreSQL access to the backend tier via network topology rather than configuration.  # Security Architecture: You think in security boundaries, not just firewalls
-      - Reduced production Docker artifacts by 90% (3.5 GB → 364 MB) using multi-stage builds — eliminating compilers from runtime images and running all containers as non-root users.  # Build Optimization & DevSecOps: You optimize for cost, attack surface, and deployment speed simultaneously
-      - Configured dual-environment Docker Compose orchestration with dependency-ordered service startup, container-level healthchecks, and immutable production images to eliminate environment drift.  # Infrastructure Reliability & Operational Maturity : You understand operational contracts between environments and build for consistency
+      - Designed **multi-tier Docker bridge network** architecture enforcing **zero-route database isolation**, restricting PostgreSQL access to the backend tier via network topology rather than configuration.
+      - Reduced production Docker artifacts by **90% (3.5 GB → 364 MB)** using **multi-stage builds** — eliminating compilers from runtime images and running all containers as **non-root users**.
+      - Configured **dual-environment Docker Compose** orchestration with dependency-ordered service startup, container-level healthchecks, and **immutable production images** to eliminate environment drift.
+
 certificates:
   - name: AWS Certified Cloud Practitioner
     date: "2025-12-01"

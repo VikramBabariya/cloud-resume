@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ basics.name | e }} — Resume</title>
+    <style>
+      {{ pdf_css }}
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================
+         HEADER — name, title, single contact line
+         ================================================================ -->
+    <header>
+      <h1>{{ basics.name | e }}</h1>
+      <p class="label">{{ basics.label | e }}</p>
+      <p class="contact">
+        {{ basics.email | e }}
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        {{ basics.phone | default("", true) | e }}
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        {{ basics.location.region | e }}, {{ basics.location.countryCode | e }}
+        {% for profile in basics.profiles %}
+          &nbsp;&nbsp;|&nbsp;&nbsp;{{ profile.network | e }}:&nbsp;<a href="{{ profile.url | e }}" class="contact-link">{{ profile.url | e }}</a>
+        {% endfor %}
+      </p>
+    </header>
+
+    <!-- ================================================================
+         EXECUTIVE SUMMARY
+         ================================================================ -->
+    <section>
+      <h2>Executive Summary</h2>
+      <p class="summary-text">{{ basics.summary | strip_md }}</p>
+    </section>
+
+    <!-- ================================================================
+         CORE TECHNICAL COMPETENCIES
+         ================================================================ -->
+    <section>
+      <h2>Core Technical Competencies</h2>
+      {% for skill_group in skills %}
+        <p class="skill-row">
+          <span class="skill-name">{{ skill_group.name | e }}:</span>
+          {{ skill_group.keywords | join(", ") | e }}
+        </p>
+      {% endfor %}
+    </section>
+
+    <!-- ================================================================
+         PROFESSIONAL EXPERIENCE
+         ================================================================ -->
+    <section>
+      <h2>Professional Experience</h2>
+      {% for job in work %}
+        <div class="entry">
+          <div class="entry-header">
+            <span class="entry-title">{{ job.position | e }}</span>
+            <span class="entry-date">
+              {{ job.startDate | format_date | e }} –
+              {{ job.endDate | default("Present", true) | format_date | e }}
+            </span>
+          </div>
+          <div class="entry-sub">
+            <span class="entry-org">{{ job.name | e }}</span>
+            <span class="entry-location">{{ job.location | e }}</span>
+          </div>
+          {% if job.summary is defined and job.summary %}
+            <p class="entry-summary">{{ job.summary | strip_md }}</p>
+          {% endif %}
+          <ul>
+            {% for highlight in job.highlights %}
+              <li>{{ highlight | strip_md }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </section>
+
+    <!-- ================================================================
+         ARCHITECTURAL PROJECTS
+         ================================================================ -->
+    <section>
+      <h2>Architectural Projects</h2>
+      {% for project in projects %}
+        <div class="entry">
+          <div class="entry-header">
+            <span class="entry-title">{{ project.name | e }}</span>
+            <span class="entry-date">
+              {{ project.startDate | format_date | e }} –
+              {{ project.endDate | default("Present", true) | format_date | e }}
+            </span>
+          </div>
+          {% if project.url is defined and project.url %}
+            <div class="entry-sub">
+              <span class="entry-org">{{ project.description | strip_md }}</span>
+              <a href="{{ project.url | e }}" class="entry-link">github.com/{{ project.url | e | replace('https://github.com/', '') }}</a>
+            </div>
+          {% elif project.description is defined and project.description %}
+            <div class="entry-sub">
+              <span class="entry-org">{{ project.description | strip_md }}</span>
+            </div>
+          {% endif %}
+          <ul>
+            {% for highlight in project.highlights %}
+              <li>{{ highlight | strip_md }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </section>
+
+    <!-- ================================================================
+         EDUCATION & CERTIFICATIONS — combined single section,
+         one line per entry (avoids WeasyPrint multi-column page-break issues)
+         ================================================================ -->
+    <section>
+      <h2>Education &amp; Certifications</h2>
+      {% for edu in education %}
+        <div class="entry">
+          <div class="entry-header">
+            <span class="entry-title">{{ edu.studyType | e }} in {{ edu.area | e }}</span>
+            <span class="entry-date">
+              {{ edu.startDate | format_date | e }} – {{ edu.endDate | format_date | e }}
+            </span>
+          </div>
+          <div class="entry-sub">
+            <span class="entry-org">{{ edu.institution | e }}</span>
+            <span class="entry-location">{{ edu.score | e }}</span>
+          </div>
+        </div>
+      {% endfor %}
+      {% for cert in certificates %}
+        <div class="entry">
+          <div class="entry-header">
+            <span class="entry-title">{{ cert.name | e }}</span>
+            <span class="entry-date">{{ cert.date | format_date | e }}</span>
+          </div>
+          <div class="entry-sub">
+            <span class="entry-org">{{ cert.issuer | e }}</span>
+          </div>
+        </div>
+      {% endfor %}
+    </section>
+  </body>
+</html>
