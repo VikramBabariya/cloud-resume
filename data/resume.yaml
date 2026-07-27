@@ -7,7 +7,7 @@ basics:
   phone: "+91 70482 63900"
   url: https://vikram-sre.dev/
   summary: |
-    Cloud & DevSecOps Engineer transitioning from a Python backend foundation to high-availability infrastructure. Specializes in architecting zero-trust AWS serverless ecosystems, enforcing immutable CI/CD delivery pipelines, and applying Shift-Left SRE quality gates to strictly reduce TCO and MTTR.
+    Cloud & DevSecOps Engineer transitioning from a Python backend foundation to high-availability infrastructure. Specializes in architecting zero-trust AWS serverless ecosystems, managing 100% of infrastructure declaratively via Terraform (IaC), enforcing immutable CI/CD delivery pipelines, and applying Shift-Left SRE quality gates to strictly reduce TCO and MTTR.
   api_gateway_url: https://vu82wyjtqk.execute-api.ap-south-1.amazonaws.com
   location:
     city: Rajkot
@@ -29,10 +29,10 @@ work:
     current: true
     summary: Executed a 12-month, full-time engineering sprint focused exclusively on mastering cloud-native architecture, DevSecOps, and SRE Maturity Level 3 principles, anchored by the development of a production-grade AWS serverless platform.
     highlights:
-      - Engineered a Zero-Trust Resume-as-Code (RaC) delivery pipeline (GitHub Actions, AWS S3), mathematically enforcing blast radius containment and PoLP by deprecating long-lived IAM keys in favor of OIDC identity federation across 100% of deployments.
-      - Slashed Mean Time To Recovery (MTTR) and eliminated pipeline compute waste by architecting Shift-Left Quality Gates, utilizing semantic validation frameworks (ajv-cli, yamllint) to enforce a strict "Fail Fast" data contract.
-      - Guaranteed flawless artifact hygiene and zero-downtime delivery by orchestrating idempotent S3 state synchronizations (--delete) coupled with automated CloudFront edge network invalidations.
-      - Enforced rigorous FinOps guardrails by hard-capping serverless AWS infrastructure exposure at ₹500 INR/month, optimizing Total Cost of Ownership (TCO) and mitigating Layer 7 Denial-of-Wallet vulnerabilities.
+      - Engineered a Zero-Trust Resume-as-Code (RaC) delivery platform (GitHub Actions, Terraform-managed AWS infrastructure), deprecating long-lived IAM keys in favor of OIDC identity federation across 100% of deployments — guaranteeing zero-downtime delivery via automated CloudFront edge cache invalidation.
+      - Eliminated all ClickOps provisioning by authoring a fully declarative Terraform codebase across five focused modules, bringing every AWS and Cloudflare resource under version-controlled, peer-reviewed infrastructure — reducing DR recovery to a single terraform apply.
+      - Slashed MTTR and eliminated pipeline compute waste by architecting Shift-Left Quality Gates, utilizing semantic validation frameworks (ajv-cli, yamllint) to enforce a strict "Fail Fast" data contract before any artifact compilation.
+      - Enforced rigorous FinOps guardrails by hard-capping serverless AWS infrastructure exposure at ₹500 INR/month, optimizing Total Cost of Ownership (TCO) across the full stack.
 
 
   - name: Infineon Technologies
@@ -65,35 +65,31 @@ education:
 
 
 skills:
-  - name: Cloud Architecture & Identity Guardrails
-    # Signals a transition away from standard application deployment into hardened infrastructure.
+  - name: Cloud & Infrastructure
     level: Intermediate
     keywords:
-      - AWS IAM (OIDC Federation, STS, PoLP)  # Elevates basic IAM to enterprise-grade identity management.
-      - AWS (Lambda, API Gateway, DynamoDB, S3)  # Core serverless compute and storage components substantiated by the RaC platform.
-      - CloudFront CDN, OAC & ACM (TLS/SSL)  # Validates edge security, zero-trust ingress, and transit encryption.
-      - Cloudflare DNS  # Demonstrates authoritative routing and network boundary control.
-      - Docker Network Segmentation (Zero-Trust)  # frontend_tier / backend_tier bridge isolation — docker-compose.yml
+      - AWS IAM (OIDC Federation, STS)
+      - AWS (Lambda, API Gateway, DynamoDB, S3)
+      - CloudFront CDN, OAC & ACM (TLS/SSL)
+      - Terraform
+      - Terraform Remote State & State Locking
+      - checkov (IaC SAST)
+      - Modular IaC Design
 
   - name: DevSecOps & Automated Delivery
-    # Groups deployment velocity with quality control, proving an SRE "Fail Fast" mindset.
     level: Intermediate
     keywords:
-      - GitHub Actions (CI/CD Automation)  # The primary deployment engine for the serverless platform.
-      - Multi-Stage Docker Builds  # 90% artifact reduction; compiler-free runtime images
-      - Container Hardening (Non-Root, Minimal Base Images)  # appuser UID 1000, nginx:alpine, python:3.12-slim
-      - Nginx (Reverse Proxy)   # Single ingress, API proxying, CORS resolution — nginx.conf
-      - Shift-Left Validation (ajv-cli, yamllint)  # Hard proof of semantic validation and pipeline quality gates.
+      - GitHub Actions (CI/CD Automation)
+      - Multi-Stage Docker Builds
+      - Container Security (Non-Root, Minimal Images)
+      - Shift-Left Validation (ajv-cli, yamllint)
 
   - name: Reliability, FinOps & Backend Engineering
-    # Bridges previous software engineering tenure with current SRE outcomes, optimizing for lean SaaS markets.
     level: Intermediate
     keywords:
-      - AWS CloudWatch & Budgets (FinOps)  # Explicitly signals strict Total Cost of Ownership (TCO) optimization and operational alerting.
-      - Immutable Infrastructure Pattern   # Code baked into image; no runtime drift — docker-compose.prod.yml
-      - Python, JavaScript (Node.js)  # Core programming languages utilized across both Infineon tenure and the strategic sprint.
-      - Django, FastAPI (Async/ASGI)  # Substantiated high-concurrency backend frameworks.
-      - PostgreSQL, RDBMS   # Relational database architecture and management.
+      - AWS CloudWatch & Budgets (FinOps)
+      - Python, JavaScript (Node.js)
+      - Django, FastAPI
 
 projects:
   - name: Inventory System
