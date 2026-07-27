@@ -1,0 +1,246 @@
+/* ==========================================================================
+   Resume PDF Stylesheet — Overleaf / LaTeX-style typesetting
+   Target: WeasyPrint 69.x  |  Output: A4 single-page PDF
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Page geometry  (A4 = 210 × 297 mm)
+   Mirrors Overleaf default article margins
+   -------------------------------------------------------------------------- */
+@page {
+  size: A4;
+  margin: 7mm 14mm 7mm 14mm;
+}
+
+/* --------------------------------------------------------------------------
+   Base typography — Latin Modern Roman is the native TeX/Overleaf face.
+   Cascade to Georgia → serif for CI runners without the font installed.
+   -------------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    'Latin Modern Roman', 'Linux Libertine', Georgia, 'Times New Roman', serif;
+  font-size: 9pt;
+  line-height: 1.22;
+  color: #000;
+  background: #fff;
+  text-align: left;
+}
+
+/* --------------------------------------------------------------------------
+   HEADER — centred name block, mirrors Overleaf \maketitle
+   -------------------------------------------------------------------------- */
+header {
+  text-align: center;
+  padding-bottom: 4pt;
+  margin-bottom: 4pt;
+  border-bottom: 0.8pt solid #222;
+}
+
+header h1 {
+  font-size: 16pt;
+  font-weight: bold;
+  letter-spacing: 0.4pt;
+  margin-bottom: 1.5pt;
+}
+
+header .label {
+  font-size: 9pt;
+  font-style: italic;
+  color: #222;
+  margin-bottom: 2pt;
+}
+
+header .contact {
+  font-size: 7.5pt;
+  color: #222;
+  line-height: 1.5;
+}
+
+/* Hyperlinks in contact line — same color as contact text, underlined for recognition */
+a.contact-link {
+  color: #222;
+  text-decoration: underline;
+  text-decoration-color: #999;
+  font-weight: normal;
+}
+
+/* --------------------------------------------------------------------------
+   Section headings — rule underline, all-caps, matches Overleaf \section{}
+   -------------------------------------------------------------------------- */
+h2 {
+  font-size: 9.5pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.7pt;
+  color: #222;
+  border-bottom: 0.7pt solid #999;
+  padding-bottom: 0.5pt;
+  margin-top: 4pt;
+  margin-bottom: 2pt;
+}
+
+/* Bold emphasis in body text — lighter than headings */
+b {
+  font-weight: bold;
+  color: #222;
+}
+
+/* --------------------------------------------------------------------------
+   Generic section wrapper
+   -------------------------------------------------------------------------- */
+section {
+  margin-bottom: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Entry block — one work / project / edu / cert item
+   -------------------------------------------------------------------------- */
+.entry {
+  margin-bottom: 2pt;
+}
+
+/* Bold title  ←→  Date on the same line */
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6pt;
+}
+
+.entry-title {
+  font-weight: bold;
+  font-size: 9.5pt;
+  color: #222;
+  flex: 1;
+}
+
+.entry-url {
+  font-weight: normal;
+  font-size: 8pt;
+  font-style: italic;
+}
+
+.entry-date {
+  font-size: 8.5pt;
+  color: #444;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Italic org name  ←→  Location */
+.entry-sub {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 0.5pt;
+  margin-bottom: 1pt;
+}
+
+.entry-org {
+  font-style: italic;
+  font-size: 9pt;
+}
+
+.entry-location {
+  font-style: normal;
+  font-size: 8.5pt;
+  color: #555;
+}
+
+/* Job location displayed left-aligned below the title row — now unused, kept for safety */
+.entry-location-left {
+  font-style: italic;
+  font-size: 8.5pt;
+  color: #555;
+}
+
+.entry-org-plain {
+  font-style: italic;
+  font-size: 9pt;
+  margin-top: 1pt;
+}
+
+.entry-summary {
+  font-style: italic;
+  font-size: 8pt;
+  color: #222;
+  margin-top: 0.5pt;
+  margin-bottom: 1.5pt;
+  line-height: 1.25;
+}
+
+/* --------------------------------------------------------------------------
+   Bullet lists — compact LaTeX tight-itemize style
+   -------------------------------------------------------------------------- */
+ul {
+  padding-left: 10pt;
+  margin-top: 1pt;
+  margin-bottom: 0;
+}
+
+li {
+  font-size: 8.5pt;
+  margin-bottom: 0.5pt;
+  line-height: 1.28;
+}
+
+/* --------------------------------------------------------------------------
+   Skills — "Category: kw1, kw2, kw3" inline rows
+   -------------------------------------------------------------------------- */
+.skill-row {
+  font-size: 8.5pt;
+  margin-bottom: 1.5pt;
+  line-height: 1.3;
+}
+
+.skill-name {
+  font-weight: bold;
+  color: #222;
+}
+
+/* --------------------------------------------------------------------------
+   Summary paragraph
+   -------------------------------------------------------------------------- */
+.summary-text {
+  font-size: 8.5pt;
+  line-height: 1.38;
+}
+
+/* --------------------------------------------------------------------------
+   Education & Certifications — single combined section, no grid needed
+   -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   Page-break helpers — avoid splitting an entry block across pages.
+   WeasyPrint honours page-break-inside: avoid on block elements.
+   -------------------------------------------------------------------------- */
+.entry {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* Clickable project URL — right side of entry-sub, normal text color, underlined */
+a.entry-link {
+  font-size: 8pt;
+  font-style: italic;
+  color: #555;
+  text-decoration: underline;
+  text-decoration-color: #aaa;
+  flex-shrink: 0;
+}
+
+/* Inline entry-url — kept for any legacy usage */
+a.entry-url {
+  font-weight: normal;
+  font-size: 8pt;
+  font-style: italic;
+  color: #555;
+  text-decoration: underline;
+  text-decoration-color: #aaa;
+}
