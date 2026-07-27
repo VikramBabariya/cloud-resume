@@ -65,44 +65,31 @@ education:
 
 
 skills:
-  - name: Cloud Architecture & Identity Guardrails
-    # Signals a transition away from standard application deployment into hardened infrastructure.
+  - name: Cloud & Infrastructure
     level: Intermediate
     keywords:
-      - AWS IAM (OIDC Federation, STS, PoLP)  # Elevates basic IAM to enterprise-grade identity management.
-      - AWS (Lambda, API Gateway, DynamoDB, S3)  # Core serverless compute and storage components substantiated by the RaC platform.
-      - CloudFront CDN, OAC & ACM (TLS/SSL)  # Validates edge security, zero-trust ingress, and transit encryption.
-      - Cloudflare DNS  # Demonstrates authoritative routing and network boundary control.
-      - Docker Network Segmentation (Zero-Trust)  # frontend_tier / backend_tier bridge isolation — docker-compose.yml
-
-  - name: Infrastructure as Code
-    # Dedicated IaC group signals Terraform as a first-class competency, not an afterthought.
-    level: Intermediate
-    keywords:
-      - "Terraform (Multi-Provider: AWS, Cloudflare)"  # Full provider breadth — AWS resources and Cloudflare DNS managed in one codebase.
-      - Terraform Remote State & State Locking  # Production-grade state management with concurrent-write protection.
-      - checkov (IaC SAST)  # Shift-left security scanning for Terraform — blocks HIGH/CRITICAL misconfigurations pre-apply.
-      - Modular IaC Design  # Demonstrates modular IaC design at system scope.
+      - AWS IAM (OIDC Federation, STS)
+      - AWS (Lambda, API Gateway, DynamoDB, S3)
+      - CloudFront CDN, OAC & ACM (TLS/SSL)
+      - Terraform
+      - Terraform Remote State & State Locking
+      - checkov (IaC SAST)
+      - Modular IaC Design
 
   - name: DevSecOps & Automated Delivery
-    # Groups deployment velocity with quality control, proving an SRE "Fail Fast" mindset.
     level: Intermediate
     keywords:
-      - GitHub Actions (CI/CD Automation)  # The primary deployment engine for the serverless platform.
-      - Multi-Stage Docker Builds  # 90% artifact reduction; compiler-free runtime images
-      - Container Hardening (Non-Root, Minimal Base Images)  # appuser UID 1000, nginx:alpine, python:3.12-slim
-      - Nginx (Reverse Proxy)   # Single ingress, API proxying, CORS resolution — nginx.conf
-      - Shift-Left Validation (ajv-cli, yamllint)  # Hard proof of semantic validation and pipeline quality gates.
+      - GitHub Actions (CI/CD Automation)
+      - Multi-Stage Docker Builds
+      - Container Security (Non-Root, Minimal Images)
+      - Shift-Left Validation (ajv-cli, yamllint)
 
   - name: Reliability, FinOps & Backend Engineering
-    # Bridges previous software engineering tenure with current SRE outcomes, optimizing for lean SaaS markets.
     level: Intermediate
     keywords:
-      - AWS CloudWatch & Budgets (FinOps)  # Explicitly signals strict Total Cost of Ownership (TCO) optimization and operational alerting.
-      - Immutable Infrastructure Pattern   # Code baked into image; no runtime drift — docker-compose.prod.yml
-      - Python, JavaScript (Node.js)  # Core programming languages utilized across both Infineon tenure and the strategic sprint.
-      - Django, FastAPI (Async/ASGI)  # Substantiated high-concurrency backend frameworks.
-      - PostgreSQL, RDBMS   # Relational database architecture and management.
+      - AWS CloudWatch & Budgets (FinOps)
+      - Python, JavaScript (Node.js)
+      - Django, FastAPI
 
 projects:
   - name: Inventory System
