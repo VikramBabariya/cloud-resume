@@ -27,12 +27,14 @@ work:
     location: Gujarat, India
     startDate: "2025-06-20"
     current: true
-    summary: Executed a 12-month, full-time engineering sprint focused exclusively on mastering cloud-native architecture, DevSecOps, and SRE Maturity Level 3 principles, anchored by the development of a **production-grade AWS serverless platform**.
+    summary: Designed and delivered a **production-grade zero-trust AWS serverless platform** — 100% declarative Terraform IaC across five modules, zero static credentials, shift-left security gates at every layer.
     highlights:
-      - Engineered a **Zero-Trust Resume-as-Code (RaC)** delivery platform (GitHub Actions, Terraform-managed AWS infrastructure), deprecating long-lived IAM keys in favor of **OIDC identity federation** across **100%** of deployments — guaranteeing **zero-downtime delivery** via automated CloudFront edge cache invalidation.
-      - Eliminated **all ClickOps provisioning** by authoring a fully declarative Terraform codebase across five focused modules, bringing every AWS and Cloudflare resource under version-controlled, peer-reviewed infrastructure — reducing DR recovery to a **single terraform apply**.
-      - Slashed **MTTR** and eliminated pipeline compute waste by architecting **Shift-Left Quality Gates**, utilizing semantic validation frameworks (ajv-cli, yamllint) to enforce a strict "Fail Fast" data contract before any artifact compilation.
-      - Enforced rigorous **FinOps guardrails** by hard-capping serverless AWS infrastructure exposure at **₹500 INR/month**, optimizing **Total Cost of Ownership (TCO)** across the full stack.
+      - Eliminated **long-lived IAM credentials** across 100% of deployments via **GitHub Actions OIDC federation** — short-lived STS tokens scoped to least-privilege, with cross-repo and cross-branch token reuse mathematically prevented by trust policy **`sub` claim binding**.
+      - Replaced all ClickOps with a **declarative Terraform codebase** across five focused modules (state-backend, cdn, compute, dns, iam) — every AWS and Cloudflare resource version-controlled and peer-reviewed, **DR recovery reduced to a single `terraform apply`**.
+      - Architected a **five-gate Terraform CI/CD pipeline** (fmt → validate → checkov SAST → plan → apply) — HIGH/CRITICAL findings block merge, intentional waivers documented inline per ADR, and `terraform plan` output posted as an **idempotent PR comment** for peer review before any resource change.
+      - Enforced **Shift-Left quality gates** across the full pipeline — ajv-cli/yamllint "Fail Fast" contracts block invalid artifacts pre-build; post-apply smoke tests verify seven live infrastructure invariants including **IAM Policy Simulator assertions** confirming PoLP boundaries hold.
+      - Hard-capped the full AWS stack at **₹500 INR/month** via dual-threshold budget alerts (35% actual / 100% forecasted) wired to SNS — API Gateway rate limiting guards against **Layer 7 Denial-of-Wallet** attacks.
+
 
   - name: Infineon Technologies
     position: Software Engineer (Backend & Automation)
