@@ -1,0 +1,138 @@
+github_profile:
+  basics:
+    name: "Vikram Babariya"
+    username: "VikramBabariya"
+    pronouns: "he/him"
+    bio: "Architecting zero-trust AWS serverless ecosystems and immutable CI/CD pipelines. Strictly enforcing blast-radius containment and PoLP."
+    location: "Gujarat, IN"
+    website: "https://vikram-sre.dev/"
+    linkedin: "in/vikram-babariya"
+    certifications:
+      - "AWS Certified Cloud Practitioner"
+  stats:
+    followers: 17
+    following: 8
+    repositories: 8
+    stars: 9
+    achievements:
+      - "Pull Shark x2"
+      - "YOLO"
+  readme:
+    title: "Cloud & DevSecOps Engineer | Site Reliability Engineering (SRE)"
+    operational_mandate: "Cloud & DevSecOps Engineer transitioning from a Python backend foundation to high-availability infrastructure. Specializes in architecting zero-trust AWS serverless ecosystems, enforcing immutable CI/CD delivery pipelines, and applying Shift-Left SRE quality gates to strictly reduce Total Cost of Ownership (TCO) and Mean Time To Recovery (MTTR)."
+    architectural_competencies:
+      cloud_infrastructure_and_security: "AWS (IAM, S3, API Gateway, DynamoDB, Lambda), OIDC Identity Federation, Zero-Trust Network Segmentation."
+      pipeline_automation_and_devsecops: "GitHub Actions, Multi-Stage Docker Builds, Container Hardening (PoLP, Non-Root), Semantic Validation (ajv-cli, yamllint)."
+      finops_and_observability: "AWS CloudWatch, Budget Hard-Capping (₹500 INR/mo limit enforcement), Immutable Infrastructure Patterns."
+      backend_execution: "Python, Node.js, FastAPI, Django, PostgreSQL."
+    flagship_infrastructure:
+      - project: "Zero-Trust Resume-as-Code (RaC) Platform"
+        architecture: "Serverless AWS delivery pipeline enforcing blast radius containment via OIDC identity federation, completely deprecating vulnerable, long-lived IAM keys."
+        outcome: "Guaranteed flawless artifact hygiene and zero-downtime delivery utilizing idempotent S3 state synchronizations and automated CloudFront edge network invalidations."
+      - project: "Inventory System: Containerized Defense-in-Depth"
+        architecture: "Multi-tier Docker bridge networking enforcing zero-route database isolation, restricting PostgreSQL access to the backend tier via explicit network topology."
+        outcome: "Slashed production Docker artifacts by 90% (3.5 GB → 364 MB) utilizing multi-stage builds and enforcing the Principle of Least Privilege (PoLP) across all container runtimes."
+    current_architectural_sprint: "Actively architecting the AWS cloud deployment for the containerized Inventory System. Enforcing rigorous VPC subnetting logic (RFC 1918) and mapping explicit NAT Gateway routing paths to guarantee strict private database isolation prior to provisioning production compute. Executing idempotent infrastructure, absolute cost governance, and zero-trust delivery."
+  pinned_repositories:
+    - name: "zero-trust-rac-platform"
+      visibility: "Public"
+      language: "HCL"
+    - name: "inventory-system"
+      visibility: "Public"
+      language: "Python"
+  repositories:
+    - name: "zero-trust-rac-platform"
+      owner: "VikramBabariya"
+      url: "https://github.com/VikramBabariya/zero-trust-rac-platform"
+      visibility: "Public"
+      about:
+        description: "An SRE-hardened Zero-Trust RaC Platform with fully declarative Terraform IaC, OIDC-federated pipelines, and idempotent CI/CD — mathematically enforcing blast radius containment and the Principle of Least Privilege (PoLP) across every infrastructure layer."
+        website: "vikram-sre.dev/"
+        topics:
+          - "aws-serverless"
+          - "cloudflare"
+          - "devsecops"
+          - "github-actions"
+          - "infrastructure-as-code"
+          - "oidc"
+          - "resume-as-code"
+          - "sre"
+          - "terraform"
+          - "zero-trust"
+      statistics:
+        stars: 1
+        watchers: 0
+        forks: 0
+      activity:
+        default_branch: "main"
+        latest_commit:
+          hash: "e153d5c"
+          author: "VikramBabariya"
+          message: "Merge pull request #34 from VikramBabariya/professional-asset-updates"
+          time: "2 hours ago"
+      releases:
+        count: 2
+        latest:
+          name: "Terraform IaC Integration"
+          time: "2 days ago"
+      contributors:
+        count: 1
+        list:
+          - "VikramBabariya"
+      languages:
+        HCL: "59.6%"
+        Jinja: "14.9%"
+        Python: "14.4%"
+        CSS: "11.1%"
+
+    - name: "inventory-system"
+      owner: "VikramBabariya"
+      url: "https://github.com/VikramBabariya/inventory-system"
+      visibility: "Public"
+      about:
+        description: "Containerized inventory platform built with a production-grade, security-first architecture. Demonstrates multi-tier Docker network isolation, an immutable ledger pattern for audit-safe stock tracking, and multi-stage builds that reduced deployment artifacts by 90%."
+        topics:
+          - "aws"
+          - "backend"
+          - "cloud-native"
+          - "devops"
+          - "docker"
+          - "docker-compose"
+          - "fastapi"
+          - "full-stack"
+          - "multi-stage-docker"
+          - "nginx"
+          - "portfolio-project"
+          - "postgresql"
+          - "react"
+          - "rest-api"
+          - "software-architecture"
+      statistics:
+        stars: 1
+        watchers: 0
+        forks: 0
+      activity:
+        default_branch: "main"
+        latest_commit:
+          hash: "47d27c5"
+          author: "VikramBabariya"
+          message: "Merge pull request #8 from VikramBabariya/doc-updates"
+          time: "last month"
+      releases:
+        count: 0
+      packages:
+        count: 0
+      contributors:
+        count: 1
+        list:
+          - "VikramBabariya"
+      languages:
+        Python: "33.3%"
+        Dockerfile: "25.1%"
+        JavaScript: "18.2%"
+        CSS: "15.6%"
+        Shell: "4.6%"
+        HTML: "3.2%"
+  contributions:
+    last_year_total: 287
+          
