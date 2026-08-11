@@ -1,0 +1,453 @@
+profile:
+  contact_and_demographics:
+    name: "Vikram Babariya"
+    pronouns: "He/Him"
+    headline: "Cloud & DevSecOps Engineer | Architecting Zero-Trust AWS Infrastructure as Code | IaC Security (Checkov/OIDC/PoLP) | Reducing TCO & MTTR via Serverless + Terraform"
+    location: "Gujarat, India"
+    linkedin_url: "https://www.linkedin.com/in/vikram-babariya"
+    # Job preferences extracted from LinkedIn profile
+  job_preferences:
+    job_titles: # Target roles aligned with Cloud/SRE transition
+      - DevOps Engineer
+      - Site Reliability Engineer
+      - Cloud Engineer
+    location_types: # Acceptable working models
+      - On-site
+      - Hybrid
+      - Remote
+    locations_onsite: # Target cities within the Indian job market
+      - Pune District, Maharashtra, India
+      - Hyderabad, Telangana, India
+      - Bengaluru, Karnataka, India
+      - Gurugram, Haryana, India
+    locations_remote: # Country-wide remote preference
+      - India
+    start_date: Immediately, I am actively applying # Current availability status
+    employment_types: # Acceptable contract types
+      - Full-time
+    visibility: All LinkedIn members # Profile visibility setting for recruiters and peers
+  network_and_analytics:
+    connections: "500+"
+    followers: 974
+    analytics:
+      profile_views: 23
+      post_impressions_past_7_days: 271
+      search_appearances: 7
+  about: |
+    I'm a Cloud & DevSecOps Engineer who transitioned from a Python backend foundation at Infineon Technologies into full-time infrastructure engineering — not just learning the tools, but building a production-grade platform to prove it.
+
+    Over the past year I've been executing a focused technical sprint: designing, provisioning, and hardening a zero-trust AWS serverless platform from the ground up. Every architectural decision is documented as an ADR, every security trade-off is justified in code, and every deployment is gated by automated quality checks before a single resource is touched.
+
+    Most recently, I migrated the entire production AWS + Cloudflare environment from ClickOps to a fully declarative Terraform codebase across five focused modules — state-backend, cdn, compute, dns, iam. Every infrastructure change is now a peer-reviewed pull request with an automated terraform plan diff and a checkov SAST gate. Post-apply smoke tests verify seven live infrastructure invariants on every merge, including IAM Policy Simulator assertions that mathematically confirm PoLP boundaries are enforced — not just documented.
+
+    What I care about:
+    — Hard security boundaries over soft policies (OIDC federation, not static IAM keys)
+    — Shift-left quality gates that catch problems before they reach production
+    — FinOps discipline: the entire stack runs under ₹500 INR/month with no corners cut on security
+    — Infrastructure treated as a first-class software artifact: versioned, tested, and auditable
+
+    ⚙️ Verify the architecture:
+    Live production: https://vikram-sre.dev
+    ADRs, IaC & SRE runbooks: https://github.com/VikramBabariya
+  top_skills:
+    - "Terraform"
+    - "Amazon Web Services (AWS)"
+    - "Site Reliability Engineering"
+    - "Zero Trust Architecture"
+    - "GitHub Actions"
+  featured:
+  - type: Media
+    title: Cloud & DevSecOps Engineer Resume - Vikram Babariya
+  - type: Link
+    title: Zero-Trust RaC Platform (AWS Serverless)
+    url: https://vikram-sre.dev/
+    description: >
+      A production-grade Resume-as-Code pipeline engineered for strict artifact hygiene 
+      and non-repudiation, utilizing ephemeral STS credentials and idempotent deployment 
+      to guarantee secure, zero-downtime delivery.
+  - type: Link
+    title: GitHub Profile
+    description: GitHub
+  - type: Post
+    reference: 
+
+  posts:
+  - id: 1
+    author: Vikram Babariya
+    time_posted: 2h ago
+    visibility: Visible to anyone on or off LinkedIn
+    content: >
+      2 weeks ago I wrote about IaC principles. Today I can share what it actually looks like when something breaks — and why that's the point. 
+      I've just completed the full Terraform integration for my Zero-Trust RaC Platform. Every AWS and Cloudflare resource is now declared as code, peer-reviewed, and version-controlled. 
+      The architecture spans 5 focused modules: 
+      🗄️state-backend — S3 (SSE-KMS + versioning) + DynamoDB lock table 
+      🌐cdn — Private S3 origin + OAC, ACM cert, CloudFront with HTTPS enforcement 
+      ⚡compute — DynamoDB, Lambda (Python 3.12), API Gateway with CORS scoped to apex 
+      🔗dns — Cloudflare CNAMEs (apex, www, ACM validation) — no more manual DR steps 
+      🔒iam — Lambda execution role, GitHub OIDC provider, deployment role 
+      But the real engineering story is in two incidents that happened during integration. 
+      ——————————————————————————————————— 
+      INC-001: The invisible secret mismatch 
+      OIDC pipeline failed at Configure AWS Credentials with: "Credentials could not be loaded" 
+      AWS masks errors intentionally. The actual cause: workflow referenced ${{ secrets.AWS_ROLE_ARN }} but the repo secret was AWS_DEPLOYMENT_ROLE_ARN. GitHub treats missing secrets as empty. AWS STS received a malformed request and returned a generic failure. 
+      Lesson: Define your secrets naming convention before you provision. 
+      ——————————————————————————————————— 
+      INC-002: The OIDC trust policy blindspot 
+      After adding src/lambda/** to CI path triggers, every PR failed: "Not authorized to perform sts:AssumeRoleWithWebIdentity" 
+      GitHub issues different JWT sub claims: 
+      • push to main → repo:org/repo:ref:refs/heads/main 
+      • pull_request → repo:org/repo:pull_request 
+      My trust policy only permitted the first pattern. PRs had always been opened but never triggered the Terraform pipeline — stayed hidden until the path filter exposed it. 
+      Fix: two-statement IAM trust policy (push/apply + PR/plan). 
+      Defense-in-depth at workflow level: terraform apply has an if: github.event_name == 'push' gate regardless of trust policy. Pipeline was broken (chicken-and-egg), so I applied the fix via terraform apply -target=module.iam. Surgical blast radius. 
+      ——————————————————————————————————— 
+      6 sequential CI gates: 
+      1️⃣ terraform fmt — before credentials requested 
+      2️⃣ OIDC + init + validate 
+      3️⃣ checkov — HIGH/CRITICAL findings block 
+      4️⃣ terraform plan — posted as PR comment 
+      5️⃣ terraform apply — main only 
+      6️⃣ Smoke tests — IAM policy simulation verifies permissions 
+      Result: a single terraform apply fully reconstructs the platform. DR that previously required manual Cloudflare, ACM, and IAM steps is a pipeline run. 
+      What's your approach to OIDC trust policy design for multi-event pipelines? Curious if the two-statement pattern is common or if there's a cleaner alternative.
+    links:
+      - title: Live
+        url: https://vikram-sre.dev
+      - title: Code + ADRs + Incidents
+        url: https://lnkd.in/daEdxim5
+    hashtags:
+      - "#Terraform"
+      - "#IaC"
+      - "#DevSecOps"
+      - "#AWS"
+      - "#OIDC"
+      - "#SRE"
+      - "#CloudEngineering"
+      - "#GitHubActions"
+      - "#ZeroTrust"
+    attachments:
+      - type: Document
+        title: terraform_module_tree_and_pipeline_flow
+        pages: 2
+    metrics:
+      reactions: 3
+      impressions: 95
+
+  - id: 2
+    author: Vikram Babariya
+    time_posted: 2w ago
+    visibility: Visible to anyone on or off LinkedIn
+    content: >
+      From "ClickOps" to Code: Why I’m shifting my mindset to Infrastructure as Code (IaC) 🚀 
+      Historically, infrastructure was provisioned manually through web consoles (often called "ClickOps") or via imperative shell and Python scripts. But these traditional methods share a critical flaw: they don't reliably track the real-world state of the infrastructure. The result? Undocumented changes, severe environment drift, and brittle deployments. 
+      Recently, I’ve been diving deep into Infrastructure as Code (IaC), specifically using tools like Terraform, and it is a complete paradigm shift. IaC fundamentally solves these historical inefficiencies by treating infrastructure as data. 
+      Here are the core principles and mechanisms that make IaC an absolute game-changer for modern DevSecOps: 
+      🔹 The Declarative Paradigm: Instead of writing imperative steps (dictating how to build something), IaC allows you to declare the final state (defining what it should look like). The IaC engine calculates the API calls required to make reality match your configuration. 
+      🔹The State File (.tfstate): This is the definitive bridge between your code and physical reality. It records the real-world status of deployed resources; if a resource isn't in the state file, the tool doesn't know it exists. 
+      🔹 Absolute Idempotency: Running the same configuration 100 times will only result in changes if the real-world infrastructure has actually deviated from the code. 
+      🔹 Providers & Resources: Providers act as plugins translating your code into specific cloud API calls (like AWS), while Resources are the fundamental building blocks (like an aws_s3_bucket) mapped out in your architecture. 
+      But beyond the tech, the business and architectural impact is what truly stands out: 
+      ✅ Shift-Left Validation: We can now lint and semantically validate architectures in Pull Requests before a single physical resource is created. 
+      ✅ Enforceable FinOps: Automated tools can calculate the exact estimated cloud costs of a proposed change prior to merging, mathematically guaranteeing budgets are never breached. 
+      ✅ Rapid Disaster Recovery: If an environment is compromised, the IaC configuration can completely recreate the precise architecture in minutes, severely reducing Mean Time To Recovery (MTTR). 
+      Transitioning to IaC isn't just about learning new syntax; it’s about architecting resilient, automated, and secure systems. Are you currently using Terraform, or still relying on manual provisioning? I’d love to hear your thoughts and favorite IaC best practices in the comments! 👇
+    hashtags:
+      - "#InfrastructureAsCode"
+      - "#Terraform"
+      - "#DevOps"
+      - "#SRE"
+      - "#CloudComputing"
+      - "#AWS"
+      - "#FinOps"
+      - "#TechJourney"
+    metrics:
+      reactions: 11
+      impressions: 280
+
+  - id: 3
+    author: Vikram Babariya
+    time_posted: 3w ago
+    edited: true
+    visibility: Visible to anyone on or off LinkedIn
+    content: >
+      Over the past year, I took an Strategic Sabbatical to formally bridge my transition from a Python backend foundation into high-availability infrastructure engineering. Instead of just updating a PDF, I decided to build a production-grade, serverless application that acts as a live demonstration of Site Reliability Engineering (SRE) and DevSecOps competencies. 
+      Today, I’m launching my Zero-Trust Resume-as-Code (RaC) Platform. This isn't just a portfolio; it's a mathematically enforced, SRE-hardened edge architecture. 
+      Here are the core engineering pillars behind the build: 
+      🔒 Zero-Trust Identity: I mathematically enforced blast radius containment by completely deprecating long-lived IAM access keys, instead utilizing OIDC identity federation for 100% of GitHub Actions deployments. 
+      ⚡ Shift-Left Quality Gates: To slash Mean Time To Recovery (MTTR) and eliminate pipeline compute waste, I architected strict "Fail Fast" data contracts using semantic validation frameworks (ajv-cli, yamllint) before any infrastructure is ever touched. 
+      📉 FinOps & Layer 7 Security: I engineered the platform with lean economics, hard-capping the AWS serverless infrastructure at ₹500 INR/month to optimize Total Cost of Ownership (TCO) and mitigate Layer 7 Denial-of-Wallet vulnerabilities. 
+      ♻️ Idempotent Deployments: The pipeline guarantees artifact hygiene and zero-downtime delivery by orchestrating idempotent S3 state synchronizations (--delete) paired with automated CloudFront edge cache invalidations. 
+      I am actively seeking my next role as a Cloud & DevSecOps Engineer where I can bring this execution-focused mindset to an enterprise team. 
+      🔗 Live Production Environment: https://vikram-sre.dev 
+      🔗 GitHub Repository (Code, ADRs, & SRE Runbooks): https://lnkd.in/daEdxim5 
+      For the Principal Engineers and Architects out there: I invite you to review my Architecture Decision Records (ADRs) or audit the codebase. If you can find a vulnerability, please report it via the structured disclosure protocol in my SECURITY.md !
+    links:
+      - title: Live Production Environment
+        url: https://vikram-sre.dev
+      - title: GitHub Repository
+        url: https://lnkd.in/daEdxim5
+    hashtags:
+      - "#DevSecOps"
+      - "#SRE"
+      - "#AWS"
+      - "#CloudEngineering"
+      - "#PlatformEngineering"
+      - "#Serverless"
+      - "#FinOps"
+      - "#GitHubActions"
+    attachments:
+      - type: Image
+        description: graphical user interface, website
+    metrics:
+      reactions: 21
+      impressions: 418
+
+  - id: 5
+    author: Vikram Babariya
+    time_posted: 1mo ago
+    edited: true
+    visibility: Visible to anyone on or off LinkedIn
+    content: >
+      Velocity without structure is a fast track to technical debt. "Vibe Coding" via AI autocomplete speeds up prototyping, but it strips away systemic context and introduces silent hallucinations. 
+      At AWS Summit India 2026, the focus shifted from ad-hoc AI generation to Spec-Driven Development. Here is how multi-agent systems like AWS Kiro are enforcing rigor back into the SDLC: 
+      --> Context Isolation: Moving away from massive prompt bloat. Specialized agents operate within strict 200K token boundaries to prevent hidden dependency hallucinations. 
+      --> Self-Correcting Guardrails: Architectural constraints are captured as immutable project principles, stopping AI from making repeat mistakes across sprints. 
+      --> Automated Verification: Independent agents act as shift-left quality gates, running compliance audits before code is ever cleared for deployment. 
+      My Engineered Reality: I hit this exact friction while engineering the CI/CD pipelines for my serverless Zero-Trust RaC(Resume-As-Code) Platform. Allowing unconstrained LLMs to mutate both data and presentation layers instantly breaks deployments. 
+      To eliminate model context drift, I pivoted to a Spec-Anchored workflow. I decoupled my resume.yaml data contract from the Python SSG and forced the pipeline to act as the ultimate authority. Using ajv-cli (JSON Schema) and yamllint, the pipeline mathematically forces any AI-generated logic to adhere to the spec. If it fails, the build terminates in seconds—executing the SRE "Fail Fast" principle and preserving CI/CD compute budgets. 
+      (See the architecture diagram of RaC Platform below for how these strict deployment boundaries integrate into the AWS ecosystem). 
+      Appreciate Kuldeep Singh and Amit Pandey for the technical deep-dive on agent context isolation—it mirrored my exact pipeline challenges. 
+      How are your teams building automated guardrails to keep AI code generation inside safe boundaries?
+    mentions:
+      - Kuldeep Singh
+      - Amit Pandey
+    hashtags:
+      - "#PlatformEngineering"
+      - "#SRE"
+      - "#DevSecOps"
+      - "#CloudArchitecture"
+      - "#AWSKiro"
+      - "#AWSSummit"
+      - "#AWSSummitIndia"
+    attachments:
+      - type: Image
+        description: Zero-Trust RaC Platform - System Design Diagram
+    metrics:
+      reactions: 11
+      comments: 1
+      impressions: 398
+
+  - id: 6
+    author: Vikram Babariya
+    time_posted: 5mo ago
+    visibility: Visible to anyone on or off LinkedIn
+    content: >
+      I spent a year building applications before I realized I was blind to the infrastructure running them. Time to fix that blind spot. 
+      I’ve officially passed my AWS Certified Cloud Practitioner exam. ☁️ 
+      Here is the biggest lesson I’ve learned about Cloud Infrastructure that I wish I fully grasped when I was strictly writing application code: 
+      Your code doesn't just consume compute; it consumes capital. When you are building features locally, you rarely think about the financial cost of an unoptimized loop or a poorly indexed database. In the cloud, an inefficient architecture directly inflates your AWS bill. Understanding cloud economics and the Shared Responsibility Model completely changes how you design software from day one. 
+      For me, this certification isn't just a badge to collect; it is the theoretical foundation for the systems I am actively building. It provided the exact structural knowledge I needed to design a serverless event-driven architecture with Lambda and DynamoDB, and I am currently applying these networking and security concepts to a containerized Docker and PostgreSQL system. 
+      To the Cloud Architects and SREs in my network: What was your biggest "aha" moment when you first transitioned from application development to cloud infrastructure? Let’s discuss in the comments. 👇
+    mentions:
+      - Amazon Web Services (AWS)
+      - AWS Training & Certification
+    links:
+      - url: https://lnkd.in/gXf_gjrg
+    hashtags:
+      - "#AWS"
+      - "#CloudEngineering"
+      - "#DevOps"
+      - "#SoftwareEngineering"
+      - "#CloudArchitecture"
+    attachments:
+      - type: Image
+        description: AWS Certified Cloud Practitioner Credly Badge
+    metrics:
+      reactions: 11
+      comments: 1
+      impressions: 1003
+
+  - id: 7
+    author: Vikram Babariya
+    time_posted: 5mo ago
+    visibility: Visible to anyone on or off LinkedIn
+    content: >
+      From Software Engineer to Cloud Native: Why I spent the last few months rebuilding my stack. 
+      Writing code is one thing. Understanding how that code survives at scale, handles traffic spikes, and stays resilient in a distributed environment is another. After a year as a Software Engineer, I realized I didn't just want to build features; I wanted to architect the systems they live on. I decided to take a step back to move two steps forward. 
+      What I’ve been doing for the last few months: 
+      The Transition: Moving from application logic to infrastructure as code. 
+      The Tech: Getting deep into the AWS ecosystem, Docker containerization, and Terraform for automation. 
+      The 'rebuild' is just the beginning. I’ll be documenting the lessons learned bridging the gap between app dev and cloud infrastructure. Follow along for the journey, and let's connect if you work in this space.
+    hashtags:
+      - "#CloudComputing"
+      - "#AWS"
+      - "#DevOps"
+      - "#CareerPivot"
+      - "#SoftwareEngineering"
+      - "#IndiaTech"
+    attachments:
+      - type: Image
+    metrics:
+      reactions: 14
+      comments: 2
+      impressions: 1370
+  experience:
+    - role: Cloud & DevSecOps Engineer
+      company: Independent Technical Sprint / Strategic Sabbatical
+      location: Gujarat, India
+      employment_type: Remote
+      duration: Jul 2025 - Present
+      summary: Designed, provisioned, and hardened a production-grade zero-trust AWS serverless platform from the ground up — treating infrastructure as a first-class software artifact with version-controlled IaC, automated security gates, and mathematically enforced least-privilege boundaries across every layer.
+      responsibilities:
+        - Eliminated long-lived IAM credentials across 100% of deployments via GitHub Actions OIDC federation — short-lived STS tokens scoped to least-privilege, with cross-repo and cross-branch token reuse mathematically prevented by trust policy sub claim binding.
+        - Replaced all ClickOps with a declarative Terraform codebase across five focused modules (state-backend, cdn, compute, dns, iam) — every AWS and Cloudflare resource version-controlled and peer-reviewed, DR recovery reduced to a single terraform apply.
+        - Architected a five-gate Terraform CI/CD pipeline (fmt → validate → checkov SAST → plan → apply) — HIGH/CRITICAL findings block merge, intentional waivers documented inline per ADR, and terraform plan output posted as an idempotent PR comment for peer review before any resource change.
+        - Enforced Shift-Left quality gates across the full pipeline — ajv-cli/yamllint "Fail Fast" contracts block invalid artifacts pre-build; post-apply smoke tests verify seven live infrastructure invariants including IAM Policy Simulator assertions confirming PoLP boundaries hold.
+        - Hard-capped the full AWS stack at ₹500 INR/month via dual-threshold budget alerts (35% actual / 100% forecasted) wired to SNS — API Gateway rate limiting guards against Layer 7 Denial-of-Wallet attacks.
+  
+    - company: Infineon Technologies
+      location: Vadodara, Gujarat, India
+      employment_type: On-site
+      total_duration: 1 yr 7 mos
+      roles:
+        - title: Software Engineer (Backend & Automation)
+          employment_type: Full-time
+          duration: Jun 2024 - Jun 2025
+          responsibilities:
+            - Architected a Django-based Unit Resolution module for an enterprise Register Map Platform, automating analog-to-digital data translations while integrating strict API quality gates and comprehensive server-side logging to guarantee data integrity.
+            - Engineered a Node.js orchestration engine to dynamically parse and execute Python test vectors within managed, ephemeral virtual environments, implementing runtime call-stack inspection to enforce "Fail Fast" validation on I2C/UART hardware operations.
+  
+        - title: Software Engineer Intern
+          employment_type: Internship
+          duration: Dec 2023 - May 2024
+          responsibilities:
+            - Architected a scalable Wafer Visualization Platform by integrating Snowflake with Django, implementing multi-threaded data ingestion to process 100+ massive datasets concurrently and reducing defect analysis time from hours to minutes.
+  education:
+    - institution: "Dharmsinh Desai University"
+      degree: "Bachelor of Technology - BTech, Computer Science"
+      duration: "Oct 2020 – May 2024"
+      grade: "7.97"
+    - institution: "The School of Science, Rajkot"
+      degree: "Science Stream (PCM)"
+      duration: "Jun 2018 – Oct 2020"
+  certifications:
+    - title: "AWS Certified Cloud Practitioner"
+      issuer: "Amazon Web Services (AWS)"
+      issue_date: "Dec 2025"
+      expiration_date: "Dec 2028"
+      credential_id: "fb94035a-e3ab-4d77-8fb0-997a1ed08e05"
+  projects:
+    - name: Inventory System | Containerized Defense-in-Depth Architecture
+      duration: Feb 2026 - Present
+      association: Independent Technical Sprint / Strategic Sabbatical
+      skills:
+        - PostgreSQL
+        - FastAPI
+        - Docker
+      details:
+        - Designed multi-tier Docker bridge network architecture enforcing zero-route database isolation, restricting PostgreSQL access to the backend tier via network topology rather than configuration.
+        - Reduced production Docker artifacts by 90% (3.5 GB -> 364 MB) using multi-stage builds — eliminating compilers from runtime images and running all containers as non-root users.
+        - Configured dual-environment Docker Compose orchestration with dependency-ordered service startup, container-level healthchecks, and immutable production images to eliminate environment drift.
+  
+    - name: Zero-Trust RaC Platform (AWS Serverless)
+      duration: Jan 2026 - Present
+      association: Independent Technical Sprint / Strategic Sabbatical
+      summary: A production-grade, fully automated AWS serverless platform that serves as a live demonstration of zero-trust architecture, declarative IaC governance, and SRE-grade delivery pipelines — every security claim is verifiable in the public codebase.
+      details:
+        - Serverless AWS edge architecture: CloudFront (TLS 1.2+, OAC) → private S3 origin → API Gateway → Lambda (Python 3.12) → DynamoDB on-demand. DNS via Cloudflare authoritative with CNAME flattening at apex. Zero public S3 exposure — origin accessible exclusively via CloudFront OAC SigV4 signing.
+        - Zero static credentials in the entire codebase — GitHub Actions authenticates exclusively via OIDC STS federation with trust policy sub claim binding scoped to repository, branch, and audience. State backend encrypted at rest with SSE-KMS (key rotation enabled), access gated by DynamoDB distributed locking.
+        - Every infrastructure change is a peer-reviewed PR with an automated terraform plan diff comment; post-apply smoke tests assert seven live invariants on every merge including IAM Policy Simulator calls that confirm PoLP boundaries hold for both the Lambda execution role and the deployment role.
+        - Nine Architecture Decision Records document every deliberate trade-off: WAF and CloudFront logging omitted under the ₹500/month FinOps hard cap, checkov waivers justified inline per ADR, MFA delete excluded due to single-account operational constraints — all security deviations are explicit and auditable, none are silent. ⚙️ Review source code, IaC runbooks, and ADRs at the attached GitHub repository link.
+  languages:
+    - "English"
+    - "Hindi"
+    - "Gujarati"
+  skills:
+    - name: Terraform
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+        - Zero-Trust RaC Platform (AWS Serverless)
+    - name: HashiCorp
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+        - Zero-Trust RaC Platform (AWS Serverless)
+    - name: Infrastructure as Code (IaC)
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+        - Zero-Trust RaC Platform (AWS Serverless)
+    - name: Site Reliability Engineering
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+    - name: Amazon Web Services (AWS)
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+        - AWS Certified Cloud Practitioner
+    - name: AWS Identity and Access Management (AWS IAM)
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+        - Zero-Trust RaC Platform (AWS Serverless)
+    - name: Zero Trust Architecture
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+        - Zero-Trust RaC Platform (AWS Serverless)
+    - name: GitHub Actions
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+        - Zero-Trust RaC Platform (AWS Serverless)
+    - name: Continuous Integration and Continuous Delivery (CI/CD)
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+        - Zero-Trust RaC Platform (AWS Serverless)
+    - name: Amazon S3
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+        - Zero-Trust RaC Platform (AWS Serverless)
+    - name: AWS Lambda
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+        - Zero-Trust RaC Platform (AWS Serverless)
+    - name: Amazon CloudFront
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+        - Zero-Trust RaC Platform (AWS Serverless)
+    - name: Amazon CloudWatch
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+    - name: Linux
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+    - name: Cloud Computing
+      associations:
+        - AWS Certified Cloud Practitioner
+    - name: Technical Documentation
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+    - name: Incident Response
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+    - name: Python (Programming Language)
+      associations:
+        - Cloud & DevSecOps Engineer at Independent Technical Sprint / Strategic Sabbatical
+        - Passed LinkedIn Skill Assessment
+        - 1 endorsement
+    - name: Docker
+      associations:
+        - Inventory System | Containerized Defense-in-Depth Architecture
+    - name: FastAPI
+      associations:
+        - Inventory System | Containerized Defense-in-Depth Architecture
+    - name: PostgreSQL
+      associations:
+        - Inventory System | Containerized Defense-in-Depth Architecture
+    - name: Nginx
+      associations:
+        - Inventory System | Containerized Defense-in-Depth Architecture
+    - name: Node.js
+      associations:
+        - Software Engineer (Backend & Automation) at Infineon Technologies
+    - name: Django
+      associations:
+        - 2 experiences at Infineon Technologies
+    - name: Git
+      associations:
+        - 2 experiences at Infineon Technologies
