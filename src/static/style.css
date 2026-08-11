@@ -1,19 +1,40 @@
-/* Core Variables for maintaining design consistency */
+/* ==========================================================================
+   Web Resume Stylesheet — Clean professional, LaTeX-inspired hierarchy
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Design tokens
+   -------------------------------------------------------------------------- */
 :root {
-  --primary-color: #2c3e50;
-  --accent-color: #2980b9;
-  --accent-hover: #3498db;
-  --text-main: #333333;
-  --text-muted: #7f8c8d;
-  --bg-color: #f4f4f7;
+  --primary-color: #1a2332;
+  --accent-color: #2563ab;
+  --accent-hover: #1d4ed8;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --text-secondary: #4b5563;
+  --bg-color: #f1f5f9;
   --card-bg: #ffffff;
-  --border-radius: 8px;
+  --border-light: #e2e8f0;
+  --border-section: #cbd5e1;
+  --border-radius: 6px;
+  --font-serif: 'Georgia', 'Times New Roman', serif;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-    Cantarell, sans-serif;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem; /* 15px */
   line-height: 1.6;
   color: var(--text-main);
   background-color: var(--bg-color);
@@ -21,55 +42,93 @@ body {
   padding: 2vh 2vw;
 }
 
+/* --------------------------------------------------------------------------
+   Card / container
+   -------------------------------------------------------------------------- */
 .container {
-  max-width: 850px;
+  max-width: 860px;
   margin: 0 auto;
   background: var(--card-bg);
-  padding: 40px 50px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 44px 54px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.06);
   border-radius: var(--border-radius);
 }
 
-/* Typography & Semantic Landmarks */
+/* --------------------------------------------------------------------------
+   Header — centred name block, mirrors PDF \maketitle
+   -------------------------------------------------------------------------- */
 header {
   text-align: center;
-  border-bottom: 2px solid #eaeaea;
-  padding-bottom: 25px;
-  margin-bottom: 30px;
+  border-bottom: 1.5px solid var(--border-section);
+  padding-bottom: 22px;
+  margin-bottom: 28px;
 }
 
+/* Name */
 h1 {
-  margin: 0;
+  margin: 0 0 4px;
+  font-family: var(--font-serif);
   color: var(--primary-color);
-  font-size: 2.5rem;
-  letter-spacing: -0.5px;
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
 }
 
+/* Label / title */
 h2 {
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-style: italic;
+  margin: 4px 0 0;
+  font-size: 1.05rem;
+}
+
+/* Contact line */
+.contact-info p {
   color: var(--text-muted);
-  font-weight: 500;
-  margin-top: 8px;
-  font-size: 1.25rem;
+  font-size: 0.875rem;
+  margin: 10px 0 0;
 }
 
+/* --------------------------------------------------------------------------
+   Section headings — rule + small-caps, mirrors PDF h2 style
+   -------------------------------------------------------------------------- */
 h3 {
-  color: var(--accent-color);
-  border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
-  margin-top: 35px;
-  font-size: 1.4rem;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  border-bottom: 1.5px solid var(--border-section);
+  padding-bottom: 5px;
+  margin-top: 32px;
+  margin-bottom: 14px;
 }
 
+/* --------------------------------------------------------------------------
+   Entry headings (job title, project name, edu degree)
+   -------------------------------------------------------------------------- */
 h4 {
-  margin: 0 0 5px 0;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 600;
   color: var(--primary-color);
-  font-size: 1.1rem;
+  line-height: 1.3;
 }
 
+/* --------------------------------------------------------------------------
+   Links
+   -------------------------------------------------------------------------- */
 a {
   color: var(--accent-color);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.15s ease;
 }
 
 a:hover {
@@ -77,23 +136,28 @@ a:hover {
   color: var(--accent-hover);
 }
 
-/* UI Components & Buttons */
+/* --------------------------------------------------------------------------
+   Profile / action buttons
+   -------------------------------------------------------------------------- */
 .profiles {
-  margin-top: 15px;
+  margin-top: 14px;
   display: flex;
   justify-content: center;
-  gap: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .btn {
   display: inline-block;
-  padding: 8px 16px;
-  border-radius: 5px;
+  padding: 6px 14px;
+  border-radius: 4px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.2px;
   transition:
-    background 0.3s ease,
+    background 0.2s ease,
     transform 0.1s ease;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -115,118 +179,283 @@ a:hover {
 }
 
 .btn-secondary:hover {
-  background: rgba(41, 128, 185, 0.1);
+  background: rgba(37, 99, 171, 0.08);
   text-decoration: none;
 }
 
 .btn-download {
   background: transparent;
-  color: #27ae60;
-  border: 1px solid #27ae60;
+  color: #16a34a;
+  border: 1px solid #16a34a;
 }
 
 .btn-download:hover {
-  background: rgba(39, 174, 96, 0.1);
+  background: rgba(22, 163, 74, 0.08);
   text-decoration: none;
-  color: #27ae60;
+  color: #16a34a;
 }
 
 .demo-link {
-  font-size: 0.85rem;
-  font-weight: normal;
+  font-size: 0.8rem;
+  font-weight: 400;
   margin-left: 8px;
+  font-style: italic;
 }
 
-/* Data Structuring & Grids */
+/* --------------------------------------------------------------------------
+   Skills
+   -------------------------------------------------------------------------- */
 .skill-category {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.skill-category strong {
+  color: var(--primary-color);
+}
+
+.skills-grid {
+  display: inline;
 }
 
 .skills-grid span {
   display: inline-block;
-  background: #ecf0f1;
-  color: var(--primary-color);
-  padding: 6px 12px;
-  margin: 6px 6px 0 0;
-  border-radius: 4px;
-  font-size: 0.85em;
+  background: #f1f5f9;
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+  padding: 3px 10px;
+  margin: 4px 4px 0 0;
+  border-radius: 3px;
+  font-size: 0.825rem;
   font-weight: 500;
 }
 
+/* --------------------------------------------------------------------------
+   Work / Project entry blocks — mirrors PDF .entry pattern
+   -------------------------------------------------------------------------- */
 .job,
 .project {
-  margin-bottom: 25px;
+  margin-bottom: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border-light);
 }
 
+.job:last-of-type,
+.project:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Title row: position/name ←→ date */
 .job-header,
 .project-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  gap: 12px;
+}
+
+/* Sub-row: company ←→ location — mirrors PDF .entry-sub */
+.job-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 2px;
+  margin-bottom: 6px;
+}
+
+.job-company {
+  font-style: italic;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
 }
 
 .job-location {
+  font-size: 0.8375rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Sub-row for projects: description ←→ tech stack */
+.project-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 2px;
+  margin-bottom: 6px;
+}
+
+.project-org {
   font-style: italic;
-  color: #666;
-  font-size: 0.9em;
-  margin: 2px 0 8px 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.project-stack {
+  font-style: normal;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.project-location {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .job-summary,
 .project-description {
-  margin: 5px 0 10px 0;
-  color: #555;
+  margin: 4px 0 8px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
 }
 
+/* --------------------------------------------------------------------------
+   Lists
+   -------------------------------------------------------------------------- */
 ul {
   padding-left: 20px;
-  margin-top: 5px;
+  margin-top: 6px;
+  margin-bottom: 0;
 }
 
 li {
-  margin-bottom: 6px;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text-main);
 }
 
+/* --------------------------------------------------------------------------
+   Date badge
+   -------------------------------------------------------------------------- */
 .date {
   color: var(--text-muted);
-  font-size: 0.9em;
+  font-size: 0.8375rem;
   font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
+/* --------------------------------------------------------------------------
+   Education & Certifications — entry-style layout matching PDF
+   -------------------------------------------------------------------------- */
+.edu-entry,
+.cert-entry {
+  margin-bottom: 14px;
+}
+
+.edu-entry:last-child,
+.cert-entry:last-child {
+  margin-bottom: 0;
+}
+
+/* Title row */
+.edu-header,
+.cert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.edu-degree,
+.cert-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--primary-color);
+}
+
+/* Sub-row: institution ←→ score / issuer */
+.edu-sub,
+.cert-sub {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.edu-institution,
+.cert-issuer {
+  font-style: italic;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.edu-score {
+  font-size: 0.8375rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Bottom grid for edu + cert side-by-side */
 .bottom-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 24px;
+  margin-top: 32px;
 }
 
-.bottom-grid h4 {
-  color: var(--accent-color);
-  font-size: 1.1rem;
-  margin-bottom: 10px;
+.bottom-grid > article > h4 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  border-bottom: 1.5px solid var(--border-section);
+  padding-bottom: 5px;
+  margin-bottom: 12px;
   margin-top: 0;
 }
 
-/* Observability Footer */
+/* --------------------------------------------------------------------------
+   Footer telemetry
+   -------------------------------------------------------------------------- */
 .footer-telemetry {
-  max-width: 850px;
-  margin: 20px auto 0;
+  max-width: 860px;
+  margin: 16px auto 0;
   text-align: right;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
 }
 
-/* Mobile Responsive Matrix */
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
 @media (max-width: 768px) {
   .container {
-    padding: 30px 20px;
+    padding: 28px 20px;
   }
+
   .job-header,
-  .project-header {
+  .project-header,
+  .job-meta,
+  .project-meta,
+  .edu-header,
+  .cert-header,
+  .edu-sub,
+  .cert-sub {
     flex-direction: column;
+    gap: 2px;
   }
+
+  .date,
+  .job-location,
+  .project-location,
+  .edu-score {
+    white-space: normal;
+  }
+
   .bottom-grid {
     grid-template-columns: 1fr;
   }
+
   .footer-telemetry {
     text-align: center;
   }
