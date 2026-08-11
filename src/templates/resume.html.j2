@@ -98,27 +98,27 @@
         {% for project in projects %}
           <article class="project">
             <div class="project-header">
-              <h4>
-                {{ project.name | e }}
-                {% if project.url is defined and project.url %}
-                  <a
-                    href="{{ project.url | e }}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="demo-link"
-                    aria-label="GitHub repository for {{ project.name | e }}"
-                    >GitHub</a
-                  >
-                {% endif %}
-              </h4>
+              <h4>{{ project.name | e }}</h4>
               <span class="date"
                 >{{ project.startDate | format_date | e }} &mdash;
                 {{ project.endDate | default('Present', true) | format_date | e }}</span
               >
             </div>
             <div class="project-meta">
-              <span class="project-org">{{ project.description | render_md }}</span>
-              <span class="project-location">{{ project.keywords | join(', ') | e }}</span>
+              <span class="project-org">
+                {{ project.description | e }}
+                <span class="project-stack">&mdash; {{ project.keywords | join(' · ') | e }}</span>
+              </span>
+              {% if project.url is defined and project.url %}
+                <a
+                  href="{{ project.url | e }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="demo-link"
+                  aria-label="GitHub repository for {{ project.name | e }}"
+                  >GitHub ↗</a
+                >
+              {% endif %}
             </div>
             <ul>
               {% for highlight in project.highlights %}
@@ -130,38 +130,45 @@
       </section>
 
       <section aria-labelledby="edu-cert-heading">
-        <h3 id="edu-cert-heading">Education &amp; Certifications</h3>
-        <div class="bottom-grid">
+        <div class="bottom-grid" id="edu-cert-heading">
           <article aria-labelledby="education-heading">
             <h4 id="education-heading">Education</h4>
             {% for edu in education %}
-              <p>
-                <strong>{{ edu.studyType | e }} in {{ edu.area | e }}</strong><br />
-                {{ edu.institution | e }} | {{ edu.score | e }}<br />
-                <span class="date"
-                  >{{ edu.startDate | format_date | e }} – {{ edu.endDate | format_date | e }}</span
-                >
-              </p>
+              <div class="edu-entry">
+                <div class="edu-header">
+                  <span class="edu-degree">{{ edu.studyType | e }} in {{ edu.area | e }}</span>
+                  <span class="date"
+                    >{{ edu.startDate | format_date | e }} – {{ edu.endDate | format_date | e }}</span
+                  >
+                </div>
+                <div class="edu-sub">
+                  <span class="edu-institution">{{ edu.institution | e }}</span>
+                  <span class="edu-score">{{ edu.score | e }}</span>
+                </div>
+              </div>
             {% endfor %}
           </article>
 
           <article aria-labelledby="certs-heading">
             <h4 id="certs-heading">Certifications</h4>
-            <ul>
-              {% for cert in certificates %}
-                <li>
-                  <strong>{{ cert.name | e }}</strong> ({{ cert.issuer | e }}) —
+            {% for cert in certificates %}
+              <div class="cert-entry">
+                <div class="cert-header">
+                  <span class="cert-name">{{ cert.name | e }}</span>
                   <span class="date">{{ cert.date | format_date | e }}</span>
-                </li>
-              {% endfor %}
-            </ul>
+                </div>
+                <div class="cert-sub">
+                  <span class="cert-issuer">{{ cert.issuer | e }}</span>
+                </div>
+              </div>
+            {% endfor %}
           </article>
         </div>
       </section>
     </main>
 
     <div class="footer-telemetry" aria-live="polite">
-      <p><b>Unique Visitors: <span id="counter">Initializing session...</span></b></p>
+      <p><b>Page Views: <span id="counter">Initializing session...</span></b></p>
     </div>
 
     <script>
