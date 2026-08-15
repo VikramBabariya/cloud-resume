@@ -26,7 +26,7 @@ work:
     position: DevOps Engineer
     location: Rajkot, India
     startDate: "2025-06-20"
-    current: true
+    endDate: "2026-08-15"
     summary: Designed and delivered a **production-grade zero-trust AWS serverless platform** — 100% declarative Terraform IaC across five modules, zero static credentials, shift-left security gates at every layer.
     highlights:
       - Eliminated **long-lived IAM credentials** across 100% of deployments via **GitHub Actions OIDC federation** — short-lived STS tokens scoped to least-privilege, with cross-repo and cross-branch token reuse mathematically prevented by trust policy **`sub` claim binding**.
@@ -38,7 +38,7 @@ work:
 
   - name: Infineon Technologies
     position: Software Engineer (Backend & Automation)
-    location: Gujarat, India
+    location: Vadodara, India
     startDate: "2024-06-01"
     endDate: "2025-06-20"
     summary: ""
@@ -48,7 +48,7 @@ work:
 
   - name: Infineon Technologies
     position: Software Engineering Intern
-    location: Gujarat, India
+    location: Vadodara, India
     startDate: "2023-12-01"
     endDate: "2024-06-01"
     summary: ""
