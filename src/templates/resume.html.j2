@@ -21,7 +21,7 @@
         <div class="contact-info">
           <p>
             {{ basics.email | e }} | {{ basics.phone | default('', true) | e }} |
-            {{ basics.location.region | e }}, {{ basics.location.countryCode | e }}
+            {{ basics.location.city | e }}, {{ basics.location.countryCode | e }}
           </p>
           <div class="profiles">
             {% for profile in basics.profiles %}
@@ -143,7 +143,7 @@
                 </div>
                 <div class="edu-sub">
                   <span class="edu-institution">{{ edu.institution | e }}</span>
-                  <span class="edu-score">{{ edu.score | e }}</span>
+                  {# <span class="edu-score">{{ edu.score | e }}</span> #}
                 </div>
               </div>
             {% endfor %}

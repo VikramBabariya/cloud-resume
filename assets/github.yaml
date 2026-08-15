@@ -18,8 +18,8 @@ github_profile:
       - "Pull Shark x2"
       - "YOLO"
   readme:
-    title: "Cloud & DevSecOps Engineer | Site Reliability Engineering (SRE)"
-    operational_mandate: "Cloud & DevSecOps Engineer transitioning from a Python backend foundation to high-availability infrastructure. Specializes in architecting zero-trust AWS serverless ecosystems, enforcing immutable CI/CD delivery pipelines, and applying Shift-Left SRE quality gates to strictly reduce Total Cost of Ownership (TCO) and Mean Time To Recovery (MTTR)."
+    title: "DevOps Engineer | Site Reliability Engineering (SRE)"
+    operational_mandate: "DevOps Engineer transitioning from a Python backend foundation to high-availability infrastructure. Specializes in architecting zero-trust AWS serverless ecosystems, enforcing immutable CI/CD delivery pipelines, and applying Shift-Left SRE quality gates to strictly reduce Total Cost of Ownership (TCO) and Mean Time To Recovery (MTTR)."
     architectural_competencies:
       cloud_infrastructure_and_security: "AWS (IAM, S3, API Gateway, DynamoDB, Lambda), OIDC Identity Federation, Zero-Trust Network Segmentation."
       pipeline_automation_and_devsecops: "GitHub Actions, Multi-Stage Docker Builds, Container Hardening (PoLP, Non-Root), Semantic Validation (ajv-cli, yamllint)."

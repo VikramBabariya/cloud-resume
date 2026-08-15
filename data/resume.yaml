@@ -2,12 +2,12 @@
 # resume.yaml - The Single Source of Truth
 basics:
   name: Vikram Babariya
-  label: Cloud & DevSecOps Engineer | Site Reliability Engineering (SRE)
+  label: DevOps Engineer | Cloud Engineering
   email: contact.vikram.babariya@gmail.com
   phone: "+91 70482 63900"
   url: https://vikram-sre.dev/
   summary: |
-    Cloud & DevSecOps Engineer transitioning from a Python backend foundation to high-availability infrastructure. Specializes in architecting zero-trust AWS serverless ecosystems, managing 100% of infrastructure declaratively via Terraform (IaC), enforcing immutable CI/CD delivery pipelines, and applying Shift-Left SRE quality gates to strictly reduce TCO and MTTR.
+    DevOps Engineer transitioning from a Python backend foundation to high-availability infrastructure. Specializes in architecting zero-trust AWS serverless ecosystems, managing 100% of infrastructure declaratively via Terraform (IaC), enforcing immutable CI/CD delivery pipelines, and applying Shift-Left SRE quality gates to strictly reduce TCO and MTTR.
   api_gateway_url: https://vu82wyjtqk.execute-api.ap-south-1.amazonaws.com
   location:
     city: Rajkot
@@ -23,10 +23,10 @@ basics:
 
 work:
   - name: Independent Technical Sprint / Strategic Sabbatical
-    position: Cloud & DevSecOps Engineer
-    location: Gujarat, India
+    position: DevOps Engineer
+    location: Rajkot, India
     startDate: "2025-06-20"
-    current: true
+    endDate: "2026-08-15"
     summary: Designed and delivered a **production-grade zero-trust AWS serverless platform** — 100% declarative Terraform IaC across five modules, zero static credentials, shift-left security gates at every layer.
     highlights:
       - Eliminated **long-lived IAM credentials** across 100% of deployments via **GitHub Actions OIDC federation** — short-lived STS tokens scoped to least-privilege, with cross-repo and cross-branch token reuse mathematically prevented by trust policy **`sub` claim binding**.
@@ -38,7 +38,7 @@ work:
 
   - name: Infineon Technologies
     position: Software Engineer (Backend & Automation)
-    location: Gujarat, India
+    location: Vadodara, India
     startDate: "2024-06-01"
     endDate: "2025-06-20"
     summary: ""
@@ -48,7 +48,7 @@ work:
 
   - name: Infineon Technologies
     position: Software Engineering Intern
-    location: Gujarat, India
+    location: Vadodara, India
     startDate: "2023-12-01"
     endDate: "2024-06-01"
     summary: ""
