@@ -19,7 +19,7 @@
         &nbsp;&nbsp;|&nbsp;&nbsp;
         {{ basics.phone | default("", true) | e }}
         &nbsp;&nbsp;|&nbsp;&nbsp;
-        {{ basics.location.region | e }}, {{ basics.location.countryCode | e }}
+        {{ basics.location.city | e }}, {{ basics.location.countryCode | e }}
         {% for profile in basics.profiles %}
           &nbsp;&nbsp;|&nbsp;&nbsp;{{ profile.network | e }}:&nbsp;<a href="{{ profile.url | e }}" class="contact-link">{{ profile.url | e }}</a>
         {% endfor %}
@@ -126,7 +126,7 @@
           </div>
           <div class="entry-sub">
             <span class="entry-org">{{ edu.institution | e }}</span>
-            <span class="entry-location">{{ edu.score | e }}</span>
+            {# <span class="entry-location">{{ edu.score | e }}</span> #}
           </div>
         </div>
       {% endfor %}

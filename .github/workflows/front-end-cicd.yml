@@ -119,7 +119,7 @@ jobs:
           # Upload PDF explicitly with correct Content-Type and Content-Disposition
           aws s3 cp ./dist/resume.pdf s3://${{ secrets.S3_BUCKET_NAME }}/resume.pdf \
             --content-type "application/pdf" \
-            --content-disposition "attachment; filename=\"Vikram_Babariya_Cloud_DevSecOps_Engineer.pdf\""
+            --content-disposition "attachment; filename=\"Vikram_Babariya_DevOps_Engineer.pdf\""
 
       # 10. Zero-Downtime Deployment & Cache Invalidation
       # Strategic Reasoning: Forces the global CDN to purge stale assets, ensuring hiring managers 
