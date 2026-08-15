@@ -58,7 +58,7 @@ profile:
     SRE:        Site Reliability Engineering · Incident Response · MTTR Reduction · Runbook · FinOps
     Languages:  Python · Bash
     Containers: Docker
-    Databases:  DynamoDB · PostgreSQL
+    Databases:  DynamoDB · PostgreSQL · Redis
   top_skills:
     - "Terraform"
     - "Amazon Web Services (AWS)"
@@ -465,6 +465,9 @@ profile:
       associations:
         - Inventory System | Containerized Defense-in-Depth Architecture
     - name: PostgreSQL
+      associations:
+        - Inventory System | Containerized Defense-in-Depth Architecture
+    - name: Redis
       associations:
         - Inventory System | Containerized Defense-in-Depth Architecture
     - name: Nginx

@@ -71,6 +71,7 @@ skills:
       - AWS IAM (OIDC Federation, STS)
       - AWS (Lambda, API Gateway, DynamoDB, S3)
       - CloudFront CDN, OAC & ACM (TLS/SSL)
+      - Cloudflare DNS
       - Terraform
       - Terraform Remote State & State Locking
       - checkov (IaC SAST)
@@ -80,16 +81,20 @@ skills:
     level: Intermediate
     keywords:
       - GitHub Actions (CI/CD Automation)
+      - Git Version Control
       - Multi-Stage Docker Builds
       - Container Security (Non-Root, Minimal Images)
       - Shift-Left Validation (ajv-cli, yamllint)
+      - Linux System Administration
+      - Shell Scripting & Automation
+      - Nginx
 
   - name: Reliability, FinOps & Backend Engineering
     level: Intermediate
     keywords:
       - AWS CloudWatch & Budgets (FinOps)
       - Python, JavaScript (Node.js)
-      - Django, FastAPI
+      - Django, FastAPI, PostgreSQL, Redis
 
 projects:
   - name: Inventory System
