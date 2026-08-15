@@ -27,7 +27,7 @@ work:
     location: Rajkot, India
     startDate: "2025-06-20"
     endDate: "2026-08-15"
-    summary: Designed and delivered a **production-grade zero-trust AWS serverless platform** — 100% declarative Terraform IaC across five modules, zero static credentials, shift-left security gates at every layer.
+    summary: Designed and delivered a **production-grade zero-trust AWS serverless platform** (live at **https://vikram-sre.dev/**) — 100% declarative Terraform IaC across five modules, zero static credentials, shift-left security gates at every layer.
     highlights:
       - Eliminated **long-lived IAM credentials** across 100% of deployments via **GitHub Actions OIDC federation** — short-lived STS tokens scoped to least-privilege, with cross-repo and cross-branch token reuse mathematically prevented by trust policy **`sub` claim binding**.
       - Replaced all ClickOps with a **declarative Terraform codebase** across five focused modules (state-backend, cdn, compute, dns, iam) — every AWS and Cloudflare resource version-controlled and peer-reviewed, **DR recovery reduced to a single `terraform apply`**.
