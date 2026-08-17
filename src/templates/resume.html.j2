@@ -107,7 +107,7 @@
             <div class="project-meta">
               <span class="project-org">
                 {{ project.description | e }}
-                <span class="project-stack">&mdash; {{ project.keywords | join(' · ') | e }}</span>
+                {# <span class="project-stack">&mdash; {{ project.keywords | join(' · ') | e }}</span> #}
               </span>
               {% if project.url is defined and project.url %}
                 <a
