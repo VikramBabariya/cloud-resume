@@ -2,7 +2,7 @@ profile:
   contact_and_demographics:
     name: "Vikram Babariya"
     pronouns: "He/Him"
-    headline: "DevOps Engineer | Ex-Infineon Backend | AWS · Terraform · Docker · GitHub Actions · Python | FinOps | Cloud Security | Site Reliability Engineering | Architecting Zero-Trust Cloud Infrastructure as Code"
+    headline: "DevOps Engineer | Ex-Infineon Backend | AWS · Terraform · Kubernetes · Docker · GitHub Actions · Python | FinOps | Cloud Security | Site Reliability Engineering | Architecting Zero-Trust Cloud Infrastructure as Code"
     location: "Rajkot, Gujarat, India"
     linkedin_url: "https://www.linkedin.com/in/vikram-babariya"
     # Job preferences extracted from LinkedIn profile
@@ -40,6 +40,8 @@ profile:
 
     Most recently, I migrated the entire production AWS + Cloudflare environment from ClickOps to a fully declarative Terraform codebase across five focused modules — state-backend, cdn, compute, dns, iam. Every infrastructure change is now a peer-reviewed pull request with an automated terraform plan diff and a checkov SAST gate. Post-apply smoke tests verify seven live infrastructure invariants on every merge, including IAM Policy Simulator assertions that mathematically confirm PoLP boundaries are enforced — not just documented.
 
+    Currently extending the Inventory System to Kubernetes — 11 manifests with zero-plaintext credential injection, init-container dependency ordering, and property-based manifest validation running shift-left before any cluster is touched.
+
     What I care about:
     — Hard security boundaries over soft policies (OIDC federation, not static IAM keys)
     — Shift-left quality gates that catch problems before they reach production
@@ -57,13 +59,13 @@ profile:
     Security:   Zero Trust Architecture · DevSecOps · Shift-Left Security · Least-Privilege IAM · OIDC
     SRE:        Site Reliability Engineering · Incident Response · MTTR Reduction · Runbook · FinOps
     Languages:  Python · Bash
-    Containers: Docker
-    Databases:  DynamoDB · PostgreSQL
+    Containers: Docker · Kubernetes (k8s, k3d/k3s)
+    Databases:  DynamoDB · PostgreSQL · Redis
   top_skills:
-    - "Terraform"
     - "Amazon Web Services (AWS)"
-    - "Site Reliability Engineering"
-    - "Zero Trust Architecture"
+    - "Terraform"
+    - "Kubernetes"
+    - "Docker"
     - "GitHub Actions"
   featured:
   - type: Media
@@ -353,10 +355,11 @@ profile:
         - PostgreSQL
         - FastAPI
         - Docker
+        - Kubernetes
       details:
+        - Built a 4-service inventory management system (FastAPI, React, PostgreSQL, Redis) and migrated it to Kubernetes — 11 manifests with init-container ordering, zero plaintext credentials via secretKeyRef, and 6 property-based tests (Hypothesis) enforcing manifest correctness without a live cluster.
+        - Reduced production Docker artifacts by 90% (3.5 GB → 364 MB) via multi-stage builds, running all containers as non-root; configured dual-environment Compose with healthchecks and immutable production images to eliminate environment drift.
         - Designed multi-tier Docker bridge network architecture enforcing zero-route database isolation, restricting PostgreSQL access to the backend tier via network topology rather than configuration.
-        - Reduced production Docker artifacts by 90% (3.5 GB -> 364 MB) using multi-stage builds — eliminating compilers from runtime images and running all containers as non-root users.
-        - Configured dual-environment Docker Compose orchestration with dependency-ordered service startup, container-level healthchecks, and immutable production images to eliminate environment drift.
   
     - name: Zero-Trust RaC Platform (AWS Serverless)
       duration: Jan 2026 - Aug 2026
@@ -376,14 +379,13 @@ profile:
       associations:
         - DevOps Engineer at Independent Technical Sprint / Strategic Sabbatical
         - Zero-Trust RaC Platform (AWS Serverless)
-    - name: HashiCorp
-      associations:
-        - DevOps Engineer at Independent Technical Sprint / Strategic Sabbatical
-        - Zero-Trust RaC Platform (AWS Serverless)
     - name: Infrastructure as Code (IaC)
       associations:
         - DevOps Engineer at Independent Technical Sprint / Strategic Sabbatical
         - Zero-Trust RaC Platform (AWS Serverless)
+    - name: Kubernetes
+      associations:
+        - Inventory System | Containerized Defense-in-Depth Architecture
     - name: Site Reliability Engineering
       associations:
         - DevOps Engineer at Independent Technical Sprint / Strategic Sabbatical
@@ -465,6 +467,9 @@ profile:
       associations:
         - Inventory System | Containerized Defense-in-Depth Architecture
     - name: PostgreSQL
+      associations:
+        - Inventory System | Containerized Defense-in-Depth Architecture
+    - name: Redis
       associations:
         - Inventory System | Containerized Defense-in-Depth Architecture
     - name: Nginx

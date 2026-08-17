@@ -20,6 +20,8 @@
         {{ basics.phone | default("", true) | e }}
         &nbsp;&nbsp;|&nbsp;&nbsp;
         {{ basics.location.city | e }}, {{ basics.location.countryCode | e }}
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        Portfolio:&nbsp;<a href="{{ basics.url | e }}" class="contact-link">{{ basics.url | e }}</a>
         {% for profile in basics.profiles %}
           &nbsp;&nbsp;|&nbsp;&nbsp;{{ profile.network | e }}:&nbsp;<a href="{{ profile.url | e }}" class="contact-link">{{ profile.url | e }}</a>
         {% endfor %}

@@ -7,7 +7,7 @@ basics:
   phone: "+91 70482 63900"
   url: https://vikram-sre.dev/
   summary: |
-    DevOps Engineer transitioning from a Python backend foundation to high-availability infrastructure. Specializes in architecting zero-trust AWS serverless ecosystems, managing 100% of infrastructure declaratively via Terraform (IaC), enforcing immutable CI/CD delivery pipelines, and applying Shift-Left SRE quality gates to strictly reduce TCO and MTTR.
+    DevOps Engineer transitioning from a Python backend foundation to high-availability infrastructure. Specializes in architecting zero-trust AWS serverless ecosystems, managing infrastructure declaratively via Terraform (IaC), enforcing immutable CI/CD delivery pipelines, and applying Shift-Left SRE quality gates to reduce TCO and MTTR.
   api_gateway_url: https://vu82wyjtqk.execute-api.ap-south-1.amazonaws.com
   location:
     city: Rajkot
@@ -27,7 +27,7 @@ work:
     location: Rajkot, India
     startDate: "2025-06-20"
     endDate: "2026-08-15"
-    summary: Designed and delivered a **production-grade zero-trust AWS serverless platform** — 100% declarative Terraform IaC across five modules, zero static credentials, shift-left security gates at every layer.
+    summary: Designed and delivered a **production-grade zero-trust AWS serverless platform** (live at **https://vikram-sre.dev/**) — 100% declarative Terraform IaC across five modules, zero static credentials, shift-left security gates at every layer.
     highlights:
       - Eliminated **long-lived IAM credentials** across 100% of deployments via **GitHub Actions OIDC federation** — short-lived STS tokens scoped to least-privilege, with cross-repo and cross-branch token reuse mathematically prevented by trust policy **`sub` claim binding**.
       - Replaced all ClickOps with a **declarative Terraform codebase** across five focused modules (state-backend, cdn, compute, dns, iam) — every AWS and Cloudflare resource version-controlled and peer-reviewed, **DR recovery reduced to a single `terraform apply`**.
@@ -70,43 +70,52 @@ skills:
     keywords:
       - AWS IAM (OIDC Federation, STS)
       - AWS (Lambda, API Gateway, DynamoDB, S3)
-      - CloudFront CDN, OAC & ACM (TLS/SSL)
       - Terraform
       - Terraform Remote State & State Locking
       - checkov (IaC SAST)
       - Modular IaC Design
+      - CloudFront CDN, OAC & ACM (TLS/SSL)
+      - Cloudflare DNS
 
   - name: DevSecOps & Automated Delivery
     level: Intermediate
     keywords:
-      - GitHub Actions (CI/CD Automation)
+      - Kubernetes
+      - k3d / k3s
+      - Kubernetes Manifest Validation
       - Multi-Stage Docker Builds
-      - Container Security (Non-Root, Minimal Images)
-      - Shift-Left Validation (ajv-cli, yamllint)
+      - Container Security
+      - GitHub Actions (CI/CD Automation)
+      - Shift-Left Validation
+      - Secret Management
+      - Linux System Administration
+      - Shell Scripting & Automation
+      - Git Version Control
+      - Nginx
 
   - name: Reliability, FinOps & Backend Engineering
     level: Intermediate
     keywords:
       - AWS CloudWatch & Budgets (FinOps)
       - Python, JavaScript (Node.js)
-      - Django, FastAPI
+      - Django, FastAPI, PostgreSQL, Redis
 
 projects:
   - name: Inventory System
     startDate: "2026-02-01"
     current: true
-    description: "Containerized Defense-in-Depth Architecture"
+    description: "Containerized Defense-in-Depth Architecture → Kubernetes Migration"
     keywords:
       - FastAPI
       - React
       - PostgreSQL
       - Docker
+      - Kubernetes
     url: https://github.com/VikramBabariya/inventory-system
     highlights:
+      - Built a **4-service inventory management system** (FastAPI, React, PostgreSQL, Redis) and migrated it to **Kubernetes** — 11 manifests with init-container ordering, zero plaintext credentials via `secretKeyRef`, and **6 property-based tests** enforcing manifest correctness without a live cluster.
+      - Reduced production Docker artifacts by **90% (3.5 GB → 364 MB)** via **multi-stage builds**, running all containers as non-root; configured **dual-environment Compose** with healthchecks and **immutable production images** to eliminate environment drift.
       - Designed **multi-tier Docker bridge network** architecture enforcing **zero-route database isolation**, restricting PostgreSQL access to the backend tier via network topology rather than configuration.
-      - Reduced production Docker artifacts by **90% (3.5 GB → 364 MB)** using **multi-stage builds** — eliminating compilers from runtime images and running all containers as **non-root users**.
-      - Configured **dual-environment Docker Compose** orchestration with dependency-ordered service startup, container-level healthchecks, and **immutable production images** to eliminate environment drift.
-
 certificates:
   - name: AWS Certified Cloud Practitioner
     date: "2025-12-01"
