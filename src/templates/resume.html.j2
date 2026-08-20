@@ -66,65 +66,77 @@
         {% endfor %}
       </section>
 
-      <section aria-labelledby="experience-heading">
-        <h3 id="experience-heading">Professional Experience</h3>
-        {% for job in work %}
+      <section aria-labelledby="profdev-heading">
+        <h3 id="profdev-heading">INDEPENDENT CLOUD &amp; PLATFORM ENGINEERING</h3>
+        {% for job in work if job.type is defined and job.type == 'sabbatical' %}
           <article class="job">
             <div class="job-header">
-              <h4>{{ job.position | e }}</h4>
-              <span class="date"
-                >{{ job.startDate | format_date | e }} &mdash;
-                {{ job.endDate | default('Present', true) | format_date | e }}</span
-              >
-            </div>
-            <div class="job-meta">
-              <span class="job-company">{{ job.name | e }}</span>
+              <h4>{{ job.name | e }}</h4>
               <span class="job-location">{{ job.location | e }}</span>
             </div>
-            {% if job.summary %}
-              <p class="job-summary"><em>{{ job.summary | render_md }}</em></p>
-            {% endif %}
-            <ul>
-              {% for highlight in job.highlights %}
-                <li>{{ highlight | render_md }}</li>
-              {% endfor %}
-            </ul>
+            <div class="job-meta">
+              <span class="job-company">{{ job.position | e }}</span>
+              <span class="date"
+                >{{ job.startDate | format_date | e }} &mdash;
+                {{ job.endDate | default('Present', true) | format_date | e }}</span>
+            </div>
+            {% for project in job.projects %}
+              <article class="project">
+                <div class="project-header">
+                  <h4>{{ project.name | e }}</h4>
+                  {% if project.url is defined and project.url %}
+                    <a
+                      href="{{ project.url | e }}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="demo-link"
+                      aria-label="Link for {{ project.name | e }}"
+                      >{{ project.url | e }} ↗</a
+                    >
+                  {% endif %}
+                </div>
+                {# <div class="project-meta">
+                  <span class="project-org">{{ project.description | render_md }}</span>
+                </div> #}
+                <ul>
+                  {% for highlight in project.highlights %}
+                    <li>{{ highlight | render_md }}</li>
+                  {% endfor %}
+                </ul>
+              </article>
+            {% endfor %}
           </article>
         {% endfor %}
       </section>
 
-      <section aria-labelledby="projects-heading">
-        <h3 id="projects-heading">Architectural Projects</h3>
-        {% for project in projects %}
-          <article class="project">
-            <div class="project-header">
-              <h4>{{ project.name | e }}</h4>
-              <span class="date"
-                >{{ project.startDate | format_date | e }} &mdash;
-                {{ project.endDate | default('Present', true) | format_date | e }}</span
-              >
+      <section aria-labelledby="experience-heading">
+        <h3 id="experience-heading">Professional Experience</h3>
+        {% set regular_jobs = work | rejectattr('type', 'equalto', 'sabbatical') | list %}
+        {% for company, jobs in regular_jobs | groupby('name') %}
+          <article class="job">
+            <div class="job-header">
+              <h4>{{ company | e }}</h4>
+              <span class="job-location">{{ (jobs | list)[0].location | e }}</span>
             </div>
-            <div class="project-meta">
-              <span class="project-org">
-                {{ project.description | e }}
-                {# <span class="project-stack">&mdash; {{ project.keywords | join(' · ') | e }}</span> #}
-              </span>
-              {% if project.url is defined and project.url %}
-                <a
-                  href="{{ project.url | e }}"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="demo-link"
-                  aria-label="GitHub repository for {{ project.name | e }}"
-                  >GitHub ↗</a
-                >
-              {% endif %}
-            </div>
-            <ul>
-              {% for highlight in project.highlights %}
-                <li>{{ highlight | render_md }}</li>
-              {% endfor %}
-            </ul>
+            {% for job in jobs %}
+              <div class="job-role">
+                <div class="job-role-header">
+                  <span class="job-position">{{ job.position | e }}</span>
+                  <span class="date"
+                    >{{ job.startDate | format_date | e }} &mdash;
+                    {{ job.endDate | default('Present', true) | format_date | e }}</span
+                  >
+                </div>
+                {% if job.summary %}
+                  <p class="job-summary"><em>{{ job.summary | render_md }}</em></p>
+                {% endif %}
+                <ul>
+                  {% for highlight in job.highlights %}
+                    <li>{{ highlight | render_md }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endfor %}
           </article>
         {% endfor %}
       </section>
@@ -143,7 +155,7 @@
                 </div>
                 <div class="edu-sub">
                   <span class="edu-institution">{{ edu.institution | e }}</span>
-                  {# <span class="edu-score">{{ edu.score | e }}</span> #}
+                  <span class="edu-score">{{ edu.score | e }}</span>
                 </div>
               </div>
             {% endfor %}
