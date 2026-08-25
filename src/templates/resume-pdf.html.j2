@@ -21,9 +21,9 @@
         &nbsp;&nbsp;|&nbsp;&nbsp;
         {{ basics.location.city | e }}, {{ basics.location.countryCode | e }}
         &nbsp;&nbsp;|&nbsp;&nbsp;
-        <a href="{{ basics.url | e }}" class="contact-link">Portfolio</a>
+        Portfolio:&nbsp;<a href="{{ basics.url | e }}" class="contact-link">{{ basics.url | e }}</a>
         {% for profile in basics.profiles %}
-          &nbsp;&nbsp;|&nbsp;&nbsp;<a href="{{ profile.url | e }}" class="contact-link">{{ profile.network | e }}</a>
+          &nbsp;&nbsp;|&nbsp;&nbsp;{{ profile.network | e }}:&nbsp;<a href="{{ profile.url | e }}" class="contact-link">{{ profile.url | e }}</a>
         {% endfor %}
       </p>
     </header>
@@ -50,78 +50,64 @@
     </section>
 
     <!-- ================================================================
-         PROFESSIONAL DEVELOPMENT (CLOUD & DEVOPS ENGINEERING)
+         PROFESSIONAL EXPERIENCE
          ================================================================ -->
     <section>
-      <h2>INDEPENDENT CLOUD &amp; PLATFORM ENGINEERING</h2>
-      {% for job in work if job.type is defined and job.type == 'sabbatical' %}
+      <h2>Professional Experience</h2>
+      {% for job in work %}
         <div class="entry">
           <div class="entry-header">
-            <span class="entry-title">{{ job.name | e }}</span>
+            <span class="entry-title">{{ job.position | e }}</span>
             <span class="entry-date">
               {{ job.startDate | format_date | e }} –
               {{ job.endDate | default("Present", true) | format_date | e }}
             </span>
           </div>
           <div class="entry-sub">
-            <span class="entry-org">{{ job.position | e }}</span>
+            <span class="entry-org">{{ job.name | e }}</span>
             <span class="entry-location">{{ job.location | e }}</span>
           </div>
-          {% for project in job.projects %}
-            <div class="entry" style="margin-top: 6pt;">
-              <div class="entry-header">
-                <span class="entry-title">{{ project.name | e }}</span>
-                {% if project.url is defined and project.url %}
-                  <a href="{{ project.url | e }}" class="entry-link">{% if 'github.com' in project.url %}GitHub ↗{% else %}Live ↗{% endif %}</a>
-                {% endif %}
-              </div>
-              {# {% if project.description is defined and project.description %}
-                <div class="entry-sub">
-                  <span class="entry-org">{{ project.description | strip_md }}</span>
-                </div>
-              {% endif %} #}
-              <ul>
-                {% for highlight in project.highlights %}
-                  <li>{{ highlight | strip_md }}</li>
-                {% endfor %}
-              </ul>
-            </div>
-          {% endfor %}
+          {% if job.summary is defined and job.summary %}
+            <p class="entry-summary">{{ job.summary | strip_md }}</p>
+          {% endif %}
+          <ul>
+            {% for highlight in job.highlights %}
+              <li>{{ highlight | strip_md }}</li>
+            {% endfor %}
+          </ul>
         </div>
       {% endfor %}
     </section>
 
     <!-- ================================================================
-         PROFESSIONAL EXPERIENCE
+         ARCHITECTURAL PROJECTS
          ================================================================ -->
     <section>
-      <h2>Professional Experience</h2>
-      {% set regular_jobs = work | rejectattr('type', 'equalto', 'sabbatical') | list %}
-      {% for company, jobs in regular_jobs | groupby('name') %}
+      <h2>Architectural Projects</h2>
+      {% for project in projects %}
         <div class="entry">
           <div class="entry-header">
-            <span class="entry-title">{{ company | e }}</span>
-            <span class="entry-location">{{ (jobs | list)[0].location | e }}</span>
+            <span class="entry-title">{{ project.name | e }}</span>
+            <span class="entry-date">
+              {{ project.startDate | format_date | e }} –
+              {{ project.endDate | default("Present", true) | format_date | e }}
+            </span>
           </div>
-          {% for job in jobs %}
-            <div class="job-role">
-              <div class="entry-header" style="margin-top: 4pt;">
-                <span class="entry-org">{{ job.position | e }}</span>
-                <span class="entry-date">
-                  {{ job.startDate | format_date | e }} –
-                  {{ job.endDate | default("Present", true) | format_date | e }}
-                </span>
-              </div>
-              {% if job.summary is defined and job.summary %}
-                <p class="entry-summary">{{ job.summary | strip_md }}</p>
-              {% endif %}
-              <ul>
-                {% for highlight in job.highlights %}
-                  <li>{{ highlight | strip_md }}</li>
-                {% endfor %}
-              </ul>
+          {% if project.url is defined and project.url %}
+            <div class="entry-sub">
+              <span class="entry-org">{{ project.description | strip_md }}</span>
+              <a href="{{ project.url | e }}" class="entry-link">github.com/{{ project.url | e | replace('https://github.com/', '') }}</a>
             </div>
-          {% endfor %}
+          {% elif project.description is defined and project.description %}
+            <div class="entry-sub">
+              <span class="entry-org">{{ project.description | strip_md }}</span>
+            </div>
+          {% endif %}
+          <ul>
+            {% for highlight in project.highlights %}
+              <li>{{ highlight | strip_md }}</li>
+            {% endfor %}
+          </ul>
         </div>
       {% endfor %}
     </section>
@@ -142,7 +128,7 @@
           </div>
           <div class="entry-sub">
             <span class="entry-org">{{ edu.institution | e }}</span>
-            <span class="entry-location">{{ edu.score | e }}</span>
+            {# <span class="entry-location">{{ edu.score | e }}</span> #}
           </div>
         </div>
       {% endfor %}
