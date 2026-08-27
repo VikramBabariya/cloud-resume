@@ -7,7 +7,7 @@ basics:
   phone: "+91 70482 63900"
   url: https://vikram-sre.dev/
   summary: |
-    DevOps Engineer with a strong enterprise foundation in backend software engineering (Python/Node.js) and automation. Combines corporate engineering rigor with dedicated hands-on architecture across zero-trust AWS serverless environments, declarative Terraform IaC, and containerized Kubernetes ecosystems. Proven expertise in architecting immutable CI/CD delivery gates, least-privilege OIDC federation, and FinOps guardrails to maximize reliability while minimizing MTTR and cloud TCO.
+    DevOps Engineer transitioning from a Python backend foundation to high-availability infrastructure. Specializes in architecting zero-trust AWS serverless ecosystems, managing infrastructure declaratively via Terraform (IaC), enforcing immutable CI/CD delivery pipelines, and applying Shift-Left SRE quality gates to reduce TCO and MTTR.
   api_gateway_url: https://vu82wyjtqk.execute-api.ap-south-1.amazonaws.com
   location:
     city: Rajkot
@@ -22,9 +22,8 @@ basics:
       url: https://github.com/VikramBabariya
 
 work:
-  - name: "Technical Sabbatical — Cloud & DevOps Engineering Sprint"
-    type: sabbatical
-    position: Self-Directed Platform Architecture & Systems Upskilling
+  - name: Independent Technical Sprint / Strategic Sabbatical
+    position: DevOps Engineer
     location: Rajkot, India
     startDate: "2025-06-01"
     endDate: "2026-06-30"
@@ -48,7 +47,6 @@ work:
           - Designed **multi-tier Docker bridge network** architecture enforcing **zero-route database isolation**, restricting PostgreSQL access to the backend tier via network topology rather than configuration.
 
   - name: Infineon Technologies
-    type: work
     position: Software Engineer (Backend & Automation)
     location: Vadodara, India
     startDate: "2024-06-01"
@@ -59,7 +57,6 @@ work:
       - Engineered a **Node.js orchestration engine** to dynamically parse and execute Python test vectors within managed, ephemeral virtual environments, implementing runtime call-stack inspection to enforce **"Fail Fast" validation** on I2C/UART hardware operations.
 
   - name: Infineon Technologies
-    type: work
     position: Software Engineering Intern
     location: Vadodara, India
     startDate: "2023-12-01"
@@ -81,46 +78,54 @@ skills:
   - name: Cloud & Infrastructure
     level: Intermediate
     keywords:
-      - AWS (Lambda, API Gateway, DynamoDB, S3, EC2, KMS)
-      - AWS IAM (OIDC Federation, STS, Policy Simulator)
-      - AWS (VPC, Route53, CloudFront, ACM, OAC)
-      - Terraform (Modular Design, Remote State & Locking)
+      - AWS IAM (OIDC Federation, STS)
+      - AWS (Lambda, API Gateway, DynamoDB, S3)
+      - Terraform
+      - Terraform Remote State & State Locking
       - checkov (IaC SAST)
+      - Modular IaC Design
+      - CloudFront CDN, OAC & ACM (TLS/SSL)
+      - Cloudflare DNS
 
-  - name: Containers, CI/CD & DevSecOps
+  - name: DevSecOps & Automated Delivery
     level: Intermediate
     keywords:
-      - Kubernetes (k3s / k3d, Manifest Validation)
-      - Docker & Docker Compose (Multi-Stage Builds, Container Security)
-      - GitHub Actions
-      - Shift-Left Validation (yamllint, ajv-cli)
+      - Kubernetes
+      - k3d / k3s
+      - Kubernetes Manifest Validation
+      - Multi-Stage Docker Builds
+      - Container Security
+      - GitHub Actions (CI/CD Automation)
+      - Shift-Left Validation
+      - Secret Management
+      - Linux System Administration
+      - Shell Scripting & Automation
+      - Git Version Control
       - Nginx
-      - Linux (Shell Scripting / Bash)
 
-  - name: Backend Engineering, Data & Observability
+  - name: Reliability, FinOps & Backend Engineering
     level: Intermediate
     keywords:
-      - Python, JavaScript (Node.js)
-      - Django, FastAPI
-      - PostgreSQL, Redis, Snowflake
       - AWS CloudWatch & Budgets (FinOps)
+      - Python, JavaScript (Node.js)
+      - Django, FastAPI, PostgreSQL, Redis
 
-# projects:
-  # - name: Inventory System
-  #   startDate: "2025-06-20"
-  #   endDate: "2026-07-31"
-  #   description: "Containerized Defense-in-Depth Architecture → Kubernetes Migration"
-  #   keywords:
-  #     - FastAPI
-  #     - React
-  #     - PostgreSQL
-  #     - Docker
-  #     - Kubernetes
-  #   url: https://github.com/VikramBabariya/inventory-system
-  #   highlights:
-  #     - Built a **4-service inventory management system** (FastAPI, React, PostgreSQL, Redis) and migrated it to **Kubernetes** — 11 manifests with init-container ordering, zero plaintext credentials via `secretKeyRef`, and **6 property-based tests** enforcing manifest correctness without a live cluster.
-  #     - Reduced production Docker artifacts by **90% (3.5 GB → 364 MB)** via **multi-stage builds**, running all containers as non-root; configured **dual-environment Compose** with healthchecks and **immutable production images** to eliminate environment drift.
-  #     - Designed **multi-tier Docker bridge network** architecture enforcing **zero-route database isolation**, restricting PostgreSQL access to the backend tier via network topology rather than configuration.
+projects:
+  - name: Inventory System
+    startDate: "2026-02-01"
+    current: true
+    description: "Containerized Defense-in-Depth Architecture → Kubernetes Migration"
+    keywords:
+      - FastAPI
+      - React
+      - PostgreSQL
+      - Docker
+      - Kubernetes
+    url: https://github.com/VikramBabariya/inventory-system
+    highlights:
+      - Built a **4-service inventory management system** (FastAPI, React, PostgreSQL, Redis) and migrated it to **Kubernetes** — 11 manifests with init-container ordering, zero plaintext credentials via `secretKeyRef`, and **6 property-based tests** enforcing manifest correctness without a live cluster.
+      - Reduced production Docker artifacts by **90% (3.5 GB → 364 MB)** via **multi-stage builds**, running all containers as non-root; configured **dual-environment Compose** with healthchecks and **immutable production images** to eliminate environment drift.
+      - Designed **multi-tier Docker bridge network** architecture enforcing **zero-route database isolation**, restricting PostgreSQL access to the backend tier via network topology rather than configuration.
 certificates:
   - name: AWS Certified Cloud Practitioner
     date: "2025-12-01"

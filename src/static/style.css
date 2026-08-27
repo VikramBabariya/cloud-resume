@@ -248,7 +248,6 @@ a:hover {
 
 /* Title row: position/name ←→ date */
 .job-header,
-.job-role-header,
 .project-header {
   display: flex;
   justify-content: space-between;
@@ -435,7 +434,6 @@ li {
   }
 
   .job-header,
-  .job-role-header,
   .project-header,
   .job-meta,
   .project-meta,
